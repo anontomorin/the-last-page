@@ -19,13 +19,13 @@ LP.doc = (function () {
     if (doc.damaged) { openPage32(doc); return; }
 
     LP.audio.paper();
-    openViewer(doc.title, `NO.${doc.no} · ${doc.date} · ${doc.cred.level}可信度 · ${doc.cred.kind}`);
+    openViewer(LP.inv.sub(doc.title), `NO.${doc.no} · ${doc.date} · ${doc.cred.level}可信度 · ${doc.cred.kind}`);
 
     const paper = LP.el('div', { class: 'paper-doc' });
-    paper.appendChild(LP.el('h3', { text: doc.title }));
+    paper.appendChild(LP.el('h3', { text: LP.inv.sub(doc.title) }));
     paper.appendChild(LP.el('div', { class: 'pdate', text: doc.date }));
     doc.content.forEach((p, i) => {
-      const para = LP.el('p', { text: p, style: `opacity:0;animation:fragIn .8s ease ${0.15 + i * 0.18}s forwards` });
+      const para = LP.el('p', { text: LP.inv.sub(p), style: `opacity:0;animation:fragIn .8s ease ${0.15 + i * 0.18}s forwards` });
       paper.appendChild(para);
     });
     LP.$('#viewer-stage').appendChild(paper);

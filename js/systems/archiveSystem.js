@@ -224,7 +224,7 @@ LP.archive = (function () {
         locked = false; title = it.label; no = '线索';
       } else {
         locked = !isUnlocked(it);
-        title = locked ? '待解锁' : it.title;
+        title = locked ? '待解锁' : LP.inv.sub(it.title);
         no = it.no;
         if (!locked && it.cred) cred = it.cred.level;
         isNew = !locked && !LP.state.has('discoveredDocuments', it.id);
@@ -307,19 +307,19 @@ LP.archive = (function () {
       LP.el('span', { class: 'cred ' + (doc.cred ? doc.cred.level : ''), text: doc.cred ? `${doc.cred.level} · ${doc.cred.kind}` : '' })
     ]);
     const body = LP.el('div', { class: 'doc-card-body' }, [
-      LP.el('h3', { text: doc.title })
+      LP.el('h3', { text: LP.inv.sub(doc.title) })
     ]);
     if (doc.type === 'photo') {
       body.appendChild(LP.el('img', { class: 'doc-thumb', src: doc.src, alt: doc.title }));
-      body.appendChild(LP.el('p', { text: doc.desc }));
+      body.appendChild(LP.el('p', { text: LP.inv.sub(doc.desc) }));
     } else if (doc.type === 'map') {
-      body.appendChild(LP.el('p', { text: doc.desc }));
+      body.appendChild(LP.el('p', { text: LP.inv.sub(doc.desc) }));
     } else if (doc.damaged) {
       body.appendChild(LP.el('p', { class: 'mono', text: '!! 文件损坏 —— 数据校验失败', style: 'color:var(--red);font-size:.8rem' }));
       body.appendChild(LP.el('p', { text: '该页的数据链路已断裂。或许，已经确证的事实可以修复它。' }));
     } else {
       (doc.content || []).slice(0, 2).forEach(p =>
-        body.appendChild(LP.el('p', { text: p })));
+        body.appendChild(LP.el('p', { text: LP.inv.sub(p) })));
       if ((doc.content || []).length > 2)
         body.appendChild(LP.el('p', { class: 'dim', text: '……' }));
     }
@@ -328,7 +328,7 @@ LP.archive = (function () {
       const rel = LP.data.documents[rid] || LP.data.people[rid] || LP.data.locations[rid];
       if (!rel) return;
       foot.appendChild(LP.el('span', {
-        class: 'rel-chip', text: rel.title || rel.name,
+        class: 'rel-chip', text: LP.inv.sub(rel.title || rel.name),
         onclick: () => {
           const d = LP.data.documents[rid];
           if (d && isUnlocked(d)) openItem(d);

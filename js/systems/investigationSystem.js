@@ -4,6 +4,16 @@
 window.LP = window.LP || {};
 LP.inv = (function () {
 
+  /* 代号→真名替换：身份确认前显示代号，确认后显示姓名 */
+  function sub(text) {
+    const s = LP.state.get();
+    const known = pid => LP.data.people[pid].known || s.discoveredPeople.includes(pid);
+    return String(text)
+      .replace(/\{Z\}/g, known('person_zhou') ? '周宁' : 'Z')
+      .replace(/\{C\}/g, known('person_chen') ? '陈川' : 'C')
+      .replace(/\{L\}/g, known('person_li') ? '李禾' : 'L');
+  }
+
   /* ---------------- 线索发现 ---------------- */
   function discoverClue(clueId, silent) {
     const clue = LP.data.clues[clueId];
@@ -14,6 +24,10 @@ LP.inv = (function () {
       LP.ui.toast(`发现线索：${clue.label}`, 'red');
     }
     renderClues();
+    // 身份确认线索：发现即确认（如公告栏揭示「周宁」）
+    Object.values(LP.data.people).forEach(p => {
+      if (p.identifyBy === clueId) identifyPerson(p.id);
+    });
     checkDeductions();
   }
 
@@ -170,6 +184,6 @@ LP.inv = (function () {
 
   return {
     discoverClue, renderClues, afterRead, identifyPerson,
-    checkDeductions, completePuzzle, setAct, initHint
+    checkDeductions, completePuzzle, setAct, initHint, sub
   };
 })();

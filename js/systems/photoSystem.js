@@ -4,14 +4,9 @@
 window.LP = window.LP || {};
 LP.photo = (function () {
 
-  /* 合影四人位置（百分比，左起：陈川 林远 周宁 李禾） */
+  /* 合影四人站位（左起）：用于底部姓名条，身份随剧情逐步揭示 */
   const FACES = {
-    photo_01: [
-      { pid: 'person_chen',    x: 13, y: 26, w: 17, h: 52 },
-      { pid: 'person_linyuan', x: 33, y: 23, w: 17, h: 55 },
-      { pid: 'person_zhou',    x: 53, y: 22, w: 17, h: 56 },
-      { pid: 'person_li',      x: 73, y: 27, w: 15, h: 51 }
-    ]
+    photo_01: ['person_chen', 'person_linyuan', 'person_zhou', 'person_li']
   };
 
   function open(id) {
@@ -19,7 +14,7 @@ LP.photo = (function () {
     if (!doc) return;
     LP.audio.open();
 
-    LP.$('#viewer-title').textContent = doc.title;
+    LP.$('#viewer-title').textContent = LP.inv.sub(doc.title);
     LP.$('#viewer-meta').textContent = `${doc.meta.file} · ${doc.meta.size} · ${doc.meta.scan}`;
     const stage = LP.$('#viewer-stage');
     const tools = LP.$('#viewer-tools');
@@ -27,26 +22,16 @@ LP.photo = (function () {
 
     let zoom = 1, rot = 0, flipped = false, tx = 0, ty = 0;
 
+    const col = LP.el('div', { class: 'photo-col' });
     const wrap = LP.el('div', { class: 'photo-wrap' });
     const card = LP.el('div', { class: 'photo-card' });
     const face = LP.el('div', { class: 'photo-face' });
     const img = LP.el('img', { src: doc.src, alt: doc.title, draggable: 'false' });
     face.appendChild(img);
 
-    /* 人脸高亮（已确认身份的人物） */
-    (FACES[id] || []).forEach(f => {
-      const p = LP.data.people[f.pid];
-      const known = p && (p.known || LP.state.has('discoveredPeople', f.pid));
-      if (!known) return;
-      face.appendChild(LP.el('div', {
-        class: 'face-mark',
-        style: `left:${f.x}%;top:${f.y}%;width:${f.w}%;height:${f.h}%`
-      }, [LP.el('span', { class: 'fname', text: p.name })]));
-    });
-
     /* 背面 */
     const back = LP.el('div', { class: 'photo-back' });
-    const btext = LP.el('div', { class: 'btext', text: doc.back.text });
+    const btext = LP.el('div', { class: 'btext', text: LP.inv.sub(doc.back.text) });
     back.appendChild(btext);
 
     /* 折痕（仅 photo_01 等带折痕的照片）—— 折痕在背面，需先翻面 */
@@ -61,7 +46,21 @@ LP.photo = (function () {
 
     card.appendChild(face); card.appendChild(back);
     wrap.appendChild(card);
-    stage.appendChild(wrap);
+    col.appendChild(wrap);
+
+    /* 合影姓名条：随身份确认逐步揭示 */
+    if (FACES[id]) {
+      const names = FACES[id].map(pid => {
+        const p = LP.data.people[pid];
+        const known = p.known || LP.state.has('discoveredPeople', pid);
+        return known ? p.name : '？';
+      });
+      col.appendChild(LP.el('div', {
+        class: 'photo-caption serif',
+        text: '从左到右：' + names.join(' · ')
+      }));
+    }
+    stage.appendChild(col);
 
     function apply() {
       img.style.transform = `scale(${zoom}) rotate(${rot}deg) translate(${tx / zoom}px,${ty / zoom}px)`;
