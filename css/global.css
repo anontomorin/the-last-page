@@ -42,6 +42,16 @@ body.theme-bright{ --paper:#FDFCF8; --paper-deep:#F2EEE2; }
 .btn-ghost.small{padding:.35rem .8rem;font-size:.72rem}
 .btn-ghost:disabled{opacity:.35;pointer-events:none}
 
+/* 红色旗带：左侧缘，随幕数推进逐渐点亮（红色主题） */
+#red-ribbon{position:fixed;left:0;top:0;bottom:0;width:5px;z-index:55;pointer-events:none;
+  background:linear-gradient(180deg,var(--red),var(--red-bright) 55%,var(--gold));
+  opacity:.12;transition:opacity 1.2s ease,width 1.2s ease}
+body[data-act="2"] #red-ribbon{opacity:.26}
+body[data-act="3"] #red-ribbon{opacity:.4}
+body[data-act="4"] #red-ribbon{opacity:.55}
+body[data-act="5"] #red-ribbon{opacity:.72}
+body[data-act="6"] #red-ribbon{opacity:.95;width:7px}
+
 /* ============ 启动画面 ============ */
 #screen-boot{align-items:center;justify-content:center;
   background:

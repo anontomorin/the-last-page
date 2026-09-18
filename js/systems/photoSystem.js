@@ -137,5 +137,87 @@ LP.photo = (function () {
     face.appendChild(LP.el('div', { class: 'photo-meta', html: rows.join('<br>') }));
   }
 
-  return { open };
+  /* ---------------- 照片排序谜题（第四幕解锁） ---------------- */
+  /* 正确顺序：按 IMG 编号（月日在前，顺序在后） */
+  const SORT_IDS = ['photo_02', 'photo_06', 'photo_11', 'photo_08', 'photo_04', 'photo_07', 'photo_10', 'photo_09'];
+  /* 打乱后的初始顺序（固定，避免随机） */
+  const SORT_SHUFFLED = ['photo_04', 'photo_09', 'photo_02', 'photo_10', 'photo_07', 'photo_11', 'photo_06', 'photo_08'];
+
+  function openSort() {
+    const s = LP.state.get();
+    if (s.act < 4) { LP.ui.toast('时机未到——先修复时间线。'); return; }
+    if (s.completedPuzzles.includes('photo_sort')) { LP.ui.toast('顺序已经校验过了。'); return; }
+    if (LP.$('.ps-overlay')) return; // 防重复叠加
+
+    LP.audio.open();
+    const overlay = LP.el('div', { class: 'ps-overlay' });
+    const panel = LP.el('div', { class: 'ps-panel' });
+    panel.appendChild(LP.el('div', { class: 'mono ps-head', text: 'PHOTO ORDER VERIFICATION · 拍摄顺序校验' }));
+    panel.appendChild(LP.el('p', {
+      class: 'ps-tip serif',
+      text: '李禾给照片编号时「月日在前，顺序在后」。把八张照片按拍摄先后排好——文件名就是答案。点选两张可交换位置。'
+    }));
+
+    const row = LP.el('div', { class: 'ps-row' });
+    let current = SORT_SHUFFLED.slice();
+    let picked = null;
+
+    function draw() {
+      row.innerHTML = '';
+      current.forEach(id => {
+        const d = LP.data.documents[id];
+        const card = LP.el('div', { class: 'ps-card' + (picked === id ? ' picked' : ''), 'data-id': id }, [
+          LP.el('div', { class: 'mono ps-file', text: d.meta.file }),
+          LP.el('div', { class: 'ps-title', text: d.title.replace('旧照片 · ', '') })
+        ]);
+        card.addEventListener('click', () => {
+          LP.audio.click();
+          if (!picked) { picked = id; draw(); return; }
+          if (picked === id) { picked = null; draw(); return; }
+          const a = current.indexOf(picked), b = current.indexOf(id);
+          [current[a], current[b]] = [current[b], current[a]];
+          picked = null;
+          LP.audio.paper();
+          draw();
+        });
+        row.appendChild(card);
+      });
+    }
+    draw();
+    panel.appendChild(row);
+
+    const btns = LP.el('div', { class: 'ps-actions' });
+    btns.appendChild(LP.el('button', {
+      class: 'btn-primary', text: '校验顺序',
+      onclick: () => {
+        if (current.every((id, i) => id === SORT_IDS[i])) {
+          LP.audio.complete();
+          LP.anim.flash();
+          LP.inv.completePuzzle('photo_sort');
+          LP.inv.discoverClue('clue_photosort');
+          LP.state.addTo('unlockedDocs', 'photo_12');
+          close();
+          LP.ui.narrate([
+            '编号即日期。',
+            '她用最笨的办法，替所有人守住了时间的顺序。',
+            '档案深处，有一张新的照片浮出了水面。'
+          ], () => LP.ui.toast('获得资料：旧照片 · 开着的门', 'gold'));
+          LP.bus.emit('refresh');
+        } else {
+          LP.audio.error();
+          LP.anim.shake(row);
+          LP.ui.toast('顺序不对——再看一遍文件名。', 'red');
+        }
+      }
+    }));
+    btns.appendChild(LP.el('button', { class: 'btn-ghost', text: '收起', onclick: close }));
+    panel.appendChild(btns);
+
+    overlay.appendChild(panel);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.body.appendChild(overlay);
+    function close() { LP.audio.click(); overlay.remove(); }
+  }
+
+  return { open, openSort };
 })();

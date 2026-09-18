@@ -46,6 +46,20 @@ LP.ending = (function () {
     stage.appendChild(submit);
   }
 
+  function finalPageLines(answers) {
+    return [
+      { text: '他们曾年轻，我们正年轻。', cls: 'user' },
+      { text: '如果你正在读这一页，说明很多年已经过去了。', cls: '' },
+      { text: '……', cls: '' },
+      { text: '问：如果过去的人能够看到今天，你最想告诉他们什么？', cls: '' },
+      { text: '答：' + answers[0], cls: 'user' },
+      { text: '问：你希望未来的人生活在怎样的世界？', cls: '' },
+      { text: '答：' + answers[1], cls: 'user' },
+      { text: '问：如果只能留下这一句话，你会写什么？', cls: '' },
+      { text: '答：' + answers[2], cls: 'user' }
+    ];
+  }
+
   /* 打印动画：逐行把答案「印」到最终页上 */
   function printFinalPage(stage, answers) {
     stage.innerHTML = '';
@@ -57,16 +71,7 @@ LP.ending = (function () {
     ]));
     stage.appendChild(page);
 
-    const lines = [
-      { text: '如果你正在读这一页，说明很多年已经过去了。', cls: '' },
-      { text: '……', cls: '' },
-      { text: '问：如果过去的人能够看到今天，你最想告诉他们什么？', cls: '' },
-      { text: '答：' + answers[0], cls: 'user' },
-      { text: '问：你希望未来的人生活在怎样的世界？', cls: '' },
-      { text: '答：' + answers[1], cls: 'user' },
-      { text: '问：如果只能留下这一句话，你会写什么？', cls: '' },
-      { text: '答：' + answers[2], cls: 'user' }
-    ];
+    const lines = finalPageLines(answers);
 
     let i = 0;
     (function next() {
@@ -118,17 +123,8 @@ LP.ending = (function () {
       LP.el('span', { text: 'ARCHIVE A-017' }),
       LP.el('span', { text: 'PAGE 032 · 补写页' })
     ]));
-    const lines = [
-      { text: '如果你正在读这一页，说明很多年已经过去了。', cls: '' },
-      { text: '……', cls: '' },
-      { text: '问：如果过去的人能够看到今天，你最想告诉他们什么？', cls: '' },
-      { text: '答：' + answers[0], cls: 'user' },
-      { text: '问：你希望未来的人生活在怎样的世界？', cls: '' },
-      { text: '答：' + answers[1], cls: 'user' },
-      { text: '问：如果只能留下这一句话，你会写什么？', cls: '' },
-      { text: '答：' + answers[2], cls: 'user' }
-    ];
-    lines.forEach(l => page.appendChild(LP.el('div', { class: 'fp-line ' + l.cls, text: l.text })));
+    finalPageLines(answers).forEach(l =>
+      page.appendChild(LP.el('div', { class: 'fp-line ' + l.cls, text: l.text })));
     page.appendChild(LP.el('div', { class: 'fp-stamp' }, [
       LP.el('span', { class: 'stamp', text: '档案完成' })
     ]));
@@ -143,7 +139,12 @@ LP.ending = (function () {
 
   function showEndingLines(stage) {
     const box = LP.el('div', { class: 'end-lines' });
-    LP.story.ENDING.lines.forEach((t, i) => {
+    const lines = LP.story.ENDING.lines.slice();
+    // 彩蛋：发现「卯时三刻」的玩家，知道他们何时离开
+    if (LP.state.has('discoveredEvidence', 'clue_ferry_time')) {
+      lines.splice(4, 0, '他们走的时候，天还没亮。');
+    }
+    lines.forEach((t, i) => {
       box.appendChild(LP.el('p', { text: t, style: `animation-delay:${i * 0.5}s` }));
     });
     stage.appendChild(box);

@@ -3,7 +3,7 @@
 .map-svg{width:100%;height:auto;border:1px solid var(--line);background:
   radial-gradient(ellipse at 60% 30%,#F6F1E3,#EAE3CE);box-shadow:var(--shadow)}
 .map-node{cursor:pointer}
-.map-node .circle{fill:#F4F1EA;stroke:var(--ink-soft);stroke-width:1.5;transition:.3s}
+.map-node .circle{fill:#F4F1EA;stroke:var(--red);stroke-width:1.5;transition:.3s}
 .map-node text{font-family:var(--font-doc);font-size:2.8px;fill:var(--ink);text-anchor:middle}
 .map-node .yr{font-family:var(--font-mono);font-size:1.6px;fill:var(--ink-soft)}
 .map-node:hover .circle{stroke:var(--red);fill:#FBF3DF}

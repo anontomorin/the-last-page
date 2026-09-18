@@ -48,13 +48,18 @@ LP.inv = (function () {
 
   /* ---------------- 资料阅读后的钩子 ---------------- */
   function afterRead(doc) {
-    // 人物确认：由署名线索触发
     const s = LP.state.get();
+    // 人物确认：由署名线索触发
     Object.values(LP.data.people).forEach(p => {
       if (p.identifyBy && s.discoveredEvidence.includes(p.identifyBy)) {
         identifyPerson(p.id);
       }
     });
+    // 藏头句：日记其六/其八/其十 首字连读「钟·楼·七」
+    const acro = ['diary_06', 'diary_08', 'diary_10']
+      .filter(d => s.discoveredDocuments.includes(d)).length;
+    if (acro >= 2) discoverClue('clue_acrostic_part');
+    if (acro >= 3) discoverClue('clue_acrostic');
     checkDeductions();
   }
 
@@ -133,11 +138,15 @@ LP.inv = (function () {
     const s = LP.state.get();
     if (s.act <= 1) return 'act1';
     if (s.act === 2) {
-      if (!s.completedPuzzles.includes('bell7') && LP.state.get().bellRings < 7) return 'bell';
+      if (!s.discoveredEvidence.includes('clue_acrostic') && s.bellRings < 7) return 'acrostic';
+      if (s.bellRings < 7) return 'bell';
       return 'board';
     }
     if (s.act === 3) return 'people';
-    if (s.act === 4) return 'timeline';
+    if (s.act === 4) {
+      if (!s.completedPuzzles.includes('timeline')) return 'timeline';
+      return 'photosort';
+    }
     return 'page32';
   }
 

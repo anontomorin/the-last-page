@@ -300,27 +300,358 @@ LP.data.documents = {
     content: [],   // 由第32页系统动态生成
     clues: [],
     related: ['diary_27', 'diary_31']
+  },
+
+  /* ---------------- 日记补全（v2） ---------------- */
+  diary_04: {
+    id: 'diary_04', type: 'diary', no: '04', title: '日记 · 其四',
+    date: '3月3日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'start',
+    content: [
+      '夜校今晚开课。',
+      '来了八个人，都是码头上扛包的。最大的四十岁，最小的才十五。',
+      '教他们写自己的名字。有个汉子握着笔，手一直在抖，写出来的「王」字歪歪扭扭。',
+      '他不好意思地笑。我说：不抖了，就是好字。'
+    ],
+    clues: [],
+    related: ['diary_13', 'photo_04', 'person_linyuan']
+  },
+
+  diary_06: {
+    id: 'diary_06', type: 'diary', no: '06', title: '日记 · 其六',
+    date: '3月5日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'start',
+    content: [
+      '钟摆滴答了一夜。周宁还在刻蜡纸。',
+      '钢针尖细，她的手指被扎破了两处，血珠渗出来，她随手擦在围裙上。',
+      '我说歇会儿吧。她头也不抬：字比血重。',
+      '《新芽》第二期，明天就能印出来了。'
+    ],
+    clues: ['clue_xinya'],
+    related: ['person_zhou', 'photo_06', 'diary_08']
+  },
+
+  diary_08: {
+    id: 'diary_08', type: 'diary', no: '08', title: '日记 · 其八',
+    date: '3月6日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'start',
+    content: [
+      '楼下全是油墨味。陈川一边摇油印机一边抱怨，说这辈子都不想再闻这个味儿了。',
+      '可我看见他偷偷多印了五十份。',
+      '我问他多印的给谁。他说：多一个人识字，就多一颗火种。',
+      '说完他自己先不好意思了，转身去洗滚筒。'
+    ],
+    clues: [],
+    related: ['person_chen', 'diary_06', 'photo_06']
+  },
+
+  diary_09: {
+    id: 'diary_09', type: 'diary', no: '09', title: '日记 · 其九',
+    date: '3月7日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'start',
+    content: [
+      '今天才知道，李禾的相机是当掉她那支派克笔换的。',
+      '那是她父亲留给她的唯一物件。',
+      '我问她舍得吗。她擦着镜头，过了很久才说：笔是写给自己的，相机是留给大家的。',
+      '她就是这样的人。话少，每一句都落在实处。'
+    ],
+    clues: [],
+    related: ['person_li', 'photo_01']
+  },
+
+  diary_10: {
+    id: 'diary_10', type: 'diary', no: '10', title: '日记 · 其十',
+    date: '3月8日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'start',
+    content: [
+      '七点半，天刚亮透，我们把路线走了一遍。',
+      '从住处出发，过老街，绕到钟楼后面，再上渡口。陈川在老街转错了弯，一头扎进面摊。',
+      '摊主认识他，笑他：又来？连面都没给你下。',
+      '我们都笑了。笑完，周宁把路线又画了一遍，说：不能错。一次都不能错。'
+    ],
+    clues: [],
+    related: ['location_oldstreet', 'location_clocktower', 'location_ferry', 'photo_08']
+  },
+
+  diary_11: {
+    id: 'diary_11', type: 'diary', no: '11', title: '日记 · 其十一',
+    date: '3月11日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'act2',
+    content: [
+      '城里气氛不对。盘查的人多了，夜校门口也出现了生面孔。',
+      '周宁连夜把《新芽》的印版拆下来，藏进了钟楼夹层。',
+      '她说，最危险的地方最安静。',
+      '钟楼啊钟楼，你替我们守着。'
+    ],
+    clues: [],
+    related: ['location_clocktower', 'person_zhou']
+  },
+
+  diary_13: {
+    id: 'diary_13', type: 'diary', no: '13', title: '日记 · 其十三',
+    date: '3月13日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'act2',
+    content: [
+      '夜校最小的学生叫石头，今天学会了写「中国」两个字。',
+      '他举着纸满教室跑，说要拿回去给娘看。',
+      '临走，他塞给我一颗糖，说：先生，甜。',
+      '糖我没吃。我把它包好了。'
+    ],
+    clues: [],
+    related: ['diary_04', 'diary_28', 'photo_07']
+  },
+
+  diary_14: {
+    id: 'diary_14', type: 'diary', no: '14', title: '日记 · 其十四',
+    date: '3月14日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'act2',
+    content: [
+      '半夜醒来，看见周宁坐在窗前。',
+      '她问我：值得吗？',
+      '我还没想好怎么答，她自己说了：值得。',
+      '顿了顿，又说：就是有点想家。',
+      '原来最坚定的人，也有想家的时候。'
+    ],
+    clues: [],
+    related: ['person_zhou', 'diary_05']
+  },
+
+  diary_16: {
+    id: 'diary_16', type: 'diary', no: '16', title: '日记 · 其十六',
+    date: '3月17日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'act3',
+    content: [
+      '陈川收到他娘的回信，薄薄一张纸，他读了三遍。',
+      '信末写着「勿念」，他把那两个字用铅笔描了又描。',
+      '他抬头冲我笑：我娘说面给我留着。',
+      '笑着笑着，他揉了揉眼睛，说是油墨熏的。',
+      '今天没有印报。'
+    ],
+    clues: [],
+    related: ['person_chen', 'letter_03']
+  },
+
+  diary_18: {
+    id: 'diary_18', type: 'diary', no: '18', title: '日记 · 其十八',
+    date: '3月15日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'act3',
+    content: [
+      '明天是个要紧日子。今晚我们包了饺子。',
+      '面和得硬了，馅是白菜的，没有肉。陈川说，等回来，他要吃放很多葱花的面，吃到撑。',
+      '周宁笑他没出息。李禾没说话，把四双手包饺子的样子拍了下来。',
+      '锅里热气升起来的时候，我忽然觉得，这大概就是家的样子。'
+    ],
+    clues: [],
+    related: ['photo_10', 'person_chen']
+  },
+
+  diary_20: {
+    id: 'diary_20', type: 'diary', no: '20', title: '日记 · 其二十',
+    date: '3月9日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'act3',
+    content: [
+      '李禾说，她的胶卷只剩最后一卷了。',
+      '我问她要留到什么时候拍。她说：留到你们回来的那天。',
+      '陈川在旁边起哄，说回来那天要吃面，面也要拍下来。',
+      '一屋子人都笑了。',
+      '原来大家都在心里，偷偷盼着那一天。'
+    ],
+    clues: [],
+    related: ['person_li', 'photo_12']
+  },
+
+  diary_22: {
+    id: 'diary_22', type: 'diary', no: '22', title: '日记 · 其二十二',
+    date: '3月4日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'act4',
+    content: [
+      '天没亮就去渡口看船。',
+      '头班船，卯时三刻。晨雾大，三丈外看不见人。',
+      '我把水路画了下来，哪里有滩，哪里转弯，都标清楚了。',
+      '周宁说，有这张图，心里就踏实。'
+    ],
+    clues: [],
+    related: ['location_ferry', 'photo_09']
+  },
+
+  diary_23: {
+    id: 'diary_23', type: 'diary', no: '23', title: '日记 · 其二十三',
+    date: '3月16日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'act4',
+    content: [
+      '倒春寒，冷得厉害。',
+      '陈川把他娘絮的棉袄，脱下来披在了石头身上。石头不要，他瞪眼：拿着！',
+      '转过身，他自己冻得直搓手。',
+      '这个总喊冷的人，最怕别人冷。'
+    ],
+    clues: [],
+    related: ['person_chen', 'letter_03', 'diary_13']
+  },
+
+  diary_25: {
+    id: 'diary_25', type: 'diary', no: '25', title: '日记 · 其二十五',
+    date: '3月18日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'act4',
+    content: [
+      '三月十八日，雨。',
+      '夜校的教室空了。黑板上还留着石头写的两个字：中国。',
+      '我没有擦。',
+      '等我回来，接着教。'
+    ],
+    clues: [],
+    related: ['diary_13', 'photo_05', 'timeline']
+  },
+
+  diary_26: {
+    id: 'diary_26', type: 'diary', no: '26', title: '日记 · 其二十六',
+    date: '3月17日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'act5',
+    content: [
+      '夜里看见李禾在灯下缝衣服。',
+      '凑近了才看清，她是把底片一片一片缝进棉衣的夹层。',
+      '她说：东西带不走太多，底片一定要带走。',
+      '照片不会替人撒谎。她要把真相，一件一件带出去。'
+    ],
+    clues: [],
+    related: ['person_li', 'diary_15', 'photo_05']
+  },
+
+  diary_28: {
+    id: 'diary_28', type: 'diary', no: '28', title: '日记 · 其二十八',
+    date: '3月19日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'act5',
+    content: [
+      '石头送的那颗糖，我一直没舍得吃。',
+      '今天拿出来看了看，糖纸都有些软了。',
+      '我把它重新包好，夹进了日记里。',
+      '甜的东西，要留给甜的日子。'
+    ],
+    clues: [],
+    related: ['diary_13']
+  },
+
+  diary_29: {
+    id: 'diary_29', type: 'diary', no: '29', title: '日记 · 其二十九',
+    date: '3月20日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'act5',
+    content: [
+      '今晚写下了一句话：如果我回不来——',
+      '写到这里，我停住了，又把它涂掉了。',
+      '没有如果。要做的事，就去做。',
+      '周宁说过：不走的话，就连知道结果的资格都没有。'
+    ],
+    clues: [],
+    related: ['diary_05', 'diary_30']
+  },
+
+  diary_30: {
+    id: 'diary_30', type: 'diary', no: '30', title: '日记 · 其三十',
+    date: '3月20日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'act5',
+    content: [
+      '明天就是二十一号了。',
+      '这本日记，就快写完了。',
+      '最后一页写什么，我还没有想好。',
+      '也许，该留一点给读它的人。'
+    ],
+    clues: [],
+    related: ['diary_31', 'page_032']
+  },
+
+  /* ---------------- 照片补全（v2） ---------------- */
+  photo_04: {
+    id: 'photo_04', type: 'photo', no: '04', title: '旧照片 · 夜校合影',
+    date: '未知', cred: { level: '高', kind: '视觉记录' },
+    unlock: 'act2',
+    src: 'assets/images/photo_school.jpg',
+    meta: { file: 'IMG_0310.jpg', size: '688 KB', scan: '600dpi' },
+    desc: '八个人挤在夜校门口，每人手里举着一张纸，纸上是各自刚学会写的名字。',
+    back: { text: '「0310 晴 · 他们都会写自己的名字了」', crease: false },
+    clues: ['clue_nightschool'],
+    related: ['diary_04', 'diary_13', 'person_linyuan']
+  },
+
+  photo_06: {
+    id: 'photo_06', type: 'photo', no: '06', title: '旧照片 · 油印机',
+    date: '未知', cred: { level: '高', kind: '视觉记录' },
+    unlock: 'act2',
+    src: 'assets/images/photo_press.jpg',
+    meta: { file: 'IMG_0305.jpg', size: '592 KB', scan: '600dpi' },
+    desc: '一台手摇油印机，滚筒上还沾着油墨。画面角落有一双手，指腹全是黑的。',
+    back: { text: '「0305 阴 · 第二期开印」', crease: false },
+    clues: ['clue_xinya'],
+    related: ['diary_06', 'diary_08']
+  },
+
+  photo_07: {
+    id: 'photo_07', type: 'photo', no: '07', title: '旧照片 · 小先生们',
+    date: '未知', cred: { level: '高', kind: '视觉记录' },
+    unlock: 'act2',
+    src: 'assets/images/photo_kids.jpg',
+    meta: { file: 'IMG_0312.jpg', size: '640 KB', scan: '600dpi' },
+    desc: '夜校的孩子们挤在黑板前。黑板上一笔一划，写着两个大字。',
+    back: { text: '「0312 晴 · 小先生们」', crease: false },
+    clues: [],
+    related: ['diary_13', 'photo_04']
+  },
+
+  photo_08: {
+    id: 'photo_08', type: 'photo', no: '08', title: '旧照片 · 面摊',
+    date: '未知', cred: { level: '高', kind: '视觉记录' },
+    unlock: 'act3',
+    src: 'assets/images/photo_stall.jpg',
+    meta: { file: 'IMG_0309.jpg', size: '614 KB', scan: '600dpi' },
+    desc: '老街转角的面摊。一个年轻人背对镜头坐着，面前的碗见了底。',
+    back: { text: '「0309 晴 · 老街口，他总嫌葱花少」', crease: false },
+    clues: [],
+    related: ['person_chen', 'location_oldstreet', 'diary_10']
+  },
+
+  photo_09: {
+    id: 'photo_09', type: 'photo', no: '09', title: '旧照片 · 渡船',
+    date: '未知', cred: { level: '高', kind: '视觉记录' },
+    unlock: 'act3',
+    src: 'assets/images/photo_ferry.jpg',
+    meta: { file: 'IMG_0316.jpg', size: '655 KB', scan: '600dpi' },
+    desc: '晨雾里的一条渡船。船头挂着一盏小马灯，光很弱，但没有灭。',
+    back: { text: '「0316 阴 · 晨雾，船来了」', crease: false },
+    clues: ['clue_ferry_boat'],
+    related: ['location_ferry', 'diary_22']
+  },
+
+  photo_10: {
+    id: 'photo_10', type: 'photo', no: '10', title: '旧照片 · 饺子',
+    date: '未知', cred: { level: '高', kind: '视觉记录' },
+    unlock: 'act3',
+    src: 'assets/images/photo_dumpling.jpg',
+    meta: { file: 'IMG_0315.jpg', size: '602 KB', scan: '600dpi' },
+    desc: '一张方桌，四双手，一排歪歪扭扭的白菜饺子。照片边缘有一点虚，像是谁笑场了。',
+    back: { text: '「0315 晴 · 出发前夜」', crease: false },
+    clues: [],
+    related: ['diary_18']
+  },
+
+  photo_11: {
+    id: 'photo_11', type: 'photo', no: '11', title: '旧照片 · 《新芽》',
+    date: '未知', cred: { level: '高', kind: '视觉记录' },
+    unlock: 'act4',
+    src: 'assets/images/photo_xinya.jpg',
+    meta: { file: 'IMG_0306.jpg', size: '578 KB', scan: '600dpi' },
+    desc: '一张油印小报的特写。油墨不匀，字迹深浅不一，但报头两个字刻得极认真。',
+    back: { text: '「0306 阴 · 印出来了」', crease: false },
+    clues: [],
+    related: ['clue_xinya', 'diary_06', 'diary_08']
+  },
+
+  photo_12: {
+    id: 'photo_12', type: 'photo', no: '12', title: '旧照片 · 开着的门',
+    date: '未知', cred: { level: '高', kind: '视觉记录' },
+    unlock: 'photosort',
+    src: 'assets/images/photo_door.jpg',
+    meta: { file: 'IMG_0321.jpg', size: '610 KB', scan: '600dpi' },
+    desc: '一扇开着的木门。屋里没有人，桌上的墨还没有干。她说过，最后一卷胶卷要留到回来那天——这一张，是那卷的最后一张。',
+    back: { text: '「0321 阴 · 门开着」', crease: false },
+    clues: ['clue_open_door'],
+    related: ['diary_20', 'diary_31', 'page_032']
   }
 };
-
-/* 日记占位：档案记录共 31 篇，多数尚未修复 */
-LP.data.diaryPlaceholders = [];
-for (let i = 4; i <= 31; i++) {
-  const skip = [5, 7, 12, 15, 19, 24, 27, 31];
-  if (skip.includes(i)) continue;
-  LP.data.diaryPlaceholders.push({
-    id: 'diary_' + String(i).padStart(2, '0'),
-    no: String(i).padStart(2, '0'),
-    title: '日记 · 待修复'
-  });
-}
-/* 照片占位：共 12 张 */
-LP.data.photoPlaceholders = [];
-for (let i = 3; i <= 12; i++) {
-  if (i === 3 || i === 5) continue;
-  LP.data.photoPlaceholders.push({
-    id: 'photo_' + String(i).padStart(2, '0'),
-    no: String(i).padStart(2, '0'),
-    title: '照片 · 待修复'
-  });
-}

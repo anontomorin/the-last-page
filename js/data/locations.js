@@ -42,7 +42,8 @@ LP.data.locations = {
     unlock: 'act4', scene: 'ferry',
     objects: [
       { id: 'obj_river', name: '河水',   pos: 'bottom' },
-      { id: 'obj_post',  name: '系缆桩', pos: 'left' }
+      { id: 'obj_post',  name: '系缆桩', pos: 'left' },
+      { id: 'obj_sign',  name: '船班木牌', pos: 'right' }
     ]
   }
 };

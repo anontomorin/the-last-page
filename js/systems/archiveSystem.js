@@ -92,7 +92,7 @@ LP.archive = (function () {
       s.discoveredLocations.length +
       s.completedPuzzles.length * 3 +
       s.ocrFragments.length;
-    const maxScore = 16 + 18 + 8 + 4 + 18 + 6;
+    const maxScore = 49 + 25 + 8 + 4 + 27 + 6;
     return Math.min(96.7, 12 + (score / maxScore) * 84.7);
   }
 
@@ -182,17 +182,10 @@ LP.archive = (function () {
   /* ---------------- 左侧列表 ---------------- */
   function listItems() {
     const docs = LP.data.documents;
-    if (curTab === 'diary') {
-      const real = Object.values(docs).filter(d => d.type === 'diary');
-      const locked = LP.data.diaryPlaceholders.map(p => ({ ...p, type: 'diary', _locked: true }));
-      return real.concat(locked).sort((a, b) => a.no.localeCompare(b.no));
+    if (curTab === 'diary' || curTab === 'photo' || curTab === 'letter') {
+      return Object.values(docs).filter(d => d.type === curTab)
+        .sort((a, b) => a.no.localeCompare(b.no));
     }
-    if (curTab === 'photo') {
-      const real = Object.values(docs).filter(d => d.type === 'photo');
-      const locked = LP.data.photoPlaceholders.map(p => ({ ...p, type: 'photo', _locked: true }));
-      return real.concat(locked).sort((a, b) => a.no.localeCompare(b.no));
-    }
-    if (curTab === 'letter') return Object.values(docs).filter(d => d.type === 'letter');
     if (curTab === 'map') return Object.values(LP.data.locations);
     if (curTab === 'person') return Object.values(LP.data.people);
     if (curTab === 'evidence') return Object.values(LP.data.clues)
@@ -230,8 +223,8 @@ LP.archive = (function () {
       } else if (curTab === 'evidence') {
         locked = false; title = it.label; no = '线索';
       } else {
-        locked = it._locked || !isUnlocked(it);
-        title = locked ? (it._locked ? it.title : '待解锁') : it.title;
+        locked = !isUnlocked(it);
+        title = locked ? '待解锁' : it.title;
         no = it.no;
         if (!locked && it.cred) cred = it.cred.level;
         isNew = !locked && !LP.state.has('discoveredDocuments', it.id);
@@ -273,6 +266,32 @@ LP.archive = (function () {
     if (curTab === 'evidence') { LP.evidence.render(prev); main.hidden = true; prev.hidden = false; return; }
     if (curTab === 'timeline') { LP.timeline.render(prev); main.hidden = true; prev.hidden = false; return; }
     main.hidden = false; prev.hidden = true;
+    renderPhotoSortBanner();
+  }
+
+  /* 照片标签页：第四幕后出现「拍摄顺序校验」入口 */
+  function renderPhotoSortBanner() {
+    const main = LP.$('#wb-empty');
+    const s = LP.state.get();
+    // 恢复默认空态
+    main.innerHTML = '';
+    if (curTab === 'photo' && s.act >= 4) {
+      const done = s.completedPuzzles.includes('photo_sort');
+      const sortBtn = LP.el('button', {
+        class: 'btn-ghost small',
+        text: done ? '已完成' : '校验拍摄顺序',
+        onclick: () => LP.photo.openSort()
+      });
+      if (done) sortBtn.setAttribute('disabled', '');
+      const banner = LP.el('div', { class: 'ps-banner' }, [
+        LP.el('div', { class: 'mono', text: 'PHOTO ORDER VERIFICATION', style: 'font-size:.6rem;letter-spacing:.3em;color:var(--red)' }),
+        LP.el('p', { class: 'serif', text: done ? '拍摄顺序已校验。她按时间记住了一切。' : '这些照片的拍摄顺序，似乎还没有人校验过。' }),
+        sortBtn
+      ]);
+      main.appendChild(banner);
+    }
+    main.appendChild(LP.el('p', { text: '选择左侧资料开始整理。' }));
+    main.appendChild(LP.el('p', { class: 'dim', text: '所有谜题都藏在档案里 —— 阅读、观察、关联、验证。' }));
   }
 
   function renderPreviewCard(doc) {

@@ -98,7 +98,8 @@ LP.map = (function () {
     obj_shop:  'M10 24 L54 24 L50 12 L14 12 Z M14 24 L14 52 L50 52 L50 24 M24 34 L40 34 M24 42 L40 42',
     obj_stone: 'M10 40 L54 40 M14 40 L12 52 L52 52 L50 40 M20 28 L44 28 M22 28 L20 40 M42 28 L44 40 M28 16 L36 16',
     obj_river: 'M8 24 C18 20 26 28 36 24 C44 21 50 27 56 24 M8 36 C18 32 26 40 36 36 C44 33 50 39 56 36 M8 48 C18 44 26 52 36 48 C44 45 50 51 56 48',
-    obj_post:  'M24 8 L24 56 M40 8 L40 56 M18 20 L46 20 M18 32 L46 32 M16 56 L48 56'
+    obj_post:  'M24 8 L24 56 M40 8 L40 56 M18 20 L46 20 M18 32 L46 32 M16 56 L48 56',
+    obj_sign:  'M12 10 L52 10 L52 34 L12 34 Z M20 34 L20 54 M44 34 L44 54 M18 18 L46 18 M18 26 L40 26'
   };
 
   function objIcon(id) {
@@ -161,6 +162,7 @@ LP.map = (function () {
     }
     if (objId === 'obj_board') return openBoard(obj, el, msgBox, stage);
     if (objId === 'obj_door') return tryDoor(obj, el, msgBox);
+    if (objId === 'obj_sign') return openFerrySign(obj, el, msgBox, stage);
 
     /* ---- 老街 / 渡口 ---- */
     markDone(el);
@@ -263,6 +265,43 @@ LP.map = (function () {
     }
     LP.audio.error();
     setMsg(msgBox, obj.locked);
+  }
+
+  /* 渡口：船班木牌，「卯时三刻」被反复描深 */
+  function openFerrySign(obj, el, msgBox, stage) {
+    const old = LP.$('.board-paper', stage.parentElement);
+    if (old) { old.remove(); return; }
+    LP.audio.paper();
+
+    const found = LP.state.has('discoveredEvidence', 'clue_ferry_time');
+    const paper = LP.el('div', { class: 'board-paper' });
+    paper.appendChild(LP.el('h4', { text: '渡 船 时 刻' }));
+    paper.appendChild(LP.el('p', {
+      class: 'dim', text: obj.text,
+      style: 'font-size:.78rem;margin-bottom:.6rem'
+    }));
+    obj.times.forEach(t => {
+      const isDeep = t === obj.deep;
+      const line = LP.el('div', {
+        class: 'board-line' + (isDeep && found ? ' revealed' : '')
+      }, [
+        LP.el('span', { class: 'ln', text: '·' }),
+        LP.el('span', { class: 'lt', text: t })
+      ]);
+      line.addEventListener('click', () => {
+        if (!isDeep) { LP.audio.click(); return setMsg(msgBox, obj.ordinary); }
+        if (found) return setMsg(msgBox, obj.deepText);
+        markDone(el);
+        LP.audio.complete();
+        LP.anim.flash();
+        line.classList.add('revealed');
+        setMsg(msgBox, obj.deepText + '\n' + obj.deepText2);
+        setTimeout(() => LP.inv.discoverClue('clue_ferry_time'), 800);
+      });
+      paper.appendChild(line);
+    });
+    stage.parentElement.appendChild(paper);
+    paper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function init() {

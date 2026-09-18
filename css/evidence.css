@@ -11,7 +11,7 @@
     #EFE9D8;
   box-shadow:var(--shadow)}
 .ev-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.ev-lines line{stroke:var(--red);stroke-width:1.4;opacity:.55;stroke-dasharray:5 4;
+.ev-lines line{stroke:var(--red);stroke-width:1.8;opacity:.6;
   animation:lineIn 1.2s ease}
 @keyframes lineIn{from{opacity:0}to{opacity:.55}}
 

@@ -22,7 +22,7 @@ LP.timeline = (function () {
     const wrap = LP.el('div', { class: 'tl-wrap timeline-wrap' });
     wrap.appendChild(LP.el('div', { class: 'tl-head' }, [
       LP.el('h3', { text: '「那一天」究竟是哪一天？' }),
-      LP.el('p', { text: '把五张资料卡放进它们真正属于的日期。照片不会撒谎——用它校验人的记忆。' })
+      LP.el('p', { text: '把七张资料卡放进它们真正属于的日期。照片不会撒谎——用它校验人的记忆。' })
     ]));
 
     const placed = s.timelineNodes || {};

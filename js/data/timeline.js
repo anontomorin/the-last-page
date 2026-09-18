@@ -38,15 +38,29 @@ LP.data.timelineCards = [
     weather: '雨', date: '3月18日',
     text: '「我记得走的那天下着雨，冷得很。」',
     cred: '中 · 主观记录'
+  },
+  {
+    id: 'tl_photo09', refId: 'photo_09',
+    title: '晨雾中的渡船', kind: 'photo',
+    weather: '阴', date: '3月16日',
+    text: '「0316 阴 · 晨雾，船来了」',
+    cred: '高 · 视觉记录'
+  },
+  {
+    id: 'tl_diary25', refId: 'diary_25',
+    title: '林远的日记 · 廿五', kind: 'diary',
+    weather: '雨', date: '3月18日',
+    text: '「教室空了。黑板上还留着两个字。」',
+    cred: '中 · 主观记录'
   }
 ];
 
 /* 正确的三天 */
 LP.data.timelineDays = [
-  { day: '3月16日', weather: '冷 · 倒春寒', accept: ['tl_letter03'],
-    fact: '陈川在住处写下家书。' },
+  { day: '3月16日', weather: '冷 · 倒春寒', accept: ['tl_letter03', 'tl_photo09'],
+    fact: '陈川在住处写下家书；李禾在晨雾里看清了头班船。' },
   { day: '3月17日', weather: '晴', accept: ['tl_photo01', 'tl_diary24'],
     fact: '四人在钟楼前合影；当晚把东西送到了。' },
-  { day: '3月18日', weather: '雨', accept: ['tl_photo05', 'tl_letter02'],
-    fact: '雨中，他们离开。李禾拍下空无一人的街。' }
+  { day: '3月18日', weather: '雨', accept: ['tl_photo05', 'tl_letter02', 'tl_diary25'],
+    fact: '雨中，他们离开。夜校的教室空了下来。' }
 ];

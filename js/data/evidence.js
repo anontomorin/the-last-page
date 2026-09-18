@@ -97,6 +97,47 @@ LP.data.clues = {
     id: 'clue_page32_cut', label: '被裁掉的最后一页',
     desc: '日记的最后一页被整齐地裁去了。切口很平——是他自己动的手。',
     from: 'diary_31', links: ['page_032']
+  },
+  /* ---------------- v2 新增线索 ---------------- */
+  clue_xinya: {
+    id: 'clue_xinya', label: '《新芽》',
+    desc: '一份手刻蜡纸、油印出来的小报。周宁说：字比血重。',
+    from: 'diary_06', links: ['photo_06', 'photo_11', 'person_zhou']
+  },
+  clue_acrostic_part: {
+    id: 'clue_acrostic_part', label: '首字连读？',
+    desc: '有几篇日记，开头第一个字连在一起，似乎能读出别的意思。',
+    from: 'diary_08', links: ['diary_06', 'diary_10']
+  },
+  clue_acrostic: {
+    id: 'clue_acrostic', label: '「钟楼 · 七」',
+    desc: '日记其六、其八、其十的首字连起来：钟、楼、七。钟楼里的某个「七」。',
+    from: 'diary_10', links: ['location_clocktower', 'clue_bell7']
+  },
+  clue_nightschool: {
+    id: 'clue_nightschool', label: '夜校',
+    desc: '码头上的夜校。多一个人识字，就多一颗火种。',
+    from: 'photo_04', links: ['diary_04', 'diary_13', 'person_linyuan']
+  },
+  clue_ferry_boat: {
+    id: 'clue_ferry_boat', label: '晨雾中的渡船',
+    desc: '0316，阴。临行之前，她又去渡口看了一次船。',
+    from: 'photo_09', links: ['location_ferry', 'diary_22']
+  },
+  clue_photosort: {
+    id: 'clue_photosort', label: '她按时间记住了一切',
+    desc: '编号即日期，月日在前，顺序在后。李禾用编号替所有人守住了时间的顺序。',
+    from: 'letter_04', links: ['photo_12', 'clue_photoback']
+  },
+  clue_ferry_time: {
+    id: 'clue_ferry_time', label: '「卯时三刻」',
+    desc: '船班木牌上被反复描深的头班船。他们走的时候，天还没亮。',
+    from: 'scene_ferry', links: ['location_ferry', 'diary_22']
+  },
+  clue_open_door: {
+    id: 'clue_open_door', label: '开着的门',
+    desc: '最后一张照片：一扇开着的门。门开着，人未归——或者，门是为后来的人留的。',
+    from: 'photo_12', links: ['page_032']
   }
 };
 
@@ -121,5 +162,21 @@ LP.data.evidenceGraph = [
   { from: 'clue_conflict_rain', to: 'timeline' },
   { from: 'clue_rain_0318', to: 'timeline' },
   { from: 'diary_31', to: 'clue_page32_cut' },
-  { from: 'clue_page32_cut', to: 'page_032' }
+  { from: 'clue_page32_cut', to: 'page_032' },
+  /* v2 */
+  { from: 'diary_06', to: 'clue_xinya' },
+  { from: 'clue_xinya', to: 'photo_11' },
+  { from: 'diary_06', to: 'clue_acrostic' },
+  { from: 'diary_08', to: 'clue_acrostic' },
+  { from: 'diary_10', to: 'clue_acrostic' },
+  { from: 'clue_acrostic', to: 'location_clocktower' },
+  { from: 'photo_04', to: 'clue_nightschool' },
+  { from: 'clue_nightschool', to: 'diary_13' },
+  { from: 'photo_09', to: 'clue_ferry_boat' },
+  { from: 'clue_ferry_boat', to: 'location_ferry' },
+  { from: 'letter_04', to: 'clue_photosort' },
+  { from: 'clue_photosort', to: 'photo_12' },
+  { from: 'diary_22', to: 'clue_ferry_time' },
+  { from: 'clue_ferry_time', to: 'location_ferry' },
+  { from: 'photo_12', to: 'clue_open_door' }
 ];
