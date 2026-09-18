@@ -4,9 +4,9 @@
 window.LP = window.LP || {};
 LP.photo = (function () {
 
-  /* 合影四人站位（左起）：用于底部姓名条，身份随剧情逐步揭示 */
+  /* 合影四人站位（与画面一致，左起：男/女/男/女）：用于底部姓名条，身份随剧情逐步揭示 */
   const FACES = {
-    photo_01: ['person_chen', 'person_linyuan', 'person_zhou', 'person_li']
+    photo_01: ['person_chen', 'person_zhou', 'person_linyuan', 'person_li']
   };
 
   function open(id) {
