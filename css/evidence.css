@@ -1,0 +1,36 @@
+/* ============ 证据板 ============ */
+.ev-wrap{max-width:920px;margin:0 auto}
+.ev-head{text-align:center;margin-bottom:1rem}
+.ev-head h3{font-family:var(--font-doc);font-size:1.2rem;letter-spacing:.15em;margin-bottom:.4rem}
+.ev-head p{font-size:.75rem;color:var(--ink-soft)}
+.ev-board{position:relative;height:480px;border:1px solid var(--line);overflow:hidden;
+  background:
+    radial-gradient(circle at 30% 20%,rgba(185,138,47,.05),transparent 50%),
+    repeating-linear-gradient(0deg,transparent 0 31px,rgba(150,130,90,.1) 31px 32px),
+    repeating-linear-gradient(90deg,transparent 0 31px,rgba(150,130,90,.1) 31px 32px),
+    #EFE9D8;
+  box-shadow:var(--shadow)}
+.ev-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.ev-lines line{stroke:var(--red);stroke-width:1.4;opacity:.55;stroke-dasharray:5 4;
+  animation:lineIn 1.2s ease}
+@keyframes lineIn{from{opacity:0}to{opacity:.55}}
+
+.ev-node{position:absolute;transform:translate(-50%,-50%);cursor:grab;
+  padding:.45rem .8rem;font-size:.72rem;font-family:var(--font-doc);font-weight:600;
+  border:1px solid var(--line);background:var(--panel);box-shadow:0 3px 10px rgba(36,36,36,.15);
+  transition:box-shadow .2s,border-color .2s;user-select:none;max-width:150px;text-align:center;
+  line-height:1.5;touch-action:none}
+.ev-node:hover{border-color:var(--red);box-shadow:0 6px 16px rgba(36,36,36,.22);z-index:5}
+.ev-node:active{cursor:grabbing}
+.ev-node.kind-clue{border-left:3px solid var(--red);color:var(--red)}
+.ev-node.kind-doc{border-left:3px solid var(--ink-soft);color:var(--ink)}
+.ev-node.kind-person{border-left:3px solid var(--gold);color:var(--gold)}
+.ev-node .ev-kind{display:block;font-family:var(--font-mono);font-size:.52rem;
+  letter-spacing:.2em;color:var(--ink-soft);font-weight:400}
+.ev-empty{height:100%;display:flex;align-items:center;justify-content:center;
+  color:var(--ink-soft);font-size:.75rem;font-family:var(--font-mono);letter-spacing:.15em;text-align:center}
+
+@media (max-width:640px){
+  .ev-board{height:420px}
+  .ev-node{font-size:.62rem;max-width:110px;padding:.35rem .5rem}
+}

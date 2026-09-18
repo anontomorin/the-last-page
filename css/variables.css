@@ -1,0 +1,41 @@
+/* ============================================================
+   设计变量 —— 整体视觉从「历史档案」逐渐过渡到「当代数字空间」
+   body[data-act] 随幕数推进，暖色与亮度逐渐增加
+   ============================================================ */
+:root{
+  /* 隐藏 ARG 线索：CSS 变量里也有档案碎片 */
+  --archive-index: 031;
+  --missing-page: 032;
+
+  --paper:#F4F1EA;          /* 背景：旧纸张 */
+  --paper-deep:#EAE4D3;
+  --ink:#242424;            /* 正文 */
+  --ink-soft:#4a463d;
+  --red:#8E1B1B;            /* 深红：编号/线索/印章/重要节点 */
+  --red-bright:#B03030;
+  --gold:#B98A2F;           /* 少量金色强调 */
+  --line:#C9C2B0;
+  --panel:#FBF9F3;
+  --shadow:0 10px 40px rgba(36,36,36,.12);
+  --ok:#3E6B48;
+
+  --font-ui:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  --font-doc:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  --font-mono:"SF Mono","JetBrains Mono","Courier New",monospace;
+
+  --bg-tint:#F4F1EA;
+  --warmth:0;
+}
+
+/* 幕数推进 → 色彩迁移：灰米白 → 暖 → 明亮白 */
+body[data-act="0"],body[data-act="1"]{ --bg-tint:#EDE9DD; }
+body[data-act="2"]{ --bg-tint:#F0EBDF; }
+body[data-act="3"]{ --bg-tint:#F4EFE3; }
+body[data-act="4"]{ --bg-tint:#F7F3E8; }
+body[data-act="5"]{ --bg-tint:#FAF7EE; }
+body[data-act="6"]{ --bg-tint:#FDFCF8; }
+
+.serif{font-family:var(--font-doc)}
+.mono{font-family:var(--font-mono)}
+.red{color:var(--red)}
+.dim{opacity:.55}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>最后一页没有写完 —— 青年数字档案 ARG</title>
+<meta name="description" content="叙事型 ARG / 数字档案探索解谜。ARCHIVE A-017《林远个人档案》等待整理。">
+<!-- ARCHIVE FRAGMENT 01 : 有些东西不在页面上，在页面背后。 -->
+<!-- ARCHIVE FRAGMENT 02 : 试试这条路 /archive/A-017/page/032 -->
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/global.css">
+<link rel="stylesheet" href="css/archive.css">
+<link rel="stylesheet" href="css/document.css">
+<link rel="stylesheet" href="css/map.css">
+<link rel="stylesheet" href="css/timeline.css">
+<link rel="stylesheet" href="css/evidence.css">
+<link rel="stylesheet" href="css/ending.css">
+</head>
+<body data-act="0">
+
+<!-- ============ 扫描线 / 噪点覆盖层 ============ -->
+<div id="fx-scanlines" aria-hidden="true"></div>
+<div id="fx-noise" aria-hidden="true"></div>
+<div id="fx-flash" aria-hidden="true"></div>
+
+<!-- ============ 启动画面（第一幕入口） ============ -->
+<section id="screen-boot" class="screen active">
+  <div class="boot-inner">
+    <div class="boot-sys mono" id="boot-log"></div>
+    <div class="boot-card" id="boot-card" hidden>
+      <div class="boot-card-head mono">DIGITAL MEMORY ARCHIVE</div>
+      <div class="boot-card-sub">青年数字档案计划</div>
+      <div class="boot-archive-no mono">ARCHIVE <span class="red">A-017</span></div>
+      <h1 class="boot-title serif">《林远个人档案》</h1>
+      <ul class="boot-stats mono">
+        <li><span>日记</span><b>31</b></li>
+        <li><span>照片</span><b>12</b></li>
+        <li><span>书信</span><b>4</b></li>
+        <li><span>地图</span><b>1</b></li>
+      </ul>
+      <div class="boot-progress mono">
+        <span>完整度</span>
+        <b id="boot-percent">96.7%</b>
+      </div>
+      <div class="boot-anomaly mono">
+        <span>异常</span>
+        <b class="red blink">PAGE_032</b>
+      </div>
+      <button id="btn-start" class="btn-primary">开始整理</button>
+      <button id="btn-continue" class="btn-ghost" hidden>继续上次的整理</button>
+      <p class="boot-note mono">本作品人物均为虚构 · 纯前端运行 · 进度自动保存在本机</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 数字档案工作台（主场景） ============ -->
+<section id="screen-archive" class="screen">
+  <header class="wb-top">
+    <div class="wb-brand mono">DIGITAL ARCHIVE <span class="red">A-017</span></div>
+    <div class="wb-act serif" id="wb-act-title">第一幕 · 档案</div>
+    <div class="wb-status mono">
+      <button id="btn-back-ending" class="btn-ghost small" hidden>返回结束页</button>
+      <span class="wb-percent">完整度 <b id="wb-percent">0%</b></span>
+    </div>
+  </header>
+
+  <nav class="wb-tabs" id="wb-tabs">
+    <button class="wb-tab active" data-tab="diary">日记</button>
+    <button class="wb-tab" data-tab="photo">照片</button>
+    <button class="wb-tab" data-tab="letter">信件</button>
+    <button class="wb-tab" data-tab="map">地图</button>
+    <button class="wb-tab" data-tab="person">人物</button>
+    <button class="wb-tab" data-tab="evidence">证据板</button>
+    <button class="wb-tab" data-tab="timeline">时间线</button>
+  </nav>
+
+  <div class="wb-body">
+    <aside class="wb-side">
+      <div class="wb-search">
+        <input id="wb-search-input" type="search" placeholder="检索档案…" autocomplete="off">
+      </div>
+      <div class="wb-list" id="wb-list"></div>
+    </aside>
+    <main class="wb-main" id="wb-main">
+      <div class="wb-empty mono" id="wb-empty">
+        <p>选择左侧资料开始整理。</p>
+        <p class="dim">所有谜题都藏在档案里 —— 阅读、观察、关联、验证。</p>
+      </div>
+      <div class="wb-preview" id="wb-preview" hidden></div>
+    </main>
+    <aside class="wb-clues" id="wb-clues">
+      <div class="wb-clues-head mono">线索板 <span id="clue-count">0</span></div>
+      <div class="wb-clues-list" id="wb-clues-list"></div>
+      <div class="wb-hint-box">
+        <button id="btn-hint" class="btn-ghost small">需要提示</button>
+        <div id="hint-text" class="hint-text serif" hidden></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ============ 地点场景（旧钟楼等） ============ -->
+<section id="screen-scene" class="screen">
+  <header class="scene-top">
+    <button class="btn-ghost small" id="btn-scene-back">← 返回工作台</button>
+    <div class="scene-title serif" id="scene-title">旧钟楼</div>
+    <div class="scene-sub mono" id="scene-sub"></div>
+  </header>
+  <div class="scene-body" id="scene-body"></div>
+</section>
+
+<!-- ============ 查看器覆盖层（文档/照片共用） ============ -->
+<div id="viewer" class="viewer" hidden>
+  <div class="viewer-frame">
+    <div class="viewer-top mono">
+      <span id="viewer-title">DOC</span>
+      <span id="viewer-meta"></span>
+      <button id="viewer-close" class="viewer-close" aria-label="关闭">×</button>
+    </div>
+    <div class="viewer-stage" id="viewer-stage"></div>
+    <div class="viewer-tools mono" id="viewer-tools"></div>
+  </div>
+</div>
+
+<!-- ============ 系统旁白 / 旁白对白层 ============ -->
+<div id="narrator" class="narrator" hidden>
+  <div class="narrator-box">
+    <div class="narrator-text serif" id="narrator-text"></div>
+    <div class="narrator-hint mono">点击继续</div>
+  </div>
+</div>
+
+<!-- ============ 系统提示 toast ============ -->
+<div id="toast" class="toast mono" hidden></div>
+
+<!-- ============ 结局 ============ -->
+<section id="screen-ending" class="screen">
+  <div class="ending-stage" id="ending-stage"></div>
+</section>
+
+<!-- ARCHIVE FRAGMENT 03 : 如果你在看源代码，说明你已经是我们中的一员。 -->
+<script src="js/utils/dom.js"></script>
+<script src="js/utils/storage.js"></script>
+<script src="js/utils/audio.js"></script>
+<script src="js/utils/animation.js"></script>
+<script src="js/core/eventBus.js"></script>
+<script src="js/core/gameState.js"></script>
+<script src="js/core/saveManager.js"></script>
+<script src="js/core/router.js"></script>
+<script src="js/data/documents.js"></script>
+<script src="js/data/people.js"></script>
+<script src="js/data/locations.js"></script>
+<script src="js/data/evidence.js"></script>
+<script src="js/data/timeline.js"></script>
+<script src="js/data/story.js"></script>
+<script src="js/systems/archiveSystem.js"></script>
+<script src="js/systems/documentSystem.js"></script>
+<script src="js/systems/photoSystem.js"></script>
+<script src="js/systems/investigationSystem.js"></script>
+<script src="js/systems/evidenceSystem.js"></script>
+<script src="js/systems/mapSystem.js"></script>
+<script src="js/systems/timelineSystem.js"></script>
+<script src="js/systems/endingSystem.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

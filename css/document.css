@@ -1,0 +1,89 @@
+/* ============ 查看器（文档 + 照片） ============ */
+.viewer{position:fixed;inset:0;z-index:120;background:rgba(24,22,17,.72);
+  backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:1.2rem}
+.viewer-frame{width:min(860px,96vw);max-height:94vh;display:flex;flex-direction:column;
+  background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);
+  animation:viewerIn .45s cubic-bezier(.2,.9,.3,1)}
+@keyframes viewerIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.viewer-top{display:flex;align-items:center;gap:.8rem;padding:.6rem 1rem;
+  border-bottom:1px solid var(--line);font-size:.72rem;letter-spacing:.15em;color:var(--ink-soft)}
+.viewer-top #viewer-title{color:var(--red);font-weight:600}
+.viewer-close{margin-left:auto;font-size:1.4rem;line-height:1;color:var(--ink-soft);
+  width:34px;height:34px;transition:.2s}
+.viewer-close:hover{color:var(--red);transform:rotate(90deg)}
+.viewer-stage{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;
+  padding:1.4rem;min-height:280px;position:relative}
+.viewer-tools{display:flex;gap:.5rem;padding:.6rem 1rem;border-top:1px solid var(--line);
+  font-size:.7rem;flex-wrap:wrap;align-items:center}
+.viewer-tools .vt{padding:.35rem .8rem;border:1px solid var(--line);cursor:pointer;
+  letter-spacing:.1em;transition:.2s;color:var(--ink-soft)}
+.viewer-tools .vt:hover{border-color:var(--red);color:var(--red)}
+.viewer-tools .vt.on{background:var(--red);color:#fff;border-color:var(--red)}
+.viewer-tools .sep{flex:1}
+
+/* ---- 文档纸张 ---- */
+.paper-doc{background:linear-gradient(175deg,#FBF7EC,#F3EDDC);border:1px solid #DCD3BC;
+  padding:2rem 2.2rem;max-width:600px;width:100%;box-shadow:0 6px 30px rgba(60,50,30,.18);
+  position:relative;font-family:var(--font-doc);animation:paperIn .6s ease}
+@keyframes paperIn{from{opacity:0;transform:rotate(-.6deg) translateY(10px)}to{opacity:1;transform:none}}
+.paper-doc::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(0deg,transparent 0 27px,rgba(150,130,90,.08) 27px 28px)}
+.paper-doc h3{font-size:1.15rem;margin-bottom:.4rem;letter-spacing:.1em}
+.paper-doc .pdate{font-family:var(--font-mono);font-size:.68rem;color:#8a7a58;margin-bottom:1.1rem}
+.paper-doc p{line-height:2.15;margin-bottom:.5rem;font-size:.98rem;color:#33302a}
+.paper-doc .red-mark{color:var(--red)}
+
+/* OCR 扫描覆盖 */
+.ocr-scan{position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  box-shadow:0 0 18px 4px rgba(185,138,47,.5);animation:scanMove 1.6s ease-in-out infinite;pointer-events:none;z-index:5}
+@keyframes scanMove{0%{top:4%}50%{top:94%}100%{top:4%}}
+.ocr-frag{color:#33302a}
+.ocr-frag.garbled{color:#9a8f78;font-family:var(--font-mono);letter-spacing:.15em;cursor:pointer;
+  background:repeating-linear-gradient(45deg,rgba(142,27,27,.08) 0 6px,transparent 6px 12px);
+  border-bottom:1px dashed var(--red);padding:0 .2em}
+.ocr-frag.garbled:hover{background:rgba(142,27,27,.15)}
+
+/* ---- 照片 ---- */
+.photo-wrap{position:relative;perspective:1400px;width:min(560px,88vw)}
+.photo-card{position:relative;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.3,.7,.3,1)}
+.photo-card.flipped{transform:rotateY(180deg)}
+.photo-face{backface-visibility:hidden;border:8px solid #F7F2E4;box-shadow:0 10px 36px rgba(0,0,0,.35);
+  position:relative;overflow:hidden;background:#111}
+.photo-face img{width:100%;filter:sepia(.35) contrast(.92) brightness(.98);user-select:none;
+  -webkit-user-drag:none;touch-action:none;cursor:grab}
+.photo-face img.dragging{cursor:grabbing}
+.photo-back{position:absolute;inset:0;backface-visibility:hidden;transform:rotateY(180deg);
+  background:linear-gradient(160deg,#F2EBD8,#E6DDC4);border:8px solid #F7F2E4;
+  box-shadow:0 10px 36px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;
+  padding:1.5rem;text-align:center}
+.photo-back .btext{font-family:var(--font-doc);color:#6d6350;font-size:.9rem;line-height:2}
+/* 折痕 */
+.photo-crease{position:absolute;right:6px;bottom:6px;width:52px;height:52px;cursor:pointer;
+  background:linear-gradient(135deg,transparent 48%,rgba(120,100,60,.35) 49%,rgba(255,255,255,.5) 50%,rgba(120,100,60,.3) 52%,transparent 53%);
+  clip-path:polygon(100% 0,100% 100%,0 100%);transition:.3s;z-index:6}
+.photo-crease:hover{transform:scale(1.15);filter:brightness(1.2)}
+.photo-crease::after{content:'';position:absolute;inset:0;animation:creaseGlow 2s infinite}
+@keyframes creaseGlow{0%,100%{box-shadow:inset -2px -2px 8px rgba(185,138,47,0)}50%{box-shadow:inset -3px -3px 14px rgba(185,138,47,.7)}}
+/* 折痕放大后的数字 */
+.crease-reveal{font-family:var(--font-mono);font-size:2.6rem;color:var(--red);letter-spacing:.3em;
+  text-shadow:0 2px 8px rgba(142,27,27,.3);animation:cardIn .5s ease}
+/* 人脸高亮框 */
+.face-mark{position:absolute;border:2px solid var(--gold);box-shadow:0 0 0 3px rgba(185,138,47,.25);
+  animation:faceIn 1s ease;pointer-events:none}
+.face-mark .fname{position:absolute;bottom:-1.7em;left:50%;transform:translateX(-50%);
+  background:var(--gold);color:#fff;font-size:.62rem;padding:.1rem .5rem;white-space:nowrap;
+  font-family:var(--font-mono);letter-spacing:.15em}
+@keyframes faceIn{from{opacity:0;transform:scale(1.4)}to{opacity:1;transform:scale(1)}}
+
+/* 元信息面板 */
+.photo-meta{position:absolute;left:0;bottom:0;right:0;background:rgba(20,18,14,.85);color:#cdc4ac;
+  font-family:var(--font-mono);font-size:.62rem;padding:.5rem .8rem;line-height:1.8;z-index:7;
+  animation:cardIn .3s}
+.photo-meta b{color:var(--gold)}
+
+@media (max-width:640px){
+  .viewer{padding:.4rem}
+  .viewer-stage{padding:.8rem}
+  .paper-doc{padding:1.3rem 1.1rem}
+  .paper-doc p{font-size:.9rem}
+}

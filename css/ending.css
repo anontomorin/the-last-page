@@ -1,0 +1,66 @@
+/* ============ 第五幕 · 第32页 OCR ============ */
+.p32-wrap{max-width:640px;margin:0 auto}
+.p32-head{font-family:var(--font-mono);font-size:.68rem;color:var(--ink-soft);
+  display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);
+  padding-bottom:.5rem;margin-bottom:1.2rem;letter-spacing:.15em;flex-wrap:wrap;gap:.4rem}
+.p32-head b{color:var(--red)}
+.p32-doc{background:linear-gradient(175deg,#FBF7EC,#F1EBD8);border:1px solid #DCD3BC;
+  padding:2.2rem 2.4rem;box-shadow:0 6px 30px rgba(60,50,30,.18);position:relative;
+  font-family:var(--font-doc)}
+.p32-doc p{line-height:2.3;margin-bottom:.8rem;font-size:1rem;min-height:1.2em}
+.p32-doc p.restored{animation:fragIn 1s ease}
+@keyframes fragIn{from{opacity:0;filter:blur(6px)}to{opacity:1;filter:blur(0)}}
+.p32-final{margin-top:1.6rem;padding-top:1.2rem;border-top:1px dashed #C9BE9E;
+  text-align:center;font-size:1.1rem;color:var(--red);font-weight:600;line-height:2.2}
+.p32-progress{margin-top:1.4rem;font-family:var(--font-mono);font-size:.7rem;
+  color:var(--ink-soft);text-align:center;letter-spacing:.2em}
+.p32-progress b{color:var(--gold);font-size:1.1rem}
+
+/* ============ 第六幕 · 结局（明亮白） ============ */
+#screen-ending{background:linear-gradient(180deg,#FDFCF8,#F7F4EC);overflow-y:auto}
+.ending-stage{max-width:680px;margin:0 auto;padding:6vh 1.4rem 10vh;width:100%}
+
+.end-q-head{text-align:center;margin-bottom:2.4rem}
+.end-q-head .mono{font-size:.68rem;letter-spacing:.3em;color:var(--ink-soft)}
+.end-q-head h2{font-family:var(--font-doc);font-size:clamp(1.4rem,4.5vw,2rem);
+  margin:.8rem 0;letter-spacing:.1em}
+.end-q-head p{font-size:.85rem;color:var(--ink-soft);line-height:2}
+
+.end-q{margin-bottom:1.8rem;animation:cardIn .7s ease backwards}
+.end-q:nth-child(2){animation-delay:.15s}
+.end-q:nth-child(3){animation-delay:.3s}
+.end-q:nth-child(4){animation-delay:.45s}
+.end-q label{display:block;font-family:var(--font-doc);font-size:1.02rem;margin-bottom:.6rem;
+  line-height:1.8}
+.end-q label .qn{color:var(--red);font-family:var(--font-mono);font-size:.7rem;
+  letter-spacing:.25em;margin-right:.5em}
+.end-q textarea{width:100%;min-height:84px;border:1px solid var(--line);background:#FFFEFB;
+  padding:.8rem 1rem;font-family:var(--font-doc);font-size:.95rem;line-height:1.9;color:var(--ink);
+  resize:vertical;outline:none;transition:border-color .2s}
+.end-q textarea:focus{border-color:var(--gold)}
+.end-submit{text-align:center;margin:2.2rem 0}
+
+/* 最终页 */
+#print-page{background:#FFFEFB;border:1px solid var(--line);box-shadow:0 12px 50px rgba(36,36,36,.14);
+  padding:2.6rem 2.8rem;font-family:var(--font-doc);position:relative}
+#print-page .fp-head{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.3em;
+  color:var(--ink-soft);display:flex;justify-content:space-between;
+  border-bottom:1px solid var(--line);padding-bottom:.6rem;margin-bottom:1.6rem}
+#print-page .fp-line{line-height:2.4;font-size:1.02rem;min-height:1.4em;white-space:pre-wrap}
+#print-page .fp-line.user{color:var(--red)}
+#print-page .fp-stamp{position:absolute;right:2rem;bottom:2rem}
+.end-complete{text-align:center;margin:2rem 0 1rem;font-family:var(--font-mono)}
+.end-complete .pct{font-size:3rem;color:var(--red);letter-spacing:.1em}
+.end-lines{margin:2rem 0;text-align:center}
+.end-lines p{font-family:var(--font-doc);line-height:2.6;font-size:1.05rem;
+  animation:fragIn 1.2s ease backwards}
+.end-hidden{margin:2rem auto;max-width:460px;border:1px dashed var(--gold);padding:1.4rem 1.6rem;
+  text-align:center;animation:fragIn 1.5s ease}
+.end-hidden .mono{font-size:.6rem;letter-spacing:.3em;color:var(--gold);margin-bottom:.8rem}
+.end-hidden p{font-family:var(--font-doc);line-height:2.3;font-size:.95rem}
+.end-actions{display:flex;gap:.8rem;justify-content:center;margin-top:2.4rem;flex-wrap:wrap}
+
+@media (max-width:640px){
+  #print-page{padding:1.6rem 1.3rem}
+  .ending-stage{padding:4vh 1rem 8vh}
+}
