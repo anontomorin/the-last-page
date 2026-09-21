@@ -11,7 +11,7 @@ LP.data.people = {
     traits: ['有理想', '会犹豫', '也会害怕', '但仍然向前'],
     question: '如果不知道结果，还要不要向前走？',
     bio: '这本日记的主人。一个普通的年轻人，在一个不普通的年代里，认真记录着自己和朋友们的生活。他也会怀疑，也会想家，也会在深夜里写不出一个字。但他一直在写。',
-    related: ['diary_20', 'diary_31', 'diary_18', 'diary_14', 'diary_24', 'diary_26', 'diary_30', 'photo_01', 'letter_01']
+    related: ['diary_20', 'diary_30', 'diary_18', 'diary_14', 'diary_24', 'diary_26', 'diary_31', 'photo_01', 'letter_01']
   },
   person_zhou: {
     id: 'person_zhou', no: 'ZN-02',
@@ -22,7 +22,7 @@ LP.data.people = {
     question: '我们真的知道自己在做什么吗？',
     bio: '四人中的「思考者」。她不是反对者——恰恰相反，她比谁都认真。她的怀疑，是她对这件事负责的方式。',
     bioLocked: '资料残缺。只有代号「Z」出现在林远的日记里。',
-    related: ['diary_31', 'diary_18', 'letter_01', 'letter_02', 'photo_09'],
+    related: ['diary_30', 'diary_18', 'letter_01', 'letter_02', 'photo_09'],
     identifyBy: 'clue_zhou_name'
   },
   person_chen: {

@@ -96,7 +96,7 @@ LP.data.clues = {
   clue_page32_cut: {
     id: 'clue_page32_cut', label: '被裁掉的最后一页',
     desc: '日记的最后一页被整齐地裁去了。切口很平——是他自己动的手。',
-    from: 'diary_30', links: ['page_032']
+    from: 'diary_31', links: ['page_032']
   },
   /* ---------------- v2 新增线索 ---------------- */
   clue_xinya: {
@@ -151,7 +151,7 @@ LP.data.evidenceGraph = [
   { from: 'clue_conflict_sun', to: 'timeline' },
   { from: 'clue_conflict_rain', to: 'timeline' },
   { from: 'clue_rain_0318', to: 'timeline' },
-  { from: 'diary_30', to: 'clue_page32_cut' },
+  { from: 'diary_31', to: 'clue_page32_cut' },
   { from: 'clue_page32_cut', to: 'page_032' },
   /* v2 */
   { from: 'diary_05', to: 'clue_xinya' },

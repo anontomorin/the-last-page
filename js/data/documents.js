@@ -409,7 +409,7 @@ LP.data.documents = {
       '{Z} 说过：不走的话，就连知道结果的资格都没有。'
     ],
     clues: [],
-    related: ['diary_31', 'diary_29']
+    related: ['diary_30', 'diary_29']
   },
 
   diary_29: {
@@ -427,20 +427,7 @@ LP.data.documents = {
   },
 
   diary_30: {
-    id: 'diary_30', type: 'diary', no: '30', title: '日记 · 其三十（最后一篇）',
-    date: '3月21日', cred: { level: '中', kind: '主观记录' },
-    unlock: 'act5',
-    content: [
-      '这本日记快写完了。',
-      '最后一页，我想留给……',
-      '（后面的字被整齐地裁掉了。切口很平，是他自己动的手。）'
-    ],
-    clues: ['clue_page32_cut'],
-    related: ['page_032']
-  },
-
-  diary_31: {
-    id: 'diary_31', type: 'diary', no: '31', title: '日记 · 其三十一',
+    id: 'diary_30', type: 'diary', no: '30', title: '日记 · 其三十',
     date: '……月22日', cred: { level: '中', kind: '主观记录' },
     unlock: 'start',
     content: [
@@ -451,6 +438,19 @@ LP.data.documents = {
     ],
     clues: [],
     related: ['person_zhou']
+  },
+
+  diary_31: {
+    id: 'diary_31', type: 'diary', no: '31', title: '日记 · 其三十一（最后一篇）',
+    date: '3月21日', cred: { level: '中', kind: '主观记录' },
+    unlock: 'act5',
+    content: [
+      '这本日记快写完了。',
+      '最后一页，我想留给……',
+      '（后面的字被整齐地裁掉了。切口很平，是他自己动的手。）'
+    ],
+    clues: ['clue_page32_cut'],
+    related: ['page_032']
   },
 
   /* ---------------- 照片（按拍摄日期编号 01-12） ---------------- */
@@ -599,7 +599,7 @@ LP.data.documents = {
     desc: '一扇开着的木门。屋里没有人，桌上的墨还没有干。她说过，最后一卷胶卷要留到回来那天——这一张，是那卷的最后一张。',
     back: { text: '「0321 阴 · 门开着」', crease: false },
     clues: ['clue_open_door'],
-    related: ['diary_09', 'diary_30', 'page_032']
+    related: ['diary_09', 'diary_31', 'page_032']
   },
 
   /* ---------------- 信件 ---------------- */
@@ -682,6 +682,6 @@ LP.data.documents = {
     damaged: true,
     content: [],   // 由第32页系统动态生成
     clues: [],
-    related: ['diary_26', 'diary_30']
+    related: ['diary_26', 'diary_31']
   }
 };
