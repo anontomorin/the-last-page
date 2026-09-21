@@ -69,11 +69,6 @@ LP.inv = (function () {
         identifyPerson(p.id);
       }
     });
-    // 藏头句：日记其六/其八/其十 首字连读「钟·楼·七」
-    const acro = ['diary_06', 'diary_08', 'diary_10']
-      .filter(d => s.discoveredDocuments.includes(d)).length;
-    if (acro >= 2) discoverClue('clue_acrostic_part');
-    if (acro >= 3) discoverClue('clue_acrostic');
     checkDeductions();
   }
 
@@ -91,10 +86,10 @@ LP.inv = (function () {
   function checkDeductions() {
     const s = LP.state.get();
 
-    // 第一幕：折痕「3-17」 + 读过日记·其三 → 解锁旧钟楼，进入第二幕
+    // 第一幕：折痕「3-17」 + 读过日记·其二十一 → 解锁旧钟楼，进入第二幕
     if (s.act === 1 &&
         s.discoveredEvidence.includes('clue_317') &&
-        s.discoveredDocuments.includes('diary_03')) {
+        s.discoveredDocuments.includes('diary_21')) {
       completePuzzle('act1');
       LP.state.addTo('discoveredLocations', 'location_clocktower');
       setAct(2, LP.story.NARRATION.act1_done);
@@ -152,7 +147,6 @@ LP.inv = (function () {
     const s = LP.state.get();
     if (s.act <= 1) return 'act1';
     if (s.act === 2) {
-      if (!s.discoveredEvidence.includes('clue_acrostic') && s.bellRings < 7) return 'acrostic';
       if (s.bellRings < 7) return 'bell';
       return 'board';
     }

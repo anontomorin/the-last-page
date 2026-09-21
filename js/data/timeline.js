@@ -12,7 +12,7 @@ LP.data.timelineCards = [
     cred: '中 · 主观记录'
   },
   {
-    id: 'tl_photo01', refId: 'photo_01',
+    id: 'tl_photo01', refId: 'photo_09',
     title: '钟楼下的合影', kind: 'photo',
     weather: '晴', date: '3月17日',
     text: '照片里的影子很短——是个大晴天。',
@@ -26,7 +26,7 @@ LP.data.timelineCards = [
     cred: '低 · 日期污损'
   },
   {
-    id: 'tl_photo05', refId: 'photo_05',
+    id: 'tl_photo05', refId: 'photo_11',
     title: '雨中的空街', kind: 'photo',
     weather: '雨', date: '3月18日',
     text: '「0318 雨 · 送他们走」',
@@ -40,7 +40,7 @@ LP.data.timelineCards = [
     cred: '中 · 主观记录'
   },
   {
-    id: 'tl_photo09', refId: 'photo_09',
+    id: 'tl_photo09', refId: 'photo_08',
     title: '晨雾中的渡船', kind: 'photo',
     weather: '阴', date: '3月16日',
     text: '「0316 阴 · 晨雾，船来了」',

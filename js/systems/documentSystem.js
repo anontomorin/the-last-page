@@ -47,7 +47,7 @@ LP.doc = (function () {
     place: () => ['location_clocktower', 'location_oldstreet', 'location_ferry']
       .every(l => LP.state.has('discoveredLocations', l)),
     time: () => LP.state.has('completedPuzzles', 'timeline'),
-    photo: () => LP.state.has('discoveredDocuments', 'photo_01') && LP.state.has('discoveredDocuments', 'photo_05'),
+    photo: () => LP.state.has('discoveredDocuments', 'photo_09') && LP.state.has('discoveredDocuments', 'photo_11'),
     letter: () => ['letter_02', 'letter_03', 'letter_04'].every(l => LP.state.has('discoveredDocuments', l))
   };
   const NEED_LABEL = {

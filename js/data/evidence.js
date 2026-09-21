@@ -6,22 +6,22 @@ LP.data.clues = {
   clue_317: {
     id: 'clue_317', label: '「3-17」',
     desc: '照片背面折痕里压着的两个数字。是日期？编号？还是别的什么？',
-    from: 'photo_01', links: ['diary_03', 'location_clocktower']
+    from: 'photo_09', links: ['diary_21', 'location_clocktower']
   },
   clue_date17: {
     id: 'clue_date17', label: '「今天是17号」',
-    desc: '日记的第一篇。17这个数字，似乎还会出现。',
-    from: 'diary_01', links: ['clue_317']
+    desc: '日记的第二十篇。17这个数字，似乎还会出现。',
+    from: 'diary_20', links: ['clue_317']
   },
   clue_clocktower: {
     id: 'clue_clocktower', label: '旧钟楼',
     desc: '3月17日，四个人在旧钟楼下合了影。',
-    from: 'diary_03', links: ['location_clocktower', 'photo_01']
+    from: 'diary_21', links: ['location_clocktower', 'photo_09']
   },
   clue_bell7: {
     id: 'clue_bell7', label: '「等钟响七次」',
     desc: '「等钟响七次以后，我们就该走了。」——钟楼的钟，还能响吗？',
-    from: 'diary_12', links: ['location_clocktower']
+    from: 'diary_18', links: ['location_clocktower']
   },
   clue_717: {
     id: 'clue_717', label: '7:17',
@@ -46,12 +46,12 @@ LP.data.clues = {
   clue_photoback: {
     id: 'clue_photoback', label: '照片背面的日期',
     desc: '李禾在每张照片中写下日期与天气——这是不会撒谎的记录。',
-    from: 'diary_15', links: ['photo_01', 'photo_05', 'person_li']
+    from: 'diary_11', links: ['photo_09', 'photo_11', 'person_li']
   },
   clue_linyuan_self: {
     id: 'clue_linyuan_self', label: '「给自己。——远」',
     desc: '单人照的背面，是林远留给自己的三个字。',
-    from: 'photo_02', links: ['person_linyuan']
+    from: 'photo_01', links: ['person_linyuan']
   },
   clue_conflict_sun: {
     id: 'clue_conflict_sun', label: '「天气很好」',
@@ -71,17 +71,17 @@ LP.data.clues = {
   clue_rain_0318: {
     id: 'clue_rain_0318', label: '0318 · 雨',
     desc: '照片不会撒谎：3月18日，雨，空无一人的街。',
-    from: 'photo_05', links: ['timeline']
+    from: 'photo_11', links: ['timeline']
   },
   clue_clock717_visual: {
     id: 'clue_clock717_visual', label: '停在 7:17 的钟面',
     desc: '照片里的钟，也停在七点十七分。它停了快八十年。',
-    from: 'photo_03', links: ['clue_717']
+    from: 'photo_10', links: ['clue_717']
   },
   clue_0317_confirm: {
     id: 'clue_0317_confirm', label: '「0317 那天，钟楼下」',
     desc: '李禾的编号说明，证实了 3-17 的含义。',
-    from: 'letter_04', links: ['clue_317', 'photo_01']
+    from: 'letter_04', links: ['clue_317', 'photo_09']
   },
   clue_row7: {
     id: 'clue_row7', label: '「记住，第七行」',
@@ -91,38 +91,28 @@ LP.data.clues = {
   clue_page32_hint: {
     id: 'clue_page32_hint', label: '「最后一句，空着」',
     desc: '林远说，最后一句不该由他来说。',
-    from: 'diary_27', links: ['page_032']
+    from: 'diary_26', links: ['page_032']
   },
   clue_page32_cut: {
     id: 'clue_page32_cut', label: '被裁掉的最后一页',
     desc: '日记的最后一页被整齐地裁去了。切口很平——是他自己动的手。',
-    from: 'diary_31', links: ['page_032']
+    from: 'diary_30', links: ['page_032']
   },
   /* ---------------- v2 新增线索 ---------------- */
   clue_xinya: {
     id: 'clue_xinya', label: '《新芽》',
     desc: '一份手刻蜡纸、油印出来的小报。周宁说：字比血重。',
-    from: 'diary_06', links: ['photo_06', 'photo_11', 'person_zhou']
-  },
-  clue_acrostic_part: {
-    id: 'clue_acrostic_part', label: '首字连读？',
-    desc: '有几篇日记，开头第一个字连在一起，似乎能读出别的意思。',
-    from: 'diary_08', links: ['diary_06', 'diary_10']
-  },
-  clue_acrostic: {
-    id: 'clue_acrostic', label: '「钟楼 · 七」',
-    desc: '日记其六、其八、其十的首字连起来：钟、楼、七。钟楼里的某个「七」。',
-    from: 'diary_10', links: ['location_clocktower', 'clue_bell7']
+    from: 'diary_05', links: ['photo_02', 'photo_03', 'person_zhou']
   },
   clue_nightschool: {
     id: 'clue_nightschool', label: '夜校',
     desc: '码头上的夜校。多一个人识字，就多一颗火种。',
-    from: 'photo_04', links: ['diary_04', 'diary_13', 'person_linyuan']
+    from: 'photo_05', links: ['diary_03', 'diary_15', 'person_linyuan']
   },
   clue_ferry_boat: {
     id: 'clue_ferry_boat', label: '晨雾中的渡船',
     desc: '0316，阴。临行之前，她又去渡口看了一次船。',
-    from: 'photo_09', links: ['location_ferry', 'diary_22']
+    from: 'photo_08', links: ['location_ferry', 'diary_04']
   },
   clue_photosort: {
     id: 'clue_photosort', label: '她按时间记住了一切',
@@ -132,7 +122,7 @@ LP.data.clues = {
   clue_ferry_time: {
     id: 'clue_ferry_time', label: '「卯时三刻」',
     desc: '船班木牌上被反复描深的头班船。他们走的时候，天还没亮。',
-    from: 'scene_ferry', links: ['location_ferry', 'diary_22']
+    from: 'scene_ferry', links: ['location_ferry', 'diary_04']
   },
   clue_open_door: {
     id: 'clue_open_door', label: '开着的门',
@@ -143,10 +133,10 @@ LP.data.clues = {
 
 /* 证据板节点关系（用于连线） */
 LP.data.evidenceGraph = [
-  { from: 'photo_01', to: 'clue_317' },
-  { from: 'clue_317', to: 'diary_03' },
-  { from: 'diary_03', to: 'location_clocktower' },
-  { from: 'diary_12', to: 'clue_bell7' },
+  { from: 'photo_09', to: 'clue_317' },
+  { from: 'clue_317', to: 'diary_21' },
+  { from: 'diary_21', to: 'location_clocktower' },
+  { from: 'diary_18', to: 'clue_bell7' },
   { from: 'clue_bell7', to: 'clue_717' },
   { from: 'clue_717', to: 'clue_zhou_name' },
   { from: 'clue_zhou_name', to: 'person_zhou' },
@@ -157,26 +147,22 @@ LP.data.evidenceGraph = [
   { from: 'diary_24', to: 'clue_conflict_sun' },
   { from: 'letter_02', to: 'clue_conflict_rain' },
   { from: 'letter_03', to: 'clue_cold_0316' },
-  { from: 'photo_05', to: 'clue_rain_0318' },
+  { from: 'photo_11', to: 'clue_rain_0318' },
   { from: 'clue_conflict_sun', to: 'timeline' },
   { from: 'clue_conflict_rain', to: 'timeline' },
   { from: 'clue_rain_0318', to: 'timeline' },
-  { from: 'diary_31', to: 'clue_page32_cut' },
+  { from: 'diary_30', to: 'clue_page32_cut' },
   { from: 'clue_page32_cut', to: 'page_032' },
   /* v2 */
-  { from: 'diary_06', to: 'clue_xinya' },
-  { from: 'clue_xinya', to: 'photo_11' },
-  { from: 'diary_06', to: 'clue_acrostic' },
-  { from: 'diary_08', to: 'clue_acrostic' },
-  { from: 'diary_10', to: 'clue_acrostic' },
-  { from: 'clue_acrostic', to: 'location_clocktower' },
-  { from: 'photo_04', to: 'clue_nightschool' },
-  { from: 'clue_nightschool', to: 'diary_13' },
-  { from: 'photo_09', to: 'clue_ferry_boat' },
+  { from: 'diary_05', to: 'clue_xinya' },
+  { from: 'clue_xinya', to: 'photo_03' },
+  { from: 'photo_05', to: 'clue_nightschool' },
+  { from: 'clue_nightschool', to: 'diary_15' },
+  { from: 'photo_08', to: 'clue_ferry_boat' },
   { from: 'clue_ferry_boat', to: 'location_ferry' },
   { from: 'letter_04', to: 'clue_photosort' },
   { from: 'clue_photosort', to: 'photo_12' },
-  { from: 'diary_22', to: 'clue_ferry_time' },
+  { from: 'diary_04', to: 'clue_ferry_time' },
   { from: 'clue_ferry_time', to: 'location_ferry' },
   { from: 'photo_12', to: 'clue_open_door' }
 ];

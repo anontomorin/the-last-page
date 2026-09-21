@@ -6,7 +6,7 @@ LP.photo = (function () {
 
   /* 合影四人站位（与画面一致，左起：男/女/男/女）：用于底部姓名条，身份随剧情逐步揭示 */
   const FACES = {
-    photo_01: ['person_chen', 'person_zhou', 'person_linyuan', 'person_li']
+    photo_09: ['person_chen', 'person_zhou', 'person_linyuan', 'person_li']
   };
 
   function open(id) {
@@ -138,9 +138,9 @@ LP.photo = (function () {
 
   /* ---------------- 照片排序谜题（第四幕解锁） ---------------- */
   /* 正确顺序：按 IMG 编号（月日在前，顺序在后） */
-  const SORT_IDS = ['photo_02', 'photo_06', 'photo_11', 'photo_08', 'photo_04', 'photo_07', 'photo_10', 'photo_09'];
+  const SORT_IDS = ['photo_01', 'photo_02', 'photo_03', 'photo_04', 'photo_05', 'photo_06', 'photo_07', 'photo_08'];
   /* 打乱后的初始顺序（固定，避免随机） */
-  const SORT_SHUFFLED = ['photo_04', 'photo_09', 'photo_02', 'photo_10', 'photo_07', 'photo_11', 'photo_06', 'photo_08'];
+  const SORT_SHUFFLED = ['photo_05', 'photo_08', 'photo_01', 'photo_07', 'photo_06', 'photo_03', 'photo_02', 'photo_04'];
 
   function openSort() {
     const s = LP.state.get();

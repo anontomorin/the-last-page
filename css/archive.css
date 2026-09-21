@@ -75,9 +75,10 @@
 .wb-clues{border-left:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;min-height:0}
 .wb-clues-head{padding:.7rem .9rem;border-bottom:1px solid var(--line);font-size:.72rem;
   letter-spacing:.25em;color:var(--ink-soft);display:flex;justify-content:space-between}
-.wb-clues-list{flex:1;overflow-y:auto;padding:.7rem}
-.clue-card{border-left:3px solid var(--red);background:var(--bg-tint);padding:.55rem .7rem;
-  margin-bottom:.5rem;cursor:pointer;animation:clueIn .5s ease;position:relative}
+.wb-clues-list{flex:1;overflow-y:auto;padding:.9rem}
+.clue-card{border-left:3px solid var(--red);background:var(--bg-tint);padding:.75rem .85rem;
+  margin-bottom:1rem;cursor:pointer;animation:clueIn .5s ease;position:relative}
+.clue-card:last-child{margin-bottom:0}
 .clue-card::before{content:'';position:absolute;right:.55rem;top:.55rem;width:9px;height:9px;
   border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--red-bright),var(--red));
   box-shadow:0 1px 3px rgba(142,27,27,.4)}
