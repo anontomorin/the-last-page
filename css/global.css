@@ -78,6 +78,14 @@ body[data-act="6"] #red-ribbon{opacity:.95;width:7px}
 @keyframes blink{50%{opacity:.15}}
 #btn-start{margin-top:1.4rem;width:100%}
 #btn-continue{margin-top:.6rem;width:100%}
+/* 双人拼卷入口 */
+.boot-duo{margin-top:.9rem}
+.boot-duo-line{font-size:.62rem;color:var(--ink-soft);letter-spacing:.25em;display:block;margin-bottom:.5rem}
+.boot-duo-btns{display:flex;gap:.6rem}
+.boot-duo-btns .btn-ghost{flex:1;padding:.6rem .5rem;font-size:.72rem}
+/* 工作台卷标 */
+.wb-mode-badge{font-size:.62rem;color:var(--gold);letter-spacing:.2em;border:1px solid var(--gold);
+  padding:.2rem .6rem}
 .boot-note{margin-top:1.2rem;font-size:.62rem;color:var(--ink-soft);opacity:.7;letter-spacing:.1em}
 
 /* ============ 旁白层 ============ */

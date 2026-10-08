@@ -19,43 +19,79 @@ LP.doc = (function () {
     if (doc.damaged) { openPage32(doc); return; }
 
     LP.audio.paper();
-    openViewer(LP.inv.sub(doc.title), `NO.${doc.no} · ${doc.date} · ${doc.cred.level}可信度 · ${doc.cred.kind}`);
+    // 记录者卷的日记：只显示编目梗概，正文在执笔者卷
+    const gist = LP.inv.isGist(doc);
+    openViewer(
+      LP.inv.sub(doc.title) + (gist ? ' · 梗概' : ''),
+      gist
+        ? `NO.${doc.no} · 编目摘要 · 正文在执笔者卷`
+        : `NO.${doc.no} · ${doc.date} · ${doc.cred.level}可信度 · ${doc.cred.kind}`
+    );
 
+    const content = LP.inv.docContent(doc);
     const paper = LP.el('div', { class: 'paper-doc' });
     paper.appendChild(LP.el('h3', { text: LP.inv.sub(doc.title) }));
-    paper.appendChild(LP.el('div', { class: 'pdate', text: doc.date }));
-    doc.content.forEach((p, i) => {
+    paper.appendChild(LP.el('div', { class: 'pdate', text: gist ? '编目摘要' : doc.date }));
+    if (gist) {
+      paper.appendChild(LP.el('div', {
+        class: 'gist-note mono', text: 'RECORD GIST · 正文不在此卷'
+      }));
+    }
+    content.forEach((p, i) => {
       const para = LP.el('p', { text: LP.inv.sub(p), style: `opacity:0;animation:fragIn .8s ease ${0.15 + i * 0.18}s forwards` });
       paper.appendChild(para);
     });
+    if (gist) {
+      paper.appendChild(LP.el('div', { class: 'gist-cta' }, [
+        LP.el('p', { class: 'serif', text: '这一页的字，写在执笔者那一卷里。让 ta 念给你听。' }),
+        LP.el('button', {
+          class: 'btn-ghost small', text: '打开通话',
+          onclick: () => { closeViewer(); LP.duo.openPanel(); }
+        })
+      ]));
+    }
     LP.$('#viewer-stage').appendChild(paper);
 
     const tools = LP.$('#viewer-tools');
-    tools.appendChild(LP.el('span', { class: 'dim', text: `${doc.content.length} 段 · 扫描件` }));
-    tools.appendChild(LP.el('span', { class: 'sep' }));
-    if (doc.clues && doc.clues.length) {
-      tools.appendChild(LP.el('span', { class: 'red', text: `含 ${doc.clues.length} 条可提取线索`, style: 'font-size:.65rem' }));
+    if (gist) {
+      tools.appendChild(LP.el('span', { class: 'dim', text: `${content.length} 段 · 编目摘要（非全文）` }));
+    } else {
+      tools.appendChild(LP.el('span', { class: 'dim', text: `${content.length} 段 · 扫描件` }));
+      tools.appendChild(LP.el('span', { class: 'sep' }));
+      if (doc.clues && doc.clues.length) {
+        tools.appendChild(LP.el('span', { class: 'red', text: `含 ${doc.clues.length} 条可提取线索`, style: 'font-size:.65rem' }));
+      }
     }
 
     LP.archive.markDocRead(doc);
   }
 
   /* ---------------- PAGE_032 · OCR 修复 ---------------- */
-  const NEED_CHECK = {
-    person: () => ['person_linyuan', 'person_zhou', 'person_chen', 'person_li']
-      .every(pid => LP.data.people[pid].known || LP.state.has('discoveredPeople', pid)),
-    place: () => ['location_clocktower', 'location_oldstreet', 'location_ferry']
-      .every(l => LP.state.has('discoveredLocations', l)),
-    time: () => LP.state.has('completedPuzzles', 'timeline'),
-    photo: () => LP.state.has('discoveredDocuments', 'photo_09') && LP.state.has('discoveredDocuments', 'photo_11'),
-    letter: () => ['letter_02', 'letter_03', 'letter_04'].every(l => LP.state.has('discoveredDocuments', l))
-  };
+  const has = k => LP.state.has('completedPuzzles', k);
+
+  /* 双人模式：每段归不同卷修复——A=人物/时间/信件，B=地点/照片 */
+  const NEED_MODE = { person: 'A', time: 'A', letter: 'A', place: 'B', photo: 'B' };
   const NEED_LABEL = {
     person: '需要先确认全部四位人物的身份',
-    place: '需要先到访全部三处地点',
+    place: '需要先确证全部三处地点',
     time: '需要先修复第四幕的时间线',
     photo: '需要看过 3·17 的合影与 3·18 的雨街',
     letter: '需要读完全部信件'
+  };
+  /* 双人模式：还缺对方那一份时，给出「去通话」的指引 */
+  const NEED_VOICE = {
+    person: '四人身份已齐，但你没见过那张合影——让记录者把四个人的站位念给你听（通话 → 记下 ta 说的）。',
+    place: '三处地点都去过了，但你不知道它们怎么串成一条线——让执笔者把那天的路线念给你听。',
+    time: '时间线已修复，但你手里只有纸——让记录者把照片背面的日期与天气念给你听。',
+    photo: '两张照片你都看过，但你还不知道她的编号规则——让执笔者把李禾那份说明念给你听。',
+    letter: '三封信都读过了，可你手里那张的最后一句是糊的——让记录者把完整的信念给你听。'
+  };
+  const NEED_PARTNER = {
+    person: '这一段属于执笔者——让 ta 来修。',
+    place: '这一段属于记录者——让 ta 来修。',
+    time: '这一段属于执笔者——让 ta 来修。',
+    photo: '这一段属于记录者——让 ta 来修。',
+    letter: '这一段属于执笔者——让 ta 来修。'
   };
 
   function openPage32(doc) {
@@ -65,15 +101,21 @@ LP.doc = (function () {
     const s = LP.state.get();
 
     const wrap = LP.el('div', { class: 'p32-wrap' });
+    // 双人模式：只统计本卷可修的段落
+    const myFrags = LP.story.PAGE32.fragments.filter(f =>
+      s.mode === 'solo' || !NEED_MODE[f.need] || NEED_MODE[f.need] === s.mode);
+    const myRestored = myFrags.filter(f => s.ocrFragments.includes(f.id)).length;
     const restoredCount = s.ocrFragments.length;
-    const pct = Math.round((restoredCount / LP.story.PAGE32.fragments.length) * 100);
+    const pct = s.mode === 'solo'
+      ? Math.round((restoredCount / LP.story.PAGE32.fragments.length) * 100)
+      : Math.round((myRestored / myFrags.length) * 100);
     wrap.appendChild(LP.el('div', { class: 'p32-head' }, [
-      LP.el('span', { text: 'OCR RECOVERY' }),
+      LP.el('span', { text: 'OCR RECOVERY' + (s.mode !== 'solo' ? ' · ' + (s.mode === 'A' ? '执笔者卷' : '记录者卷') : '') }),
       LP.el('span', { html: `完整度 <b>${pct}%</b>` })
     ]));
 
     const paper = LP.el('div', { class: 'p32-doc' });
-    if (restoredCount < 5) paper.appendChild(LP.el('div', { class: 'ocr-scan' }));
+    if (myRestored < myFrags.length) paper.appendChild(LP.el('div', { class: 'ocr-scan' }));
 
     LP.story.PAGE32.fragments.forEach(f => {
       const restored = s.ocrFragments.includes(f.id);
@@ -81,10 +123,12 @@ LP.doc = (function () {
       if (restored) {
         p.appendChild(LP.el('span', { class: 'ocr-frag', text: f.text }));
       } else {
+        // 属于对方的段落：显示为"待另一卷修复"
+        const isPartner = s.mode !== 'solo' && NEED_MODE[f.need] && NEED_MODE[f.need] !== s.mode;
         const g = LP.el('span', {
-          class: 'ocr-frag garbled',
-          text: `▓▓▓▓▓▓▓▓▓▓〔${f.label}〕`,
-          title: '点击尝试修复',
+          class: 'ocr-frag garbled' + (isPartner ? ' partner' : ''),
+          text: isPartner ? `▓▓▓▓▓▓▓▓▓▓〔${f.label}·对方修复〕` : `▓▓▓▓▓▓▓▓▓▓〔${f.label}〕`,
+          title: isPartner ? '这一段在你的搭档手里' : '点击尝试修复',
           onclick: () => tryRestore(f)
         });
         p.appendChild(g);
@@ -92,8 +136,8 @@ LP.doc = (function () {
       paper.appendChild(p);
     });
 
-    // 全部修复后显示最后一句（仍由玩家决定是否“补写”——剧情上保持空白反转）
-    if (restoredCount >= 5) {
+    // 本卷段落全部修完 → 触发反转（双人各触发一次，两人各自进入第六幕）
+    if (myRestored >= myFrags.length) {
       const fin = LP.el('div', { class: 'p32-final' });
       paper.appendChild(fin);
       if (!s.completedPuzzles.includes('page32')) {
@@ -117,7 +161,9 @@ LP.doc = (function () {
     } else {
       paper.appendChild(LP.el('div', {
         class: 'p32-progress',
-        html: `已修复 <b>${restoredCount}</b> / ${LP.story.PAGE32.fragments.length} 段`
+        html: s.mode === 'solo'
+          ? `已修复 <b>${restoredCount}</b> / ${LP.story.PAGE32.fragments.length} 段`
+          : `你这一卷已修复 <b>${myRestored}</b> / ${myFrags.length} 段`
       }));
     }
 
@@ -132,10 +178,37 @@ LP.doc = (function () {
     LP.archive.markDocRead(doc);
   }
 
+  /* 本方自己能确证的事实 */
+  const NEED_SELF = {
+    person: () => ['person_linyuan', 'person_zhou', 'person_chen', 'person_li']
+      .every(pid => LP.data.people[pid].known || LP.state.has('discoveredPeople', pid)),
+    place: () => ['location_clocktower', 'location_oldstreet', 'location_ferry']
+      .every(l => LP.state.has('discoveredLocations', l)),
+    time: () => LP.state.has('completedPuzzles', 'timeline'),
+    photo: () => LP.state.has('discoveredDocuments', 'photo_09') && LP.state.has('discoveredDocuments', 'photo_11'),
+    letter: () => ['letter_02', 'letter_03', 'letter_04'].every(l => LP.state.has('discoveredDocuments', l))
+  };
+  const NEED_VOICE_FLAG = { person: 'duo_faces', place: 'duo_route', time: 'duo_tl_photo', photo: 'duo_photoback', letter: 'duo_letter02_tail' };
+
   function tryRestore(f) {
-    if (!NEED_CHECK[f.need]()) {
+    const s = LP.state.get();
+    // 双人模式卷别归属
+    if (s.mode !== 'solo' && NEED_MODE[f.need] && NEED_MODE[f.need] !== s.mode) {
+      LP.audio.error();
+      LP.ui.toast(NEED_PARTNER[f.need], 'gold');
+      LP.anim.shake(LP.$('.p32-doc'));
+      return;
+    }
+    if (!NEED_SELF[f.need]()) {
       LP.audio.error();
       LP.ui.toast(NEED_LABEL[f.need], 'red');
+      LP.anim.shake(LP.$('.p32-doc'));
+      return;
+    }
+    // 本方事实齐了，但还缺对方口述的那一份
+    if (s.mode !== 'solo' && !has(NEED_VOICE_FLAG[f.need])) {
+      LP.audio.error();
+      LP.ui.toast(NEED_VOICE[f.need], 'gold');
       LP.anim.shake(LP.$('.p32-doc'));
       return;
     }

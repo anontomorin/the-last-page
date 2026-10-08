@@ -20,8 +20,13 @@
 .tl-card .tc-text{font-size:.72rem;color:var(--ink-soft);line-height:1.7;margin-bottom:.4rem}
 .tl-card .tc-cred{font-family:var(--font-mono);font-size:.58rem;color:var(--ink-soft);
   border-top:1px dashed var(--line);padding-top:.35rem}
-.tl-card .tc-weather{position:absolute;top:.5rem;right:.6rem;font-size:.62rem;color:var(--red);
-  font-family:var(--font-mono)}
+.tl-card.done-mark .tc-title{color:var(--ok)}
+/* 双人模式：属于对方的卡位占位 */
+.tl-card.tl-ghost{cursor:default;opacity:.45;border-style:dashed;background:transparent;
+  box-shadow:none}
+.tl-card.tl-ghost:hover{transform:none;box-shadow:none}
+.tl-duo-tip{text-align:center;font-size:.68rem;color:var(--gold);letter-spacing:.1em;
+  border:1px dashed var(--gold);padding:.55rem 1rem;margin-bottom:1.2rem;line-height:1.8}
 
 /* 三日槽位 */
 .tl-days{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.4rem}
@@ -31,9 +36,26 @@
 .tl-slot-head{text-align:center;border-bottom:1px solid var(--line);padding-bottom:.5rem}
 .tl-slot-head .d{font-family:var(--font-doc);font-size:1.05rem;font-weight:700;letter-spacing:.1em}
 .tl-slot-head .w{font-family:var(--font-mono);font-size:.6rem;color:var(--ink-soft);letter-spacing:.15em}
+/* 槽位上的「天色 / 日期」待填项 */
+.tl-meta{display:flex;gap:.5rem;align-items:flex-end;border:1px dashed var(--line);
+  background:var(--paper-deep);padding:.5rem .55rem}
+.tl-meta-cell{flex:1;display:flex;flex-direction:column;gap:.25rem;min-width:0}
+.tl-meta-k{font-size:.55rem;letter-spacing:.2em;color:var(--ink-soft)}
+.tl-sel,.tl-date-in{width:100%;border:1px solid var(--line);background:#FFFDF6;
+  font-family:var(--font-mono);font-size:.72rem;color:var(--ink);padding:.28rem .35rem;
+  border-radius:0;outline:none}
+.tl-sel:focus,.tl-date-in:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(160,124,58,.18)}
+.tl-date-row{display:flex;align-items:center;gap:.25rem}
+.tl-date-in{text-align:center;max-width:2.6rem}
+.tl-date-in:disabled{background:repeating-linear-gradient(45deg,#F1EBD9,#F1EBD9 5px,#E8E0C9 5px,#E8E0C9 10px);
+  color:var(--ink-soft)}
+.tl-date-unit{font-size:.68rem;color:var(--ink-soft)}
+.tl-meta-lock{flex-basis:100%;font-size:.55rem;letter-spacing:.12em;color:var(--gold);
+  text-align:center;padding-top:.15rem}
+
 .tl-slot .tl-card{width:100%;cursor:pointer}
 .tl-slot .tl-card:hover{transform:none}
-.tl-slot.empty-hint::after{content:'将资料卡拖入此处';position:absolute;inset:3rem .8rem .8rem;
+.tl-slot.empty-hint::after{content:'将资料卡拖入此处';position:absolute;inset:6.5rem .8rem .8rem;
   display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--ink-soft);
   font-family:var(--font-mono);letter-spacing:.2em;border:1px dashed var(--line);pointer-events:none}
 .tl-slot.done{border-color:var(--ok)}

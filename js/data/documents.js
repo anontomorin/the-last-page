@@ -117,10 +117,10 @@ LP.data.documents = {
     date: '3月8日', cred: { level: '中', kind: '主观记录' },
     unlock: 'start',
     content: [
-      '七点半，天刚亮透，我们把路线走了一遍。',
+      '七点半，天刚亮透，我们把计划中的路线预演了一遍。',
       '从住处出发，过老街，绕到钟楼后面，再上渡口。{C} 在老街转错了弯，一头扎进面摊。',
       '摊主认识他，笑他：又来？连面都没给你下。',
-      '我们都笑了。笑完，{Z} 把路线又画了一遍，说：不能错。一次都不能错。'
+      '我们都笑了。笑完，{Z} 把路线又画了一遍，说：不能错。一次都不能错。那天记下的是预演，不是后来离开时的行程记录。'
     ],
     clues: [],
     related: ['location_oldstreet', 'location_clocktower', 'location_ferry', 'photo_04']
@@ -264,6 +264,7 @@ LP.data.documents = {
       '{Z} 把联络的办法改了：以钟声为号。',
       '她在布告栏那边等我的时候说——',
       '「等钟响七次以后，我们就该走了。」',
+      '钟索连着钟楼内门的旧门闩。七声既是约定信号，也是开门的机关。',
       '七次。我记住了。'
     ],
     clues: ['clue_bell7'],
@@ -273,7 +274,8 @@ LP.data.documents = {
   diary_19: {
     id: 'diary_19', type: 'diary', no: '19', title: '日记 · 其十九',
     date: '3月16日', cred: { level: '中', kind: '主观记录' },
-    unlock: 'act4',
+    // 页头直接印着 3月16日 —— 第五幕（时间线已修复）之后再放出，免得提前泄题
+    unlock: 'act5',
     content: [
       '倒春寒，冷得厉害。',
       '{C} 把他娘絮的棉袄，脱下来披在了石头身上。石头不要，他瞪眼：拿着！',
@@ -358,11 +360,12 @@ LP.data.documents = {
   diary_25: {
     id: 'diary_25', type: 'diary', no: '25', title: '日记 · 其二十五',
     date: '3月18日', cred: { level: '中', kind: '主观记录' },
-    unlock: 'act4',
+    // 同上：页头印着 3月18日，第五幕之后再放出
+    unlock: 'act5',
     content: [
       '三月十八日，雨。',
       '夜校的教室空了。黑板上还留着石头写的两个字：中国。',
-      '我没有擦。',
+      '门口积着一小滩水，进来的人鞋都是湿的。我没有擦黑板。',
       '等我回来，接着教。'
     ],
     clues: [],
@@ -497,8 +500,8 @@ LP.data.documents = {
     src: 'assets/images/photo_stall.jpg',
     meta: { file: 'IMG_0309.jpg', size: '614 KB', scan: '600dpi' },
     desc: '老街转角的面摊。一个年轻人背对镜头坐着，面前的碗见了底。',
-    back: { text: '「0309 晴 · 老街口，他总嫌葱花少」', crease: false },
-    clues: [],
+    back: { text: '「0309 晴 · 老街口，他总嫌葱花少 —— 给陈川」', crease: false },
+    clues: ['clue_chen_name'],
     related: ['person_chen', 'location_oldstreet', 'diary_08']
   },
 
@@ -581,7 +584,8 @@ LP.data.documents = {
   photo_11: {
     id: 'photo_11', type: 'photo', no: '11', title: '旧照片 · 雨中的街',
     date: '未知', cred: { level: '高', kind: '视觉记录' },
-    unlock: 'act4',
+    // 记录者卷要靠这张照片的背面落款确认「李禾」，故提前到第三幕解锁
+    unlock: 'act3',
     src: 'assets/images/photo_rain_street.jpg',
     meta: { file: 'IMG_0319.jpg', size: '701 KB', scan: '600dpi' },
     desc: '一条空荡荡的老街，下着雨。青石板路反着光，像是有人刚刚离开。',
@@ -620,7 +624,9 @@ LP.data.documents = {
 
   letter_02: {
     id: 'letter_02', type: 'letter', no: '02', title: '信件 · 门缝里的纸',
-    date: '3月16日', cred: { level: '中', kind: '主观记录' },
+    // 信里写的是「走的那天」—— 说明它写成于离开之后，因此不署日期
+    // （旧值 3月16日 与信的内容、也与时间线里它所属的那一格互相矛盾）
+    date: '未署日期', cred: { level: '中', kind: '主观记录' },
     unlock: 'act2_door',
     content: [
       '远：',
@@ -685,3 +691,42 @@ LP.data.documents = {
     related: ['diary_26', 'diary_31']
   }
 };
+
+/* ============================================================
+   双人拼卷：卷别可见性 + B 卷（记录者卷）残缺文本
+   visibleIn: 缺省=两卷可见；'B'=仅记录者卷（照片）；'A'=仅执笔者卷
+   contentB: 双人模式下 B 卷玩家看到的版本（视角/信息残缺）
+   ============================================================ */
+(function () {
+  const D = LP.data.documents;
+
+  /* 照片与地图原件：仅 B 卷可见（A 卷看不到影像，只能听描述） */
+  Object.values(D).forEach(doc => {
+    if (doc.type === 'photo' || doc.type === 'map') doc.visibleIn = 'B';
+  });
+
+  /* 日记的 B 卷文本已移到 js/data/diaryGist.js —— 记录者卷只显示「编目梗概」 */
+
+  /* 信件：仅 A 卷可见（文字证据归执笔者；B 卷只能听对方念） */
+  ['letter_01', 'letter_02', 'letter_03', 'letter_04'].forEach(id => {
+    if (D[id]) D[id].visibleIn = 'A';
+  });
+
+  /* A 卷的门缝信是一张「水渍残页」：最后一句要由记录者口述补全 */
+  if (D.letter_02) {
+    D.letter_02.contentA = [
+      '远：',
+      '布告我贴在钟楼里了。记住，第七行。',
+      '你们总说我疑心重。可越是这种时候，越要把每一行字都看清楚。',
+      '（以下被水渍泡烂，只剩几个字的残笔：「……那天……冷得很……天气很好……」）',
+      '——Z.N.'
+    ];
+    D.letter_02.contentAFull = [
+      '远：',
+      '布告我贴在钟楼里了。记住，第七行。',
+      '你们总说我疑心重。可越是这种时候，越要把每一行字都看清楚。',
+      '我记得走的那天下着雨，冷得很。你在本子上却写「天气很好」。',
+      '也许你的记忆比我的勇敢。——Z.N.'
+    ];
+  }
+})();

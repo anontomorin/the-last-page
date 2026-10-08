@@ -50,6 +50,13 @@
         <b class="red blink">PAGE_032</b>
       </div>
       <button id="btn-start" class="btn-primary">开始整理</button>
+      <div class="boot-duo">
+        <span class="boot-duo-line mono">—— 双人拼卷 · 需语音连线 ——</span>
+        <div class="boot-duo-btns">
+          <button id="btn-mode-a" class="btn-ghost">执笔者卷（A）</button>
+          <button id="btn-mode-b" class="btn-ghost">记录者卷（B）</button>
+        </div>
+      </div>
       <button id="btn-continue" class="btn-ghost" hidden>继续上次的整理</button>
       <p class="boot-note mono">本作品人物均为虚构 · 纯前端运行 · 进度自动保存在本机</p>
     </div>
@@ -62,6 +69,8 @@
     <div class="wb-brand mono">DIGITAL ARCHIVE <span class="red">A-017</span></div>
     <div class="wb-act serif" id="wb-act-title">第一幕 · 档案</div>
     <div class="wb-status mono">
+      <span id="wb-mode-badge" class="wb-mode-badge" hidden></span>
+      <button id="btn-duo" class="btn-ghost small" hidden>通话 · 口述／听写</button>
       <button id="btn-back-ending" class="btn-ghost small" hidden>返回结束页</button>
       <span class="wb-percent">完整度 <b id="wb-percent">0%</b></span>
     </div>
@@ -79,6 +88,12 @@
 
   <div class="wb-body">
     <aside class="wb-side">
+      <section class="case-index" aria-labelledby="case-index-title">
+        <div class="case-index-head mono" id="case-index-title">异常索引 ·「那一天」</div>
+        <p>档案索引把几份记录归入同一事件，但天气对不上：</p>
+        <div class="case-weather mono"><span>倒春寒</span><span>晴</span><span>雨</span></div>
+        <p class="case-index-question">它们真的是同一天吗？日期与来源待核。</p>
+      </section>
       <div class="wb-search">
         <input id="wb-search-input" type="search" placeholder="检索档案…" autocomplete="off">
       </div>
@@ -149,18 +164,22 @@
 <script src="js/core/eventBus.js"></script>
 <script src="js/core/gameState.js"></script>
 <script src="js/core/saveManager.js"></script>
+<script src="js/core/fragment.js"></script>
 <script src="js/core/router.js"></script>
 <script src="js/data/documents.js"></script>
+<script src="js/data/diaryGist.js"></script>
 <script src="js/data/people.js"></script>
 <script src="js/data/locations.js"></script>
 <script src="js/data/evidence.js"></script>
 <script src="js/data/timeline.js"></script>
 <script src="js/data/story.js"></script>
+<script src="js/data/duoScript.js"></script>
 <script src="js/systems/archiveSystem.js"></script>
 <script src="js/systems/documentSystem.js"></script>
 <script src="js/systems/photoSystem.js"></script>
 <script src="js/systems/investigationSystem.js"></script>
 <script src="js/systems/evidenceSystem.js"></script>
+<script src="js/systems/duoSystem.js"></script>
 <script src="js/systems/mapSystem.js"></script>
 <script src="js/systems/timelineSystem.js"></script>
 <script src="js/systems/endingSystem.js"></script>

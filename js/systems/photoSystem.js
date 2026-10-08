@@ -12,6 +12,10 @@ LP.photo = (function () {
   function open(id) {
     const doc = LP.data.documents[id];
     if (!doc) return;
+    if (!LP.inv.docVisible(doc)) {
+      LP.ui.toast('这一张不在你这一卷里 —— 让记录者把看到的念给你听。', 'gold');
+      return;
+    }
     LP.audio.open();
 
     LP.$('#viewer-title').textContent = LP.inv.sub(doc.title);
@@ -69,7 +73,26 @@ LP.photo = (function () {
       flipped = v == null ? !flipped : v;
       card.classList.toggle('flipped', flipped);
       LP.audio.paper();
-      if (flipped) LP.state.addTo('photoFlipped', id);
+      if (flipped) {
+        LP.state.addTo('photoFlipped', id);
+        /* 背面小字：只要真的翻到写有日期的那一面，就记下这条线索
+           —— 不再只依赖某一篇日记，翻任意一张带日期的照片都能稳定触发 */
+        if (doc.back && /\d{4}/.test(doc.back.text || '')) {
+          LP.inv.discoverClue('clue_photoback');
+        }
+        // B 卷专属：照片 11 背面落款「送他们走」揭示记录者李禾
+        if (id === 'photo_11' && LP.state.get().mode === 'B' &&
+            !LP.state.has('discoveredPeople', 'person_li')) {
+          setTimeout(() => {
+            LP.inv.discoverClue('clue_li_name');
+            LP.ui.narrate([
+              '照片背面，一行小字：「0318 雨 · 送他们走」。',
+              '把空街留下来的人，把所有人送出去的人——',
+              '是李禾。'
+            ]);
+          }, 500);
+        }
+      }
     }
 
     /* 拖动（放大后平移） */
@@ -101,24 +124,48 @@ LP.photo = (function () {
   /* 折痕里的「3-17」 */
   function revealCrease(doc, back) {
     if (LP.state.has('discoveredEvidence', doc.back.creaseClue)) {
-      LP.ui.toast('折痕里压着两个数字：3-17');
+      LP.ui.toast('折痕里压着的字迹，你已经辨读过了。');
       return;
     }
     back.innerHTML = '';
-    back.appendChild(LP.el('div', { class: 'crease-reveal', text: '3 – 1 7' }));
-    back.appendChild(LP.el('div', {
-      class: 'btext', text: '折痕里，压着两个手写的数字。',
-      style: 'margin-top:1rem'
-    }));
+    const mode = LP.state.get().mode;
+    if (mode === 'B') {
+      // 双人 B 卷：不直接给答案，只给需要口头描述的形状
+      back.appendChild(LP.el('div', { class: 'crease-reveal', text: '3 – 1 7', style: 'filter:blur(1.5px);opacity:.75' }));
+      back.appendChild(LP.el('div', {
+        class: 'btext',
+        text: '折痕里压着两个手写的符号：像是三，又像是一和七挨在一起，第二笔有点花。',
+        style: 'margin-top:1rem'
+      }));
+      back.appendChild(LP.el('div', {
+        class: 'btext',
+        text: '——把它描述给你的执笔者听。答案在 ta 的日记里。',
+        style: 'margin-top:.6rem;color:var(--gold)'
+      }));
+    } else {
+      back.appendChild(LP.el('div', { class: 'crease-reveal', text: '3 – 1 7' }));
+      back.appendChild(LP.el('div', {
+        class: 'btext', text: '折痕里，压着两个手写的数字。',
+        style: 'margin-top:1rem'
+      }));
+    }
     LP.audio.complete();
     LP.anim.flash();
     setTimeout(() => {
       LP.inv.discoverClue(doc.back.creaseClue);
-      LP.ui.narrate([
-        '3-17。',
-        '三月十七日？还是……某个编号？',
-        '也许，日记里有答案。'
-      ]);
+      if (mode === 'B') {
+        LP.ui.narrate([
+          '你把这个形状记在了心里。',
+          '也许是「3-17」，也许不是。',
+          '让你的执笔者去日记里查——这两个字，只有 ta 能对上。'
+        ]);
+      } else {
+        LP.ui.narrate([
+          '3-17。',
+          '三月十七日？还是……某个编号？',
+          '也许，日记里有答案。'
+        ]);
+      }
     }, 900);
   }
 
@@ -144,6 +191,12 @@ LP.photo = (function () {
 
   function openSort() {
     const s = LP.state.get();
+    if (s.mode === 'A') {
+      // 拍摄顺序校验不在执笔者卷里（ta 连照片都看不到），这里只做指引
+      LP.ui.toast('拍摄顺序由你的记录者校验 —— 让 ta 排完，把最后一张念给你听。', 'gold');
+      if (LP.duo) LP.duo.openPanel();
+      return;
+    }
     if (s.act < 4) { LP.ui.toast('时机未到——先修复时间线。'); return; }
     if (s.completedPuzzles.includes('photo_sort')) { LP.ui.toast('顺序已经校验过了。'); return; }
     if (LP.$('.ps-overlay')) return; // 防重复叠加

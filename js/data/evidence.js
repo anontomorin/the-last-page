@@ -25,7 +25,7 @@ LP.data.clues = {
   },
   clue_717: {
     id: 'clue_717', label: '7:17',
-    desc: '钟响七声之后，指针停在了 7:17。七。第七行，会不会有什么？',
+    desc: '钟面早已停在 7:17。七声是约定信号；七与钟面上的 7:17 都指向公告栏第七行。',
     from: 'scene_clocktower', links: ['clue_bell7', 'letter_02']
   },
   clue_zhou_name: {
@@ -45,7 +45,7 @@ LP.data.clues = {
   },
   clue_photoback: {
     id: 'clue_photoback', label: '照片背面的日期',
-    desc: '李禾在每张照片中写下日期与天气——这是不会撒谎的记录。',
+    desc: '部分照片背题记录了日期与天气；合影背面留白，日期藏在折痕里，天气要从画面判断。',
     from: 'diary_11', links: ['photo_09', 'photo_11', 'person_li']
   },
   clue_linyuan_self: {
@@ -70,7 +70,7 @@ LP.data.clues = {
   },
   clue_rain_0318: {
     id: 'clue_rain_0318', label: '0318 · 雨',
-    desc: '照片不会撒谎：3月18日，雨，空无一人的街。',
+    desc: '空街照片背面标着 0318 和「雨」，为离开之日提供了一条可核对的记录。',
     from: 'photo_11', links: ['timeline']
   },
   clue_clock717_visual: {

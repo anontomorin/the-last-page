@@ -6,34 +6,56 @@ window.LP = window.LP || {};
 /* ---------------- 通用 UI 助手 ---------------- */
 LP.ui = (function () {
 
-  /* 旁白：逐行显示，点击继续 */
+  /* 旁白：逐行显示，点击继续
+     —— 多处系统可能在很近的时间点连续调用（翻面 / 听写 / 幕切换），
+        旧的写法会让两段打字机同时往同一个节点里写字，出现乱码。
+        这里改为「串行队列」：新的旁白排队等上一段播完，绝不叠加。 */
+  const nq = [];          // 待播队列
+  let nActive = false;    // 是否正在播
+
   function narrate(lines, cb) {
+    const arr = (Array.isArray(lines) ? lines.slice() : [lines])
+      .map(x => String(x == null ? '' : x))
+      .filter(x => x !== '');
+    if (!arr.length) { cb && cb(); return; }
+    nq.push({ arr, cb });
+    if (!nActive) runNext();
+  }
+
+  function runNext() {
+    if (!nq.length) { nActive = false; return; }
+    nActive = true;
+    const job = nq.shift();
     const layer = LP.$('#narrator');
     const text = LP.$('#narrator-text');
-    const arr = Array.isArray(lines) ? lines.slice() : [lines];
-    let i = 0, cancelType = null, typing = false;
+    let i = 0, cancelType = null, typing = false, closed = false;
 
     function showLine() {
       typing = true;
-      cancelType = LP.anim.typewriter(text, arr[i], 26, () => { typing = false; });
+      cancelType = LP.anim.typewriter(text, job.arr[i], 26, () => { typing = false; });
+    }
+    function finish() {
+      if (closed) return;
+      closed = true;
+      layer.onclick = null;
+      layer.hidden = true;
+      job.cb && job.cb();
+      runNext();
     }
     function onClick() {
       LP.audio.click();
-      if (typing) { // 点击快进当前行
+      if (typing) {                       // 点击快进当前行
         cancelType && cancelType();
-        text.textContent = arr[i];
+        text.textContent = job.arr[i];
         typing = false;
         return;
       }
       i++;
-      if (i >= arr.length) {
-        layer.onclick = null;
-        layer.hidden = true;
-        cb && cb();
-      } else showLine();
+      if (i >= job.arr.length) finish();
+      else showLine();
     }
     layer.hidden = false;
-    layer.onclick = onClick; // 用 onclick 覆盖，避免多次 narrate 叠加监听
+    layer.onclick = onClick;              // 用 onclick 覆盖，避免多次 narrate 叠加监听
     showLine();
   }
 
@@ -133,16 +155,20 @@ LP.archive = (function () {
       }
     })();
 
-    LP.$('#btn-start').addEventListener('click', () => {
-      // 存在旧存档时，「开始整理」= 重新整理这份档案
+    LP.$('#btn-start').addEventListener('click', () => startGame('solo'));
+    LP.$('#btn-mode-a').addEventListener('click', () => startGame('A'));
+    LP.$('#btn-mode-b').addEventListener('click', () => startGame('B'));
+
+    function startGame(mode) {
+      // 存在旧存档时，重新开始 = 清空旧进度
       if (LP.save.hasSave() && LP.state.get().act > 0) {
         if (!confirm('已存在上次的整理记录。重新整理将清空旧进度，确定吗？')) return;
         LP.save.wipe();
       }
       LP.audio.unlock();
-      LP.state.set({ act: 1 });
+      LP.state.set({ act: 1, mode });
       enterWorkbench(true);
-    });
+    }
     LP.$('#btn-continue').addEventListener('click', () => {
       LP.audio.click();
       enterWorkbench(false);
@@ -153,12 +179,37 @@ LP.archive = (function () {
     LP.router.go('archive');
     refreshAll();
     if (fresh) {
-      LP.ui.narrate([
-        '欢迎接入，志愿者。',
-        '你正在整理的是 ARCHIVE A-017 ——《林远个人档案》。',
-        '这份档案缺了一页。其余的，都藏在细节里。',
-        '阅读、观察、关联、验证。开始吧。'
-      ]);
+      const mode = LP.state.get().mode;
+      if (mode === 'solo') {
+        LP.ui.narrate([
+          '欢迎接入，志愿者。',
+          '你正在整理的是 ARCHIVE A-017 ——《林远个人档案》。',
+          '档案索引把几份记录归入同一事件，可索引里同时出现倒春寒、晴天和雨天。',
+          '这份档案缺了一页。你要查清：这些矛盾记录，究竟是不是同一天？',
+          '阅读、观察、关联、验证。来源与日期，等你逐一核实。'
+        ]);
+      } else {
+        const roleName = mode === 'A' ? '执笔者卷' : '记录者卷';
+        const partner = mode === 'A' ? '记录者' : '执笔者';
+        const own = mode === 'A'
+          ? '你留在馆里翻纸页：日记与信件在你手里，照片你一张也看不到，现场也由 ta 走。'
+          : '你扛着相机跑现场：照片与地图在你手里，信件你一封也看不到，钟楼老街渡口都要你亲自去。';
+        const field = mode === 'A'
+          ? '钟楼、老街、渡口——你进不去，也不该进去：那是 ta 的活。'
+          : '钟楼、老街、渡口——只有你能进。你看到的每一样，都要念给 ta 听。';
+        LP.ui.narrate([
+          `欢迎接入，${roleName}的整理人。`,
+          '这份档案被分成了两卷：你看到的，和 ta 看到的，并不一样。',
+          '两卷共用一条异常索引：几份记录被归入同一事件，天气却分别是倒春寒、晴天和雨天。',
+          '你们要查清这些记录是否真的属于同一天；日期和来源要靠两卷交叉核实。',
+          own,
+          field,
+          `你的${partner}正在另一端整理另一半。`,
+          '保持通话——右上角「通话」面板里，你可以把手里的东西念给 ta 听，也把 ta 说的记下来。',
+          '有些页，只有你们互相念给对方听，才能拼完整。',
+          '（提醒：这一卷读不完自己那一半。每一幕都有一处，必须等 ta 开口。）'
+        ]);
+      }
     }
   }
 
@@ -183,7 +234,8 @@ LP.archive = (function () {
   function listItems() {
     const docs = LP.data.documents;
     if (curTab === 'diary' || curTab === 'photo' || curTab === 'letter') {
-      return Object.values(docs).filter(d => d.type === curTab)
+      return Object.values(docs)
+        .filter(d => d.type === curTab && LP.inv.docVisible(d))
         .sort((a, b) => a.no.localeCompare(b.no));
     }
     if (curTab === 'map') return Object.values(LP.data.locations);
@@ -234,6 +286,7 @@ LP.archive = (function () {
         LP.el('span', { class: 'no mono', text: no }),
         LP.el('span', { class: 't', text: title }),
         cred ? LP.el('span', { class: 'cred ' + cred, text: cred + ' 可信度' }) : null,
+        (locked || !LP.inv.isGist(it)) ? null : LP.el('span', { class: 'gist-flag', text: '梗概' }),
         isNew ? LP.el('span', { class: 'new-flag' }) : null
       ]);
       if (!locked) item.addEventListener('click', () => { LP.audio.click(); openItem(it); });
@@ -242,6 +295,7 @@ LP.archive = (function () {
   }
 
   function openItem(it) {
+    if (!LP.inv.docVisible(it)) { LP.ui.toast('这一页在对方手里——让你的搭档念给你听。', 'gold'); return; }
     if (curTab === 'map') {
       if (it.scene) LP.map.openScene(it.id);
       else LP.ui.toast('你所在的地方。', null);
@@ -275,7 +329,15 @@ LP.archive = (function () {
     const s = LP.state.get();
     // 恢复默认空态
     main.innerHTML = '';
-    if (curTab === 'photo' && s.act >= 4) {
+    const mode = s.mode;
+    // 照片原件归记录者卷：执笔者看不到影像，也不该由 ta 做顺序校验
+    if (curTab === 'photo' && mode === 'A') {
+      main.appendChild(LP.el('div', { class: 'ps-banner duo-note' }, [
+        LP.el('div', { class: 'mono', text: 'PHOTO · NOT IN THIS VOLUME', style: 'font-size:.6rem;letter-spacing:.3em;color:var(--red)' }),
+        LP.el('p', { class: 'serif', text: '照片原件在记录者卷里。你看不见它们，拍摄顺序也由 ta 校验——让 ta 把看到的东西念给你听。' }),
+        LP.el('button', { class: 'btn-ghost small', text: '打开通话', onclick: () => LP.duo.openPanel() })
+      ]));
+    } else if (curTab === 'photo' && s.act >= 4 && mode !== 'A') {
       const done = s.completedPuzzles.includes('photo_sort');
       const sortBtn = LP.el('button', {
         class: 'btn-ghost small',
@@ -292,6 +354,24 @@ LP.archive = (function () {
     }
     main.appendChild(LP.el('p', { text: '选择左侧资料开始整理。' }));
     main.appendChild(LP.el('p', { class: 'dim', text: '所有谜题都藏在档案里 —— 阅读、观察、关联、验证。' }));
+  }
+
+  /* 底部「相关资料」标签：只暴露玩家已经确证过的信息
+     —— 未确认身份的人物、未解锁的资料、未确证的地点都不显示名字，避免剧透 */
+  function relLabel(rid) {
+    const person = LP.data.people[rid];
+    if (person) {
+      return (person.known || LP.state.has('discoveredPeople', rid)) ? person.name : null;
+    }
+    const loc = LP.data.locations[rid];
+    if (loc) {
+      return LP.state.has('discoveredLocations', rid) ? loc.name : null;
+    }
+    const d = LP.data.documents[rid];
+    if (!d) return null;
+    if (!isUnlocked(d)) return null;        // 还没解锁：连标题都不给
+    if (!LP.inv.docVisible(d)) return null; // 不在这一卷里
+    return LP.inv.sub(d.title);
   }
 
   function renderPreviewCard(doc) {
@@ -318,20 +398,21 @@ LP.archive = (function () {
       body.appendChild(LP.el('p', { class: 'mono', text: '!! 文件损坏 —— 数据校验失败', style: 'color:var(--red);font-size:.8rem' }));
       body.appendChild(LP.el('p', { text: '该页的数据链路已断裂。或许，已经确证的事实可以修复它。' }));
     } else {
-      (doc.content || []).slice(0, 2).forEach(p =>
+      const content = LP.inv.docContent(doc) || [];
+      content.slice(0, 2).forEach(p =>
         body.appendChild(LP.el('p', { text: LP.inv.sub(p) })));
-      if ((doc.content || []).length > 2)
+      if (content.length > 2)
         body.appendChild(LP.el('p', { class: 'dim', text: '……' }));
     }
     const foot = LP.el('div', { class: 'doc-card-foot' });
     (doc.related || []).forEach(rid => {
-      const rel = LP.data.documents[rid] || LP.data.people[rid] || LP.data.locations[rid];
-      if (!rel) return;
+      const label = relLabel(rid);
+      if (!label) return;                 // 未确认 / 未解锁 / 不在本卷 —— 一律不显示，避免剧透
+      const d = LP.data.documents[rid];
       foot.appendChild(LP.el('span', {
-        class: 'rel-chip', text: LP.inv.sub(rel.title || rel.name),
+        class: 'rel-chip', text: label,
         onclick: () => {
-          const d = LP.data.documents[rid];
-          if (d && isUnlocked(d)) openItem(d);
+          if (d && isUnlocked(d) && LP.inv.docVisible(d)) openItem(d);
           else LP.ui.toast('相关资料尚未解锁');
         }
       }));
@@ -339,7 +420,10 @@ LP.archive = (function () {
     const actions = LP.el('div', { class: 'doc-actions' });
     const openBtn = LP.el('button', {
       class: 'btn-ghost small',
-      text: doc.type === 'photo' ? '查看原件' : doc.damaged ? '尝试修复' : doc.type === 'map' ? '展开地图' : '阅读全文',
+      text: doc.type === 'photo' ? '查看原件'
+        : doc.damaged ? '尝试修复'
+        : doc.type === 'map' ? '展开地图'
+        : LP.inv.isGist(doc) ? '阅读梗概' : '阅读全文',
       onclick: () => {
         LP.audio.open();
         if (doc.type === 'photo') { LP.photo.open(doc.id); markDocRead(doc); }
@@ -355,7 +439,8 @@ LP.archive = (function () {
 
   function markDocRead(doc) {
     if (LP.state.addTo('discoveredDocuments', doc.id)) {
-      (doc.clues || []).forEach(cid => LP.inv.discoverClue(cid, true));
+      // 只看到「编目梗概」的页：正文不在这一卷，线索也不该由这一卷直接提取
+      if (!LP.inv.isGist(doc)) (doc.clues || []).forEach(cid => LP.inv.discoverClue(cid, true));
       LP.inv.afterRead(doc);
       refreshStatus();
       renderList();
@@ -430,6 +515,18 @@ LP.archive = (function () {
     renderList();
     renderMain();
     LP.inv.renderClues();
+    // 双人模式徽标与交换入口
+    const mode = LP.state.get().mode;
+    const badge = LP.$('#wb-mode-badge');
+    const duoBtn = LP.$('#btn-duo');
+    if (mode === 'A' || mode === 'B') {
+      badge.hidden = false;
+      badge.textContent = mode === 'A' ? '执笔者卷 · A' : '记录者卷 · B';
+      duoBtn.hidden = false;
+    } else {
+      badge.hidden = true;
+      duoBtn.hidden = true;
+    }
   }
 
   function getTab() { return curTab; }

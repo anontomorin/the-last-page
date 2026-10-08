@@ -14,6 +14,8 @@
 .map-path{stroke:var(--red);stroke-width:1.6;fill:none;stroke-dasharray:300;stroke-dashoffset:300;
   animation:drawPath 2.2s ease forwards;opacity:.6}
 @keyframes drawPath{to{stroke-dashoffset:0}}
+.map-duo-note{border:1px dashed var(--red);background:#FBF3DF;padding:1rem 1.2rem;margin-bottom:1rem;text-align:center}
+.map-duo-note p{margin:.5rem 0 .7rem;font-size:.9rem}
 .map-legend{font-family:var(--font-mono);font-size:.62rem;color:var(--ink-soft);
   display:flex;gap:1.2rem;justify-content:center;margin-top:.7rem;flex-wrap:wrap}
 

@@ -11,9 +11,34 @@ LP.map = (function () {
     ['location_oldstreet', 'location_ferry']
   ];
 
+  /* ---------------- 现场走访的归属 ----------------
+     双人模式下，现场只属于记录者（B）：ta 扛着相机跑现场。
+     执笔者（A）留在档案馆里翻纸页，一切都只能靠听。 */
+  function canEnterScene() {
+    return LP.state.get().mode !== 'A';
+  }
+  function tellNoScene(locName) {
+    LP.audio.error();
+    LP.ui.toast('现场由你的记录者走访 —— 让 ta 把看到的东西念给你听。', 'gold');
+    setTimeout(() => { if (LP.duo) LP.duo.openPanel(); }, 260);
+  }
+
   function renderMap(container) {
     container.innerHTML = '';
+    const s = LP.state.get();
     const wrap = LP.el('div', { class: 'map-wrap' });
+
+    // 执笔者卷：地图只是纸上的位置，现场不属于 ta
+    if (!canEnterScene()) {
+      wrap.appendChild(LP.el('div', { class: 'map-duo-note' }, [
+        LP.el('div', { class: 'mono', text: 'FIELD WORK · NOT IN THIS VOLUME', style: 'font-size:.6rem;letter-spacing:.3em;color:var(--red)' }),
+        LP.el('p', {
+          class: 'serif',
+          text: '你留在档案馆里翻纸页。钟楼、老街、渡口，都由你的记录者一趟趟走过去——ta 看到什么，会念给你听。'
+        }),
+        LP.el('button', { class: 'btn-ghost small', text: '打开通话', onclick: () => LP.duo.openPanel() })
+      ]));
+    }
     const svgNS = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(svgNS, 'svg');
     svg.setAttribute('viewBox', '0 0 100 100');
@@ -67,6 +92,7 @@ LP.map = (function () {
         g.addEventListener('click', () => {
           LP.audio.click();
           if (loc.scene) {
+            if (!canEnterScene()) return tellNoScene(loc.name);
             LP.state.addTo('discoveredLocations', loc.id);
             openScene(loc.id);
           } else {
@@ -78,11 +104,10 @@ LP.map = (function () {
     });
 
     wrap.appendChild(svg);
-    wrap.appendChild(LP.el('div', { class: 'map-legend' }, [
-      LP.el('span', { text: '◦ 红圈标记：与档案相关的地点' }),
-      LP.el('span', { text: '◦ 虚线圈：尚未发现' }),
-      LP.el('span', { text: '◦ 点击已解锁地点进入现场' })
-    ]));
+    const legend = canEnterScene()
+      ? ['◦ 红圈标记：与档案相关的地点', '◦ 虚线圈：尚未发现', '◦ 点击已解锁地点进入现场']
+      : ['◦ 红圈标记：与档案相关的地点', '◦ 虚线圈：尚未发现', '◦ 现场由记录者走访 —— 你只能听 ta 描述'];
+    wrap.appendChild(LP.el('div', { class: 'map-legend' }, legend.map(t => LP.el('span', { text: t }))));
     container.appendChild(wrap);
   }
 
@@ -115,6 +140,7 @@ LP.map = (function () {
   function openScene(locId) {
     const loc = LP.data.locations[locId];
     if (!loc || !loc.scene) return;
+    if (!canEnterScene()) return tellNoScene(loc.name);
     LP.router.go('scene');
     LP.$('#scene-title').textContent = loc.name;
     LP.$('#scene-sub').textContent = loc.desc;
@@ -158,6 +184,15 @@ LP.map = (function () {
     }
     if (objId === 'obj_bench') {
       markDone(el);
+      // 长椅缝里的纸条：只说明「以钟声为号」，那个数字被水泡烂了 —— 必须听执笔者念日记
+      if (LP.state.addTo('completedPuzzles', 'bench_paper')) {
+        setTimeout(() => {
+          LP.ui.toast('记下了：以钟声为号。可响几下，纸上看不出来。', 'gold');
+          if (LP.state.get().mode === 'B') {
+            setTimeout(() => LP.ui.toast('这张纸是从执笔者那本日记上撕下来的 —— 让 ta 把那一页念给你听。', 'gold'), 1300);
+          }
+        }, 500);
+      }
       return setMsg(msgBox, obj.text + '\n' + obj.paper);
     }
     if (objId === 'obj_board') return openBoard(obj, el, msgBox, stage);
@@ -172,14 +207,25 @@ LP.map = (function () {
   /* 旧钟：连点七次 */
   function ringBell(el, msgBox, stage) {
     const s = LP.state.get();
+    const C = LP.story.CLOCKTOWER.obj_bell;
+
+    // 记录者卷：日记里那句被墨盖住了 —— 次数必须由执笔者口述获得（钟楼里没有第二处写着这个数）
+    const needCount = s.mode === 'B' && !s.completedPuzzles.includes('duo_bell7');
+    if (needCount) {
+      LP.audio.error();
+      setMsg(msgBox, C.needCount + '\n' + C.needCount2);
+      LP.ui.toast('你还不知道该敲几下 —— 打开「通话」，让执笔者念日记给你听。', 'gold');
+      return;
+    }
+
     if (s.bellRings >= 7) {
-      return setMsg(msgBox, LP.story.CLOCKTOWER.obj_bell.after);
+      return setMsg(msgBox, C.after);
     }
     let clockEl = LP.$('.clock-face', stage);
     if (!clockEl) {
       clockEl = LP.el('div', { class: 'clock-face' }, [
-        LP.el('div', { class: 'clock-hand h', style: 'transform:rotate(80deg)' }),   // 2:40
-        LP.el('div', { class: 'clock-hand m', style: 'transform:rotate(240deg)' }),
+        LP.el('div', { class: 'clock-hand h', style: 'transform:rotate(218.5deg)' }), // 7:17, matches photo
+        LP.el('div', { class: 'clock-hand m', style: 'transform:rotate(102deg)' }),
         LP.el('div', { class: 'clock-center' })
       ]);
       clockEl.style.cssText = 'position:absolute;top:14%;left:50%;transform:translateX(-50%) scale(.55)';
@@ -190,15 +236,24 @@ LP.map = (function () {
     LP.audio.clock();
     LP.anim.flash();
     clockEl.classList.remove('ringing'); void clockEl.offsetWidth; clockEl.classList.add('ringing');
-    setMsg(msgBox, LP.story.CLOCKTOWER.obj_bell.ringing(n));
+
+    // 双人 B 卷：不报"第几声"，只给钟声本身，让玩家口头数给搭档听
+    if (s.mode === 'B') {
+      setMsg(msgBox, n >= 7 ? C.after : '咚——');
+    } else {
+      setMsg(msgBox, C.ringing(n));
+    }
 
     if (n >= 7) {
       LP.inv.completePuzzle('bell7');
       LP.inv.discoverClue('clue_717');
-      // 指针停在 7:17
-      LP.$('.clock-hand.h', clockEl).style.transform = 'rotate(218.5deg)';
-      LP.$('.clock-hand.m', clockEl).style.transform = 'rotate(102deg)';
-      setTimeout(() => setMsg(msgBox, LP.story.CLOCKTOWER.obj_bell.after), 900);
+      // 钟面始终停在照片记录的 7:17；七声只触发连到门闩的铁索。
+      if (s.mode === 'B') {
+        setTimeout(() => setMsg(msgBox,
+          C.after + '\n钟敲了七下。告诉你的执笔者——ta 那边的日记，也是这么写的。'), 900);
+      } else {
+        setTimeout(() => setMsg(msgBox, C.after), 900);
+      }
     }
   }
 
@@ -238,8 +293,15 @@ LP.map = (function () {
         markDone(el);
         LP.inv.completePuzzle('board_row7');
         setMsg(msgBox, obj.row7);
-        setTimeout(() => LP.inv.discoverClue('clue_zhou_name'), 800);
-      });
+        // 双人 B 卷：名字要"念给"执笔者听；A 拼入碎片后才真正确认人物
+        if (LP.state.get().mode === 'B') {
+          setTimeout(() => {
+            LP.ui.toast('把第七行的名字念给你的执笔者——人物档案在 ta 手里。', 'gold');
+            LP.inv.discoverClue('clue_zhou_name', true);
+          }, 800);
+        } else {
+          setTimeout(() => LP.inv.discoverClue('clue_zhou_name'), 800);
+        }      });
       paper.appendChild(line);
     });
     stage.parentElement.appendChild(paper);
@@ -256,11 +318,25 @@ LP.map = (function () {
       markDone(el);
       LP.inv.completePuzzle('clocktower_door');
       setMsg(msgBox, obj.open + '\n' + obj.inside);
-      LP.state.addTo('unlockedDocs', 'letter_02');
-      setTimeout(() => {
-        LP.ui.toast('获得资料：信件 · 门缝里的纸', 'gold');
-        LP.anim.flash();
-      }, 700);
+      // 双人 B 卷：信件归执笔者——B 把内容念给 A，A 才能"读全"
+      if (LP.state.get().mode === 'B') {
+        setTimeout(() => LP.ui.narrate([
+          '门缝里卡着一个折得很小的纸包。是一封信。',
+          '「远：布告我贴在钟楼里了。记住，第七行。」',
+          '「我记得走的那天下着雨，冷得很。你在本子上却写『天气很好』。」',
+          '——这封信属于执笔者卷，ta 手里那张被水渍糊了半句。',
+          '打开「通话」，把信念给 ta 听。'
+        ]), 700);
+      } else {
+        LP.state.addTo('unlockedDocs', 'letter_02');
+        setTimeout(() => {
+          LP.ui.toast('获得资料：信件 · 门缝里的纸（残页 —— 最后一句被水渍糊住了）', 'gold');
+          LP.anim.flash();
+          if (LP.state.get().mode === 'A') {
+            setTimeout(() => LP.ui.toast('让记录者把完整的信念给你听。', 'gold'), 1200);
+          }
+        }, 700);
+      }
       return;
     }
     LP.audio.error();

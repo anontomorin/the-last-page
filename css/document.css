@@ -33,6 +33,12 @@
 .paper-doc p{line-height:2.15;margin-bottom:.5rem;font-size:.98rem;color:#33302a}
 .paper-doc .red-mark{color:var(--red)}
 
+/* ---- 编目梗概（记录者卷的日记） ---- */
+.paper-doc .gist-note{font-size:.58rem;letter-spacing:.28em;color:#a08c60;
+  border-top:1px dashed #D3C6A6;border-bottom:1px dashed #D3C6A6;padding:.35rem 0;margin-bottom:1rem}
+.paper-doc .gist-cta{margin-top:1.4rem;padding-top:1rem;border-top:1px dashed #D3C6A6;text-align:center}
+.paper-doc .gist-cta p{font-size:.86rem;color:#7a6c50;margin-bottom:.7rem}
+
 /* OCR 扫描覆盖 */
 .ocr-scan{position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);
   box-shadow:0 0 18px 4px rgba(185,138,47,.5);animation:scanMove 1.6s ease-in-out infinite;pointer-events:none;z-index:5}
@@ -42,6 +48,7 @@
   background:repeating-linear-gradient(45deg,rgba(142,27,27,.08) 0 6px,transparent 6px 12px);
   border-bottom:1px dashed var(--red);padding:0 .2em}
 .ocr-frag.garbled:hover{background:rgba(142,27,27,.15)}
+.ocr-frag.garbled.partner{color:#b8ac92;border-bottom-style:dotted;background:none;cursor:default}
 
 /* ---- 照片 ---- */
 .photo-wrap{position:relative;perspective:1400px;width:min(560px,88vw)}

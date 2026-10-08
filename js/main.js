@@ -8,6 +8,7 @@
     LP.doc.init();
     LP.map.init();
     LP.inv.initHint();
+    LP.duo.init();
     LP.archive.init();
 
     // 隐藏 ARG：直接访问 #/archive/A-017/page/032

@@ -48,6 +48,10 @@
   border-bottom:1px solid var(--line);padding-bottom:.6rem;margin-bottom:1.6rem}
 #print-page .fp-line{line-height:2.4;font-size:1.02rem;min-height:1.4em;white-space:pre-wrap}
 #print-page .fp-line.user{color:var(--red)}
+#print-page .fp-line.partner{color:var(--gold)}
+#print-page .fp-line.blank{color:#b8ac92;font-size:.9rem}
+.fp-duo-sig{margin-top:1.6rem;padding-top:1rem;border-top:1px dashed #C9BE9E;
+  font-family:var(--font-mono);font-size:.7rem;color:var(--ink-soft);text-align:center;letter-spacing:.1em}
 #print-page .fp-stamp{position:absolute;right:2rem;bottom:2rem}
 .end-complete{text-align:center;margin:2rem 0 1rem;font-family:var(--font-mono)}
 .end-complete .pct{font-size:3rem;color:var(--red);letter-spacing:.1em}
@@ -58,6 +62,16 @@
   text-align:center;animation:fragIn 1.5s ease}
 .end-hidden .mono{font-size:.6rem;letter-spacing:.3em;color:var(--gold);margin-bottom:.8rem}
 .end-hidden p{font-family:var(--font-doc);line-height:2.3;font-size:.95rem}
+/* 合卷 · 碎片码面板 */
+.mg-block{border:1px dashed var(--line);padding:.9rem 1rem;margin-bottom:1rem;background:#FFFDF6}
+.mg-block-title{font-size:.6rem;letter-spacing:.22em;color:var(--gold);margin-bottom:.55rem}
+.mg-code{width:100%;border:1px solid var(--line);background:#FFFDF6;padding:.6rem .7rem;
+  font-size:.66rem;line-height:1.7;color:var(--ink);resize:vertical;outline:none;
+  word-break:break-all;letter-spacing:.02em}
+.mg-code:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(160,124,58,.15)}
+.mg-block .ps-actions{margin-top:.6rem}
+.mg-alt{margin-top:.4rem;border-top:1px dashed var(--line);padding-top:.9rem}
+
 .end-actions{display:flex;gap:.8rem;justify-content:center;margin-top:2.4rem;flex-wrap:wrap}
 
 @media (max-width:640px){

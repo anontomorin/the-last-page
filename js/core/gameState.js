@@ -7,6 +7,7 @@ LP.state = (function () {
   const DEFAULTS = {
     currentScene: 'boot',        // boot | archive | scene | ending
     act: 0,                      // 0 未开始 1~6 六幕
+    mode: 'solo',                // solo 单人 | A 执笔者卷 | B 记录者卷
     archiveProgress: 0,          // 档案完整度（百分比数字）
 
     discoveredEvidence: [],      // 已发现线索 id
@@ -17,10 +18,15 @@ LP.state = (function () {
     unlockedLocationsData: {},   // 地点内已调查的对象
 
     timelineNodes: {},           // 时间线槽位 → 证据 id
+    tlWeather: ['', '', ''],     // 时间线：三日的天色判定
+    tlDate: ['', '', ''],        // 时间线：三日的日期判定
     unlockedPages: [],
     completedPuzzles: [],        // 已完成的谜题 id
     hiddenClues: [],             // 隐藏 ARG 线索
-    finalMessage: null,          // { q1, q2, q3, line }
+    finalMessage: null,          // { q1, q2, q3 } 己方回答
+    partnerMessage: null,        // 合卷后对方的 { name, q1, q2, q3 }（双人模式）
+    partnerName: '',             // 对方卷主署名
+    merged: false,               // 是否已合卷
     bellRings: 0,                // 钟楼敲钟次数
     photoFlipped: [],            // 翻过面的照片
     hintLevels: {},              // puzzleId -> 已使用提示级别
