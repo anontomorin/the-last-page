@@ -161,15 +161,28 @@ LP.inv = (function () {
       return;
     }
 
-    // 第三幕：四人全部确认
+    // 第三幕：四人全部确认 + 玩家在证据板上亲自连出三条身份关系
+    //   「人物认出来了」不等于「证据链成立」——
+    //   必须由玩家主动把「线索上的名字」与「人」对应起来（选对关系类型），
+    //   这一条主线才算推进。
     if (s.act === 3) {
       const all = ['person_linyuan', 'person_zhou', 'person_chen', 'person_li']
         .every(pid => LP.data.people[pid].known || s.discoveredPeople.includes(pid));
-      if (all) {
+      const req = (LP.data.reasonRequired && LP.data.reasonRequired.act3) || [];
+      const links = s.evidenceLinks || [];
+      const reasoned = req.length === 0 || req.every(k => links.includes(k));
+      if (all && reasoned) {
         completePuzzle('act3');
         LP.state.addTo('discoveredLocations', 'location_oldstreet');
         setAct(4, LP.story.NARRATION.act3_done);
         return;
+      }
+      // 四人已确认但证据链未建立 —— 给出明确指引并切到证据板
+      if (all && !reasoned && !s.act3Hinted) {
+        LP.state.set({ act3Hinted: true });
+        const need = req.filter(k => !links.includes(k)).length;
+        LP.ui.toast(`四个名字都对上了，但这些名字「属于谁」还没有被证明。你在证据板上还差 ${need} 条身份关系。`, 'gold');
+        LP.archive.setTab('evidence');
       }
     }
 

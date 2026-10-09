@@ -119,6 +119,42 @@ body[data-act="6"] #red-ribbon{opacity:.95;width:7px}
 ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
 ::-webkit-scrollbar-track{background:transparent}
 
+/* ============ 键盘可达性 ============
+   仅对键盘聚焦显示描边（鼠标点击不显示），保证 tab 导航全程可见。
+   触屏 / 窄屏下节点与按钮保证最小点击尺寸。 */
+:focus{outline:none}
+:focus-visible{
+  outline:2px solid var(--gold);
+  outline-offset:2px;
+  border-radius:1px;
+}
+button:focus-visible,a:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--gold);
+  outline-offset:2px;
+}
+/* 浅底上的金色描边对比度不足时，改用深色内描边加外发光 */
+.light :focus-visible,.ev-board :focus-visible{
+  outline-color:var(--red);
+}
+
+/* 窄屏：保证可点区域不小于 40px（触屏友好） */
+@media (max-width:640px){
+  .wb-tab{min-height:40px}
+  .btn-primary,.btn-ghost{min-height:38px}
+  .doc-item{min-height:40px}
+  .ev-node{min-height:34px}
+}
+
+/* 尊重「减少动态效果」偏好 */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+    scroll-behavior:auto!important;
+  }
+}
+
 /* 打印：只输出最终页 */
 @media print{
   body *{visibility:hidden}

@@ -166,3 +166,64 @@ LP.data.evidenceGraph = [
   { from: 'clue_ferry_time', to: 'location_ferry' },
   { from: 'photo_12', to: 'clue_open_door' }
 ];
+
+/* ============================================================
+   证据板 · 主动推理规则（P0）
+   ------------------------------------------------------------
+   玩家不再只是拖节点——而是要「亲自连出关系」：
+     · 选中两个节点，选定关系类型（支持 / 矛盾 / 补充 / 同一），
+       可再写一句理由、并挂上作为依据的原件。
+     · 系统按下面的规则判定：连对了 → 记入 state.evidenceLinks；
+       连错了 → 给出「哪一类关系对不上」的反馈，不计入。
+     · 主线推进要求玩家至少建立 requiredFor 里指定的若干条正确关系。
+   ------------------------------------------------------------ */
+LP.data.reasonTypes = [
+  { key: 'support',   label: '支持',   desc: '一者为另一者提供旁证' },
+  { key: 'conflict',  label: '矛盾',   desc: '两者说法互相冲突，需查明原因' },
+  { key: 'supplement',label: '补充',   desc: '两者互相补全同一件事的拼图' },
+  { key: 'same',      label: '同一',   desc: '两者指向同一个人 / 同一天 / 同一物' }
+];
+
+/* 正确关系表：from<to 归一化后比对。
+   每条 = 玩家能「自己推出来」的关键结论，且都有原件支撑。 */
+LP.data.reasonRules = [
+  /* —— 身份链：线索名字 → 人物（第三幕核心） —— */
+  { from: 'clue_zhou_name', to: 'person_zhou', type: 'same',
+    why: '「周宁」就是日记里那个总在提问的「Z」。名字与人对上了。',
+    src: ['letter_02', 'location_clocktower'], key: 'id_zhou' },
+  { from: 'clue_chen_name', to: 'person_chen', type: 'same',
+    why: '家书末尾署名「陈川」——那个总喊冷的「C」有了名字。',
+    src: ['letter_03'], key: 'id_chen' },
+  { from: 'clue_li_name', to: 'person_li', type: 'same',
+    why: '照片编号说明的落款是「李禾」——沉默的「L」是把一切留下来的人。',
+    src: ['letter_04', 'photo_11'], key: 'id_li' },
+
+  /* —— 时间冲突链：三种天气说法互相矛盾（第四幕动机） —— */
+  { from: 'clue_conflict_sun', to: 'clue_conflict_rain', type: 'conflict',
+    why: '林远写「天气很好」，周宁记得「下着雨」——同一天不可能既晴又雨。',
+    src: ['diary_24', 'letter_02'], key: 'cf_sun_rain' },
+  { from: 'clue_cold_0316', to: 'clue_rain_0318', type: 'conflict',
+    why: '三月十六「倒春寒」与三月十八「雨」，说明这根本不是同一天。',
+    src: ['letter_03', 'photo_11'], key: 'cf_cold_rain' },
+
+  /* —— 折痕链：把第一幕的发现与照片本体接起来 —— */
+  { from: 'photo_09', to: 'clue_317', type: 'support',
+    why: '折痕压在合影背面——「3-17」正是从这张照片上读出来的。',
+    src: ['photo_09'], key: 'crease_src' },
+  { from: 'clue_0317_confirm', to: 'clue_317', type: 'support',
+    why: '李禾的编号说明证实了「3-17」就是三月十七日。',
+    src: ['letter_04'], key: 'crease_proof' },
+
+  /* —— 缺失页链：最后一页被裁去 —— */
+  { from: 'diary_31', to: 'clue_page32_cut', type: 'support',
+    why: '切口很平，是作者自己动的手——最后一页被整齐裁去。',
+    src: ['diary_31'], key: 'page_cut' },
+  { from: 'clue_page32_cut', to: 'page_032', type: 'same',
+    why: '被裁掉的那一页，就是缺失的 PAGE_032。',
+    src: ['diary_31', 'page_032'], key: 'page_is_032' }
+];
+
+/* 主线解锁要求：第三幕需要玩家亲手建立下面三条身份关系 */
+LP.data.reasonRequired = {
+  act3: ['id_zhou', 'id_chen', 'id_li']
+};

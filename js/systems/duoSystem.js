@@ -9,7 +9,15 @@
 window.LP = window.LP || {};
 LP.duo = (function () {
 
-  /* ---------------- 听写校验 ---------------- */
+  /* ---------------- 听写校验 ----------------
+     三层判定（v4，收紧了「只要沾边就算过」的宽松匹配）：
+       1) short   —— 短答（一个数、一个名字、一个方向）：
+                    归一化后必须「等于」某个标准答案或同义答案。
+       2) natural —— 自然语言描述：必须命中 accept 里至少 minHits 个
+                    「完整词」，短到只剩一个字的关键词不算命中。
+       3) 描述型带必须项 —— acceptGroups：每组都必须命中一个才算过。
+     另外统一拦截「常见误答」reject：即便沾到关键词，也判为未听懂。
+  ------------------------------------------------------------ */
   function norm(s) {
     return String(s == null ? '' : s)
       .replace(/\s+/g, '')
@@ -19,15 +27,76 @@ LP.duo = (function () {
       .toLowerCase();
   }
 
+  /* 归一化后是否「就是」这个词（短答用）：
+     · 完全相等 → 命中
+     · 答案被夹在一句不长的描述里（如「像是三，又像一和七挨在一起」）→ 命中
+     · 但整句不能长得离谱，否则会误伤（如把一段无关的话里出现「三」当成答案） */
+  function isExact(n, k) {
+    const nk = norm(k);
+    if (!nk) return false;
+    if (n === nk) return true;
+    if (n.indexOf(nk) < 0) return false;
+    // 允许在答案前后各带一点描述；对短答案给更宽的窗口，对长答案给固定余量
+    const slack = nk.length <= 2 ? 24 : nk.length <= 4 ? 20 : 14;
+    return n.length <= nk.length + slack;
+  }
+
+  /* 命中一个「完整词」：要求该关键词本身有足够信息量（≥2 字符，纯数字除外） */
+  function hasWord(n, k) {
+    const nk = norm(k);
+    if (!nk) return false;
+    // 单字中文关键词信息量太低，不接受为自然语言命中（短答另有 isExact 处理）
+    if (nk.length < 2 && !/^[0-9]+$/.test(nk)) return false;
+    return n.indexOf(nk) >= 0;
+  }
+
+  /* 分组命中：每组本身已限定「必须给到这个信息」，单字关键词也可算（如「晴」「雨」） */
+  function groupHit(n, k) {
+    const nk = norm(k);
+    return !!nk && n.indexOf(nk) >= 0;
+  }
+
   function checkAnswer(item, input) {
     const n = norm(input);
     if (!n) return false;
-    if (item.listen.acceptGroups && item.listen.acceptGroups.length) {
-      return item.listen.acceptGroups.every(group =>
-        group.some(k => n.indexOf(norm(k)) >= 0));
+    const L = item.listen;
+
+    /* 1) 短答：归一化相等 / 近似相等（先算命中） */
+    let ok = false;
+    if (L.kind === 'short' && L.accept && L.accept.length) {
+      ok = L.accept.some(k => isExact(n, k));
+    } else if (L.acceptGroups && L.acceptGroups.length) {
+      /* 3) 描述型带必须项：每组都要命中（组内单字也认，因为分组已限定信息） */
+      ok = L.acceptGroups.every(group => group.some(k => groupHit(n, k)));
+    } else {
+      /* 2) 自然语言：按完整词计数 */
+      const hits = (L.accept || []).filter(k => hasWord(n, k)).length;
+      ok = hits >= (L.minHits || 1);
     }
-    const hits = item.listen.accept.filter(k => n.indexOf(norm(k)) >= 0).length;
-    return hits >= (item.listen.minHits || 1);
+    if (!ok) return false;
+
+    /* 4) 「配对误答」：日期出现时，天气被配成了别的日期 */
+    if (L.rejectPair) {
+      const bad = L.rejectPair.some(([anchors, wrongs]) =>
+        anchors.some(a => groupHit(n, a)) && wrongs.some(w => groupHit(n, w)));
+      if (bad) return false;
+    }
+
+    /* 命中后仍要排除「误答词」。
+       短答：reject 按「整体相等」判定 —— 只有整句就是那个错答案才算错，
+             避免「3-17」因为含子串「3」「7」而被误杀；
+       长答/分组：reject 按「包含」判定 —— 长句里出现明确相反的说法即为误答。 */
+    if (L.reject && L.reject.length) {
+      const isShort = L.kind === 'short';
+      const hit = L.reject.some(k => {
+        const nk = norm(k);
+        if (!nk) return false;
+        return isShort ? (n === nk || (n.length <= nk.length + 4 && n.indexOf(nk) >= 0))
+                       : n.indexOf(nk) >= 0;
+      });
+      if (hit) return false;
+    }
+    return true;
   }
 
   /* 朗读（可选；浏览器不支持时静默） */

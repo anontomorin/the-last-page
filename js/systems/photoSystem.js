@@ -117,6 +117,23 @@ LP.photo = (function () {
     tools.appendChild(mk('翻面', () => applyFlip()));
     tools.appendChild(LP.el('span', { class: 'sep' }));
     tools.appendChild(mk('档案信息', () => toggleMeta(face, doc)));
+    /* 原件 → 调查位置：这张照片被用在哪（时间线 / 证据板） */
+    const cards = LP.timeline && LP.timeline.cardsForDoc ? LP.timeline.cardsForDoc(id) : [];
+    const inBoard = LP.data.evidenceGraph.some(e => e.from === id || e.to === id);
+    if (cards.length) {
+      tools.appendChild(mk('◈ 用于时间线', () => {
+        LP.doc.closeViewer();
+        LP.archive.setTab('timeline');
+        setTimeout(() => LP.timeline.focusCard(cards[0]), 160);
+      }));
+    }
+    if (inBoard) {
+      tools.appendChild(mk('◈ 证据板', () => {
+        LP.doc.closeViewer();
+        LP.archive.setTab('evidence');
+        setTimeout(() => LP.evidence.focusNode(id), 160);
+      }));
+    }
 
     LP.$('#viewer').hidden = false;
   }

@@ -62,8 +62,39 @@ LP.doc = (function () {
         tools.appendChild(LP.el('span', { class: 'red', text: `含 ${doc.clues.length} 条可提取线索`, style: 'font-size:.65rem' }));
       }
     }
+    appendNavTools(doc);
 
     LP.archive.markDocRead(doc);
+  }
+
+  /* 原件 → 调查位置：把「这份原件被用在哪」显式给出，玩家可以追溯来源
+     —— 时间线卡片 / 证据板节点，双向导航的另一半（P1） */
+  function appendNavTools(doc) {
+    const tools = LP.$('#viewer-tools');
+    const cards = LP.timeline && LP.timeline.cardsForDoc ? LP.timeline.cardsForDoc(doc.id) : [];
+    const inBoard = LP.data.evidenceGraph.some(e => e.from === doc.id || e.to === doc.id);
+    if (!cards.length && !inBoard) return;
+    tools.appendChild(LP.el('span', { class: 'sep' }));
+    if (cards.length) {
+      const btn = LP.el('button', { class: 'vt', text: '◈ 用于时间线' });
+      btn.addEventListener('click', () => {
+        LP.audio.click();
+        closeViewer();
+        LP.archive.setTab('timeline');
+        setTimeout(() => LP.timeline.focusCard(cards[0]), 160);
+      });
+      tools.appendChild(btn);
+    }
+    if (inBoard) {
+      const btn = LP.el('button', { class: 'vt', text: '◈ 证据板上的关联' });
+      btn.addEventListener('click', () => {
+        LP.audio.click();
+        closeViewer();
+        LP.archive.setTab('evidence');
+        setTimeout(() => LP.evidence.focusNode(doc.id), 160);
+      });
+      tools.appendChild(btn);
+    }
   }
 
   /* ---------------- PAGE_032 · OCR 修复 ---------------- */

@@ -20,6 +20,9 @@ LP.state = (function () {
     timelineNodes: {},           // 时间线槽位 → 证据 id
     tlWeather: ['', '', ''],     // 时间线：三日的天色判定
     tlDate: ['', '', ''],        // 时间线：三日的日期判定
+    evidenceLinks: [],           // 证据板：玩家建立的推理关系 [已完成（判定通过）的]
+    evidenceTrials: [],          // 证据板：玩家提交过的关系尝试（含错误，用于反馈与追溯）
+    act3Hinted: false,           // 第三幕「四人已认、证据链未立」的引导是否已提示过
     unlockedPages: [],
     completedPuzzles: [],        // 已完成的谜题 id
     hiddenClues: [],             // 隐藏 ARG 线索

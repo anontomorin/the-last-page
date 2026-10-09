@@ -1,0 +1,10 @@
+# 测试产物
+_playtest/shots/
+_playtest/dictation.result.json
+_playtest/*.log
+
+# 依赖与系统文件
+node_modules/
+package-lock.json
+.DS_Store
+Thumbs.db

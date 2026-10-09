@@ -1,0 +1,17 @@
+{
+  "name": "the-last-page",
+  "version": "1.0.0",
+  "private": true,
+  "description": "《最后一页没有写完》—— 叙事型 ARG / 数字档案解谜游戏（纯前端，无构建步骤）",
+  "scripts": {
+    "serve": "node _playtest/serve.js",
+    "test": "node _playtest/harness.js",
+    "test:dictation": "node _playtest/dictation.test.js",
+    "test:playthrough": "node _playtest/playthrough.js"
+  },
+  "keywords": ["arg", "puzzle", "narrative", "game", "pure-frontend"],
+  "license": "MIT",
+  "devDependencies": {
+    "playwright-core": "^1.56.0"
+  }
+}

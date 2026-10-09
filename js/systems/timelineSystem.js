@@ -201,12 +201,14 @@ LP.timeline = (function () {
   }
 
   function cardEl(c, slotIdx, container) {
-    /* 卡面不再显示日期与天色 —— 那是要你自己读出来的 */
+    /* 卡面不再显示日期与天色 —— 那是要你自己读出来的；
+       日期证据退回原件，卡面只给一个「查看原件」入口（P0 信息泄露修复） */
     const el = LP.el('div', { class: 'tl-card', draggable: 'true', 'data-id': c.id }, [
       LP.el('span', { class: 'tc-kind', text: c.kind.toUpperCase() }),
       LP.el('div', { class: 'tc-title', text: c.title }),
       LP.el('div', { class: 'tc-text', text: c.text }),
-      LP.el('div', { class: 'tc-cred', text: c.cred })
+      LP.el('div', { class: 'tc-cred', text: c.cred }),
+      refBtn(c)
     ]);
     el.addEventListener('dragstart', e => {
       e.dataTransfer.setData('text/plain', c.id);
@@ -227,6 +229,42 @@ LP.timeline = (function () {
     return el;
   }
 
+  /* 「查看原件」：把玩家引到这张卡对应的原始档案
+     —— 日期答案只在原件里（照片背面/折痕/编号说明），这是唯一的正当入口 */
+  function refBtn(c) {
+    const doc = LP.data.documents[c.refId];
+    const label = doc ? '查看原件 · ' + LP.inv.sub(doc.title) : '查看原件';
+    const btn = LP.el('button', {
+      class: 'tc-ref mono', text: '↗ 查看原件',
+      title: doc ? label : '原件缺失'
+    });
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openRef(c);
+    });
+    btn.addEventListener('pointerdown', e => e.stopPropagation());
+    return btn;
+  }
+
+  /* 打开卡片对应的原件；不在本卷 / 未解锁时给出「去问搭档」的指引 */
+  function openRef(c) {
+    const doc = LP.data.documents[c.refId];
+    if (!doc) { LP.ui.toast('原件暂不可查。'); return; }
+    LP.audio.open();
+    if (!LP.archive.isUnlocked(doc)) { LP.ui.toast('这份原件还没有解锁。', 'gold'); return; }
+    if (!LP.inv.docVisible(doc)) {
+      const tip = c.kind === 'photo'
+        ? '这张照片的原件在记录者卷里 —— 你看不到影像，让 ta 把背面写了什么念给你听。'
+        : '这件文字原本在执笔者卷里 —— 你看不到正文，让 ta 念给你听。';
+      LP.ui.toast(tip, 'gold');
+      if (LP.duo) setTimeout(() => LP.duo.openPanel(), 320);
+      return;
+    }
+    if (doc.type === 'photo') LP.photo.open(doc.id);
+    else LP.doc.open(doc.id);
+    LP.archive.markDocRead(doc);
+  }
+
   function moveCard(cid, slotIdx, container) {
     const nodes = JSON.parse(JSON.stringify(LP.state.get().timelineNodes || {}));
     Object.keys(nodes).forEach(k => { nodes[k] = nodes[k].filter(x => x !== cid); });
@@ -239,12 +277,42 @@ LP.timeline = (function () {
     render(container);
   }
 
-  function conflict(container, text) {
+  /* 分级反馈：把「哪一层推理出错」说清楚，而不是笼统报错
+     —— P1「推理反馈」：分组 / 天气 / 日期 分别反馈，指向该复查的证据 */
+  const FEEDBACK = {
+    groups: {
+      title: '① 分组未通过 · 天色分堆',
+      body: '你把这些记录按日子分的堆，对不上。同一天里的记录，天色必须一致——' +
+            '先别急着填日期，回头看看每张卡里关于天气的那句话，把「冷 / 晴 / 雨」重新归堆。',
+      fix: '需要复查：每张卡里提到天气的那句话'
+    },
+    weather: {
+      title: '② 天气判定未通过 · 天色下拉',
+      body: '你分好的三堆没错，但给它们选的天色不对。天气有直接写明的（「倒春寒」「下着雨」），' +
+            '也有要从画面推断的（合影里影子很短 → 晴）。逐堆重新判一次。',
+      fix: '需要复查：直接记载 vs 画面推断'
+    },
+    date: {
+      title: '③ 日期未通过 · 定日子',
+      body: '分组和天气都对了，卡在日期上。日子不是猜的——它写在原件里：' +
+            '照片背面的题字、合影折痕里的符号、编号说明的规则。' +
+            '点每张卡上的「查看原件」，或听你的搭档把原件念出来。',
+      fix: '需要复查：照片背题 / 折痕 / 编号说明'
+    }
+  };
+
+  function feedback(container, kind) {
+    const f = FEEDBACK[kind];
     LP.audio.error();
-    LP.anim.shake(container.querySelector('.tl-days'));
+    const days = container.querySelector('.tl-days');
+    if (days) LP.anim.shake(days);
     const old = container.querySelector('.tl-conflict');
     if (old) old.remove();
-    container.querySelector('.tl-wrap').appendChild(LP.el('div', { class: 'tl-conflict', text }));
+    container.querySelector('.tl-wrap').appendChild(LP.el('div', { class: 'tl-conflict' }, [
+      LP.el('div', { class: 'tc-title', text: f.title }),
+      LP.el('p', { text: f.body }),
+      LP.el('div', { class: 'tc-fix mono', text: '◈ ' + f.fix })
+    ]));
   }
 
   function validate(container) {
@@ -269,12 +337,12 @@ LP.timeline = (function () {
       return inSlot.length === want.length && inSlot.every((x, j) => x === want[j]);
     });
     if (!groupsOK) {
-      return conflict(container, '同一天里的天色对不上 —— 有记录放错了日子。');
+      return feedback(container, 'groups');
     }
 
     /* ② 天色判定 */
     if (!days.every((d, i) => tw[i] === d.weather)) {
-      return conflict(container, '天色判定与证据对不上 —— 再读一遍每张卡里关于天气的那句话。');
+      return feedback(container, 'weather');
     }
 
     /* 双人：到这里只是「我这半边」对上了 */
@@ -283,10 +351,10 @@ LP.timeline = (function () {
       if (!heardDates(s)) {
         LP.audio.error();
         LP.ui.toast(dateLockTip(s), 'gold');
-        return conflict(container, dateLockTip(s));
+        return feedback(container, 'date');
       }
       if (!days.every((d, i) => String(td[i] || '').trim() === d.num)) {
-        return conflict(container, '日期与证据对不上 —— 日子是从证据里读出来的，不是猜出来的。');
+        return feedback(container, 'date');
       }
       LP.audio.complete();
       LP.anim.flash();
@@ -298,7 +366,7 @@ LP.timeline = (function () {
 
     /* 单人：还要定日子 */
     if (!days.every((d, i) => String(td[i] || '').trim() === d.num)) {
-      return conflict(container, '日期与照片背面的编号对不上 —— 日子是从证据里读出来的，不是猜出来的。');
+      return feedback(container, 'date');
     }
 
     LP.audio.complete();
@@ -308,14 +376,54 @@ LP.timeline = (function () {
     LP.inv.checkDeductions();
   }
 
+  /* 完成态：每个日子不仅给出结论，还给出「这条结论的来源」
+     —— 玩家可以顺着来源点回原件，追溯每条关键结论的出处 */
   function showFacts(wrap) {
     LP.$$('.tl-slot', wrap).forEach((slot, i) => {
       slot.classList.add('done');
+      const day = LP.data.timelineDays[i];
       if (!LP.$('.tl-slot-fact', slot)) {
-        slot.appendChild(LP.el('div', { class: 'tl-slot-fact', text: LP.data.timelineDays[i].fact }));
+        slot.appendChild(LP.el('div', { class: 'tl-slot-fact', text: day.fact }));
+      }
+      if (!LP.$('.tl-slot-src', slot)) {
+        const src = LP.el('div', { class: 'tl-slot-src' });
+        src.appendChild(LP.el('span', { class: 'tl-slot-src-k mono', text: '来源' }));
+        day.accept.forEach(cid => {
+          const card = LP.data.timelineCards.find(x => x.id === cid);
+          if (!card) return;
+          const chip = LP.el('button', {
+            class: 'tl-src-chip', text: card.title,
+            title: '回到这张卡对应的原件'
+          });
+          chip.addEventListener('click', e => { e.stopPropagation(); openRef(card); });
+          src.appendChild(chip);
+        });
+        slot.appendChild(src);
       }
     });
   }
 
-  return { render };
+  /* 反向导航：从原件回到时间线，并高亮对应卡片（P1 双向导航） */
+  function focusCard(cardId, container) {
+    const host = container || LP.$('#wb-preview');
+    if (!host) return;
+    if (LP.archive.getTab() !== 'timeline') LP.archive.setTab('timeline');
+    const target = LP.$(`.tl-card[data-id="${cardId}"]`, host) || LP.$(`.tl-card[data-id="${cardId}"]`);
+    if (target) {
+      target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      target.animate([
+        { boxShadow: '0 0 0 0 rgba(185,138,47,.7)' },
+        { boxShadow: '0 0 0 10px rgba(185,138,47,0)' }
+      ], { duration: 900, iterations: 3 });
+    } else {
+      LP.ui.toast('这张卡已在时间线里 —— 去「时间线」标签页查看。', 'gold');
+    }
+  }
+
+  /* 卡片 id → 该卡所在的原件 id（供查看器反向导航用） */
+  function cardsForDoc(docId) {
+    return LP.data.timelineCards.filter(c => c.refId === docId).map(c => c.id);
+  }
+
+  return { render, openRef, focusCard, cardsForDoc };
 })();
