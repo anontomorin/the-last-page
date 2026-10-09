@@ -76,13 +76,16 @@ body[data-act="6"] #red-ribbon{opacity:.95;width:7px}
 .boot-anomaly b{letter-spacing:.15em}
 .blink{animation:blink 1.1s steps(2) infinite}
 @keyframes blink{50%{opacity:.15}}
-#btn-start{margin-top:1.4rem;width:100%}
+#btn-start{width:100%}
 #btn-continue{margin-top:.6rem;width:100%}
-/* 双人拼卷入口 */
-.boot-duo{margin-top:.9rem}
-.boot-duo-line{font-size:.62rem;color:var(--ink-soft);letter-spacing:.25em;display:block;margin-bottom:.5rem}
-.boot-duo-btns{display:flex;gap:.6rem}
-.boot-duo-btns .btn-ghost{flex:1;padding:.6rem .5rem;font-size:.72rem}
+/* 入口：单人 / 双人卷别，三者平级且样式一致 */
+.boot-entries{margin-top:1.4rem}
+.boot-entries-head{font-size:.62rem;color:var(--ink-soft);letter-spacing:.3em;margin-bottom:.8rem}
+.boot-entries-row{display:flex;gap:.6rem;margin-top:.6rem}
+.boot-entries-row .btn-primary{flex:1;min-width:0;padding:.85rem 1rem}
+@media (max-width:420px){
+  .boot-entries-row{flex-direction:column}
+}
 /* 工作台卷标 */
 .wb-mode-badge{font-size:.62rem;color:var(--gold);letter-spacing:.2em;border:1px solid var(--gold);
   padding:.2rem .6rem}
