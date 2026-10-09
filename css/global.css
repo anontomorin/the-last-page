@@ -94,6 +94,8 @@ body[data-act="6"] #red-ribbon{opacity:.95;width:7px}
 /* ============ 旁白层 ============ */
 .narrator{position:fixed;inset:0;z-index:150;display:flex;align-items:flex-end;justify-content:center;
   background:rgba(20,18,14,.55);backdrop-filter:blur(3px);cursor:pointer;padding:2rem 1rem 8vh}
+/* soft：不虚化背景 —— 玩家需要一边读旁白、一边看清身后的页面（如刚修复的 PAGE_032） */
+.narrator.soft{background:rgba(20,18,14,.26);backdrop-filter:none}
 .narrator-box{max-width:640px;width:100%;background:var(--panel);border:1px solid var(--line);
   border-left:4px solid var(--red);padding:1.6rem 1.8rem;box-shadow:var(--shadow);animation:cardIn .5s ease}
 .narrator-text{font-size:1.05rem;line-height:2;white-space:pre-wrap}

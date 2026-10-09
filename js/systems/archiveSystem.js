@@ -13,12 +13,15 @@ LP.ui = (function () {
   const nq = [];          // 待播队列
   let nActive = false;    // 是否正在播
 
-  function narrate(lines, cb) {
+  /* opts.soft：不虚化背后的画面。
+     默认旁白层带 backdrop blur，把注意力压到文字上；但当玩家正要「看」背后
+     的东西（例如刚修复完的 PAGE_032）时，虚化会直接把他要看的内容糊掉。 */
+  function narrate(lines, cb, opts) {
     const arr = (Array.isArray(lines) ? lines.slice() : [lines])
       .map(x => String(x == null ? '' : x))
       .filter(x => x !== '');
     if (!arr.length) { cb && cb(); return; }
-    nq.push({ arr, cb });
+    nq.push({ arr, cb, opts: opts || null });
     if (!nActive) runNext();
   }
 
@@ -28,6 +31,7 @@ LP.ui = (function () {
     const job = nq.shift();
     const layer = LP.$('#narrator');
     const text = LP.$('#narrator-text');
+    layer.classList.toggle('soft', !!(job.opts && job.opts.soft));
     let i = 0, cancelType = null, typing = false, closed = false;
 
     function showLine() {

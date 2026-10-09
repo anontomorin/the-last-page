@@ -176,11 +176,14 @@ LP.doc = (function () {
         LP.anim.typewriter(fin, '　', 400, () => {
           fin.textContent = '（这一页的结尾，是空白的。）';
           LP.state.addTo('completedPuzzles', 'page32');
+          /* 这一刻整页才第一次完整（restored 段落刚走完 1s 的显影动画）。
+             旁白改用 soft —— 不虚化背景：默认的 blur 遮罩会把这页糊掉，
+             玩家根本没机会看清自己刚修好的东西。 */
           LP.ui.narrate(LP.story.NARRATION.page32_twist, () => {
             fin.textContent = LP.story.PAGE32.final;
             closeViewer();
             LP.inv.checkDeductions();
-          });
+          }, { soft: true });
         });
       } else {
         fin.textContent = LP.story.PAGE32.final;
