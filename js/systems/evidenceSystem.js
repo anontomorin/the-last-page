@@ -1,11 +1,14 @@
 /* ============================================================
    证据板系统 —— 已发现线索的可视化关联网络
    ------------------------------------------------------------
-   v4（P0 主动推理）：
-     · 节点可拖动整理（保留）
-     · 玩家「亲自连线」：点两个节点 → 选关系类型 →（可写理由、挂依据）
-       → 系统判定。连对记入 state.evidenceLinks，连错给出分层反馈。
-     · 主线（第三幕）要求玩家至少连出规定数量的正确关系。
+   v5：
+     · 「＋ 建立关系」→ 点两个节点 → 选关系类型 → 系统判定（连对入
+       state.evidenceLinks，连错分层反馈）。
+     · 板上「可关联」的每一对都能被连线确认：规则表覆盖静态关联图的
+       全部边 + 线索自带的 links（共 53 条），两端节点自动上板。
+     · 人物节点按档案代号显示（Z / C / L；无代号者用姓名）。
+     · 节点数可到 50+，列数封顶 6 列、板高随行数增长。
+     · 第三幕主线：四人确认 **且** 三条身份关系均已建立才推进。
    ============================================================ */
 window.LP = window.LP || {};
 LP.evidence = (function () {
@@ -25,7 +28,9 @@ LP.evidence = (function () {
       { kind: 'doc', label: LP.data.documents[id].title } : null;
     if (LP.data.people[id]) {
       const p = LP.data.people[id];
-      return (p.known || st.discoveredPeople.includes(id)) ? { kind: 'person', label: p.name } : null;
+      if (!(p.known || st.discoveredPeople.includes(id))) return null;
+      // 档案板上人物恢复「按代号归档」：Z / C / L（无代号的（如档案主）仍用姓名）
+      return { kind: 'person', label: p.code || p.name, hint: p.name };
     }
     if (LP.data.locations[id]) return st.discoveredLocations.includes(id) ?
       { kind: 'doc', label: LP.data.locations[id].name } : null;
@@ -36,34 +41,45 @@ LP.evidence = (function () {
     return null;
   }
 
-  /* 已建立的正确关系（玩家连出的） */
+  /* 已建立的正确关系（玩家连出的）—— evidenceLinks 里存的是 rule.key，
+     因此先按「无向节点对」找回规则，再判断它的 key 是否已被确立。 */
   function linkKey(a, b) { return [a, b].sort().join('>'); }
-  function isLinked(a, b) { return s().evidenceLinks.includes(linkKey(a, b)); }
+  function ruleFor(a, b) {
+    const k = linkKey(a, b);
+    return (LP.data.reasonRules || []).find(r => linkKey(r.from, r.to) === k) || null;
+  }
+  function acceptedTypes(rule) { return rule.types || (rule.type ? [rule.type] : []); }
+  function primaryType(rule) { const t = acceptedTypes(rule); return t[0] || 'support'; }
+  function isLinked(a, b) {
+    const r = ruleFor(a, b);
+    return !!r && s().evidenceLinks.includes(r.key);
+  }
 
   /* ---------- 布局 ---------- */
-  function gridPositions(count) {
-    const cols = Math.ceil(Math.sqrt(count * 1.5));
-    const rows = Math.ceil(count / cols);
+  /* 节点数可达 50+（板上「可关联」的每一对都会带出两端），
+     因此列数封顶 6 列，保证横向间距；行高固定，板子随行数变高。 */
+  function layout(count) {
+    const cols = Math.max(2, Math.min(6, Math.ceil(Math.sqrt(count * 1.15))));
+    const rows = Math.max(1, Math.ceil(count / cols));
     const pos = [];
     for (let i = 0; i < count; i++) {
       const r = Math.floor(i / cols), c = i % cols;
-      const rowCols = (r === rows - 1) ? (count - r * cols) : cols;
+      const inRow = (r === rows - 1) ? (count - r * cols) : cols;
       pos.push({
-        x: ((c + 0.5) / rowCols) * 80 + 10,
-        y: ((r + 0.5) / rows) * 72 + 14
+        x: ((c + 0.5) / inRow) * 84 + 8,
+        y: ((r + 0.5) / rows) * 84 + 8
       });
     }
-    return pos;
+    return { pos, rows };
   }
 
-  /* 把玩家已建立的关系也纳入可见性：关系两端一出现就显示 */
+  /* 板上的节点 = 静态关联图的两端 ∪ 可连线关系的两端。
+     后者不可省略：否则「可关联」的线索根本不会出现在板上，也就无从连线。 */
   function collectVisible() {
     const visible = new Map();
-    LP.data.evidenceGraph.forEach(e => {
-      const a = knownNode(e.from), b = knownNode(e.to);
-      if (a) visible.set(e.from, a);
-      if (b) visible.set(e.to, b);
-    });
+    const add = id => { if (!visible.has(id)) { const m = knownNode(id); if (m) visible.set(id, m); } };
+    LP.data.evidenceGraph.forEach(e => { add(e.from); add(e.to); });
+    (LP.data.reasonRules || []).forEach(r => { add(r.from); add(r.to); });
     return visible;
   }
 
@@ -118,13 +134,16 @@ LP.evidence = (function () {
       return;
     }
 
-    const positions = gridPositions(visible.size);
+    const { pos: positions, rows } = layout(visible.size);
+    if (rows * 88 > 480) board.style.height = (rows * 88) + 'px';
+    if (visible.size > 34) board.classList.add('dense');
     let i = 0;
     visible.forEach((meta, id) => {
       const pos = positions[i++];
       const el = LP.el('div', {
         class: 'ev-node kind-' + meta.kind + (selFirst === id ? ' picked' : ''),
         'data-id': id,
+        title: meta.hint ? meta.hint : meta.label,
         style: `left:${pos.x}%;top:${pos.y}%`
       }, [
         LP.el('span', { class: 'ev-kind', text: meta.kind === 'clue' ? '线索' : meta.kind === 'person' ? '人物' : '资料' }),
@@ -156,7 +175,7 @@ LP.evidence = (function () {
       const rule = LP.data.reasonRules.find(r => r.key === key);
       if (!rule) return;
       const row = LP.el('div', { class: 'ev-log-row' });
-      row.appendChild(LP.el('span', { class: 'mono ev-log-type', text: typeLabel(rule.type) }));
+      row.appendChild(LP.el('span', { class: 'mono ev-log-type', text: typeLabel(primaryType(rule)) }));
       row.appendChild(LP.el('span', { class: 'ev-log-why', text: rule.why }));
       box.appendChild(row);
     });
@@ -244,20 +263,16 @@ LP.evidence = (function () {
   /* 判定：连对记入 evidenceLinks；连错给出分层反馈 */
   function attemptLink(a, b, type, why, container) {
     const st = s();
-    const key = linkKey(a, b);
+    const rule = ruleFor(a, b);
 
     /* 已经建立过 */
-    if (st.evidenceLinks.includes(key)) {
+    if (rule && st.evidenceLinks.includes(rule.key)) {
       LP.ui.toast('这条关系已经建立过了。', 'gold');
       selFirst = null; render(container); return;
     }
 
-    /* 查找规则：先按 key 归一化，再按 from/to + type 匹配 */
-    const rule = LP.data.reasonRules.find(r => r.key === key)
-      || LP.data.reasonRules.find(r => linkKey(r.from, r.to) === key && r.type === type);
-
-    if (rule && rule.type === type) {
-      /* 连对 */
+    /* 连对：节点对存在规则，且所选类型在可接受集合内 */
+    if (rule && acceptedTypes(rule).includes(type)) {
       LP.state.addTo('evidenceLinks', rule.key);
       LP.audio.complete();
       LP.anim.flash();
@@ -269,14 +284,13 @@ LP.evidence = (function () {
     }
 
     /* 两端之间存在正确关系，但类型选错了 */
-    const rightRule = LP.data.reasonRules.find(r => linkKey(r.from, r.to) === key);
-    if (rightRule) {
+    if (rule) {
       LP.audio.error();
       LP.ui.toast(
         `这两者之间确实有关系，但你想的不是「${typeLabel(type)}」——再从它们各自说了什么想一想。`,
         'red'
       );
-      recordTrial(a, b, type, rightRule.key);
+      recordTrial(a, b, type, rule.key);
       selFirst = null; render(container);
       return;
     }
@@ -322,7 +336,7 @@ LP.evidence = (function () {
 
     /* 玩家建立的正确关系（高亮，带类型色） */
     LP.data.reasonRules.forEach(r => {
-      if (s().evidenceLinks.includes(r.key)) draw(r.from, r.to, 'linked type-' + r.type);
+      if (s().evidenceLinks.includes(r.key)) draw(r.from, r.to, 'linked type-' + primaryType(r));
     });
   }
 

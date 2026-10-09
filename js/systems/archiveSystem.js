@@ -398,11 +398,17 @@ LP.archive = (function () {
       body.appendChild(LP.el('p', { class: 'mono', text: '!! 文件损坏 —— 数据校验失败', style: 'color:var(--red);font-size:.8rem' }));
       body.appendChild(LP.el('p', { text: '该页的数据链路已断裂。或许，已经确证的事实可以修复它。' }));
     } else {
+      // 完整显示正文：摘要式截断会藏掉关键的「天气 / 日期 / 署名」，
+      // 而这些恰恰是推理要用的证据，因此这里不再截断。
       const content = LP.inv.docContent(doc) || [];
-      content.slice(0, 2).forEach(p =>
+      content.forEach(p =>
         body.appendChild(LP.el('p', { text: LP.inv.sub(p) })));
-      if (content.length > 2)
-        body.appendChild(LP.el('p', { class: 'dim', text: '……' }));
+      if (LP.inv.isGist(doc)) {
+        body.appendChild(LP.el('p', {
+          class: 'dim', style: 'font-size:.72rem;font-style:italic',
+          text: '（这是记录者卷的编目梗概——正文原件在对方手里。）'
+        }));
+      }
     }
     const foot = LP.el('div', { class: 'doc-card-foot' });
     (doc.related || []).forEach(rid => {

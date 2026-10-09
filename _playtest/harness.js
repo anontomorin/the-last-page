@@ -61,21 +61,36 @@ section('数据一致性自检');
   const clueIds = new Set(Object.keys((LP.data && LP.data.clues) || {}));
   const docIds = new Set(Object.keys((LP.data && LP.data.documents) || {}));
   const peopleIds = new Set(Object.keys((LP.data && LP.data.people) || {}));
+  const locIds = new Set(Object.keys((LP.data && LP.data.locations) || {}));
+  const typeIds = new Set(((LP.data && LP.data.reasonTypes) || []).map(t => t.key));
 
   let miss = 0;
+  const ruleKeys = [];
+  const lk = (a, b) => [a, b].sort().join('>');
   ((LP.data && LP.data.reasonRules) || []).forEach(r => {
+    ruleKeys.push(r.key);
     [r.from, r.to].forEach(id => {
       const known = clueIds.has(id) || docIds.has(id) || peopleIds.has(id) ||
-        ['timeline', 'page_032'].includes(id);
+        locIds.has(id) || ['timeline', 'page_032'].includes(id);
       if (!known) { bad(`reasonRules「${r.key}」引用了不存在的节点 ${id}`); miss++; }
     });
+    const types = r.types || (r.type ? [r.type] : []);
+    if (!types.length) { bad(`reasonRules「${r.key}」没有指定关系类型`); miss++; }
+    types.forEach(t => { if (!typeIds.has(t)) { bad(`reasonRules「${r.key}」的类型「${t}」无效`); miss++; } });
     (r.src || []).forEach(sid => {
-      if (!docIds.has(sid) && !clueIds.has(sid) && !(LP.data.documents && LP.data.documents[sid]) &&
-          !['location_clocktower', 'location_oldstreet', 'location_ferry'].includes(sid)) {
+      if (!docIds.has(sid) && !clueIds.has(sid) && !peopleIds.has(sid) && !locIds.has(sid)) {
         bad(`reasonRules「${r.key}」引用了不存在的依据 ${sid}`); miss++;
       }
     });
   });
+  const dupKeys = ruleKeys.filter((k, i) => ruleKeys.indexOf(k) !== i);
+  if (dupKeys.length) { bad('reasonRules 存在重复 key', [...new Set(dupKeys)].join(',')); miss++; }
+  /* 板上画得出的每条静态关联，都应当能被玩家确认（否则「看得见却连不上」） */
+  const rulePairs = new Set(((LP.data && LP.data.reasonRules) || []).map(r => lk(r.from, r.to)));
+  const uncovered = ((LP.data && LP.data.evidenceGraph) || []).filter(e => !rulePairs.has(lk(e.from, e.to)));
+  if (uncovered.length) {
+    bad('以下静态关联无法被玩家确认', uncovered.map(e => e.from + '→' + e.to).join(', ')); miss++;
+  }
   ((LP.data && LP.data.reasonRequired && LP.data.reasonRequired.act3) || []).forEach(k => {
     if (!((LP.data.reasonRules) || []).some(r => r.key === k)) {
       bad(`reasonRequired.act3 指定的「${k}」不在 reasonRules 中`); miss++;

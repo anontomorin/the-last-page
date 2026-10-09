@@ -14,7 +14,7 @@ LP.data.people = {
     related: ['diary_20', 'diary_30', 'diary_18', 'diary_14', 'diary_24', 'diary_26', 'diary_31', 'photo_01', 'letter_01']
   },
   person_zhou: {
-    id: 'person_zhou', no: 'ZN-02',
+    id: 'person_zhou', no: 'ZN-02', code: 'Z',
     name: '周宁', keyword: '怀疑',
     known: false,
     age: '？', role: '？',
@@ -26,7 +26,7 @@ LP.data.people = {
     identifyBy: 'clue_zhou_name'
   },
   person_chen: {
-    id: 'person_chen', no: 'CC-03',
+    id: 'person_chen', no: 'CC-03', code: 'C',
     name: '陈川', keyword: '生活',
     known: false,
     age: '？', role: '？',
@@ -38,7 +38,7 @@ LP.data.people = {
     identifyBy: 'clue_chen_name'
   },
   person_li: {
-    id: 'person_li', no: 'LH-04',
+    id: 'person_li', no: 'LH-04', code: 'L',
     name: '李禾', keyword: '记忆',
     known: false,
     age: '？', role: '？',

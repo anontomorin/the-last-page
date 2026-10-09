@@ -79,6 +79,9 @@
 .ev-node.kind-clue{border-left:3px solid var(--red);color:var(--red)}
 .ev-node.kind-doc{border-left:3px solid var(--ink-soft);color:var(--ink)}
 .ev-node.kind-person{border-left:3px solid var(--gold);color:var(--gold)}
+/* 节点较多时自动收窄，避免窄栏里互相压边 */
+.ev-board.dense .ev-node{max-width:118px;font-size:.66rem;padding:.38rem .6rem}
+.ev-board.dense .ev-node .ev-kind{font-size:.48rem}
 .ev-node .ev-kind{display:block;font-family:var(--font-mono);font-size:.52rem;
   letter-spacing:.2em;color:var(--ink-soft);font-weight:400}
 .ev-empty{height:100%;display:flex;align-items:center;justify-content:center;

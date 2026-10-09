@@ -188,40 +188,154 @@ LP.data.reasonTypes = [
    每条 = 玩家能「自己推出来」的关键结论，且都有原件支撑。 */
 LP.data.reasonRules = [
   /* —— 身份链：线索名字 → 人物（第三幕核心） —— */
-  { from: 'clue_zhou_name', to: 'person_zhou', type: 'same',
+  { from: 'clue_zhou_name', to: 'person_zhou', types: ['same'],
     why: '「周宁」就是日记里那个总在提问的「Z」。名字与人对上了。',
     src: ['letter_02', 'location_clocktower'], key: 'id_zhou' },
-  { from: 'clue_chen_name', to: 'person_chen', type: 'same',
+  { from: 'clue_chen_name', to: 'person_chen', types: ['same'],
     why: '家书末尾署名「陈川」——那个总喊冷的「C」有了名字。',
     src: ['letter_03'], key: 'id_chen' },
-  { from: 'clue_li_name', to: 'person_li', type: 'same',
+  { from: 'clue_li_name', to: 'person_li', types: ['same'],
     why: '照片编号说明的落款是「李禾」——沉默的「L」是把一切留下来的人。',
     src: ['letter_04', 'photo_11'], key: 'id_li' },
 
   /* —— 时间冲突链：三种天气说法互相矛盾（第四幕动机） —— */
-  { from: 'clue_conflict_sun', to: 'clue_conflict_rain', type: 'conflict',
+  { from: 'clue_conflict_sun', to: 'clue_conflict_rain', types: ['conflict'],
     why: '林远写「天气很好」，周宁记得「下着雨」——同一天不可能既晴又雨。',
     src: ['diary_24', 'letter_02'], key: 'cf_sun_rain' },
-  { from: 'clue_cold_0316', to: 'clue_rain_0318', type: 'conflict',
+  { from: 'clue_cold_0316', to: 'clue_rain_0318', types: ['conflict'],
     why: '三月十六「倒春寒」与三月十八「雨」，说明这根本不是同一天。',
     src: ['letter_03', 'photo_11'], key: 'cf_cold_rain' },
 
   /* —— 折痕链：把第一幕的发现与照片本体接起来 —— */
-  { from: 'photo_09', to: 'clue_317', type: 'support',
+  { from: 'photo_09', to: 'clue_317', types: ['support'],
     why: '折痕压在合影背面——「3-17」正是从这张照片上读出来的。',
     src: ['photo_09'], key: 'crease_src' },
-  { from: 'clue_0317_confirm', to: 'clue_317', type: 'support',
+  { from: 'clue_0317_confirm', to: 'clue_317', types: ['support'],
     why: '李禾的编号说明证实了「3-17」就是三月十七日。',
     src: ['letter_04'], key: 'crease_proof' },
 
   /* —— 缺失页链：最后一页被裁去 —— */
-  { from: 'diary_31', to: 'clue_page32_cut', type: 'support',
+  { from: 'diary_31', to: 'clue_page32_cut', types: ['support'],
     why: '切口很平，是作者自己动的手——最后一页被整齐裁去。',
     src: ['diary_31'], key: 'page_cut' },
-  { from: 'clue_page32_cut', to: 'page_032', type: 'same',
+  { from: 'clue_page32_cut', to: 'page_032', types: ['same'],
     why: '被裁掉的那一页，就是缺失的 PAGE_032。',
     src: ['diary_31', 'page_032'], key: 'page_is_032' }
 ];
+
+/* ------------------------------------------------------------
+   补齐：板上「可关联」的每一对，都给出可判定的关系类型。
+   ------------------------------------------------------------
+   静态关联图（evidenceGraph）与线索自带的 links 里，原本只有个位数
+   的关系能被玩家确认，其余的虚线看得见却连不上。这里把每一条真实
+   关联都补全，玩家选中两个节点、选对类型，即可亲手把它确立下来。
+   ------------------------------------------------------------ */
+(function () {
+  const R = (from, to, types, why, key, src) => ({ from, to, types, why, key, src });
+  LP.data.reasonRules.push(
+    /* —— 合影 / 折痕 / 钟楼 —— */
+    R('photo_09', 'clue_317', ['support', 'supplement'],
+      '折痕压在合影背面——「3-17」正是从这张照片上读出来的。', 'link_crease_src', ['photo_09']),
+    R('clue_317', 'diary_21', ['support', 'supplement'],
+      '「3-17」在日记其二十一中落了地——那天四人在钟楼下合了影。', 'link_317_diary21', ['diary_21']),
+    R('diary_21', 'location_clocktower', ['support', 'supplement'],
+      '日记其二十一写明：3月17日，四人在旧钟楼下合了影。', 'link_diary21_clocktower', ['diary_21']),
+    R('diary_18', 'clue_bell7', ['support', 'supplement'],
+      '日记其十八：「等钟响七次以后，我们就该走了。」', 'link_diary18_bell7', ['diary_18']),
+    R('clue_bell7', 'clue_717', ['support', 'supplement'],
+      '约定的「七声」，与停在 7:17 的钟面——两个「七」互相印证。', 'link_bell7_717', ['diary_18', 'photo_10']),
+    R('clue_717', 'clue_zhou_name', ['support', 'supplement'],
+      '钟面 7:17 指向公告栏第七行；第七行上写着一个名字。', 'link_717_zhouname', ['letter_02', 'location_clocktower']),
+    R('clue_clocktower', 'location_clocktower', ['same', 'support'],
+      '「3月17日，四人在旧钟楼下合了影」——说的就是钟楼。', 'link_clocktower_loc', ['diary_21']),
+    R('clue_clocktower', 'photo_09', ['support', 'supplement'],
+      '那张合影，正是在旧钟楼下拍的。', 'link_clocktower_photo09', ['diary_21', 'photo_09']),
+    R('clue_clock717_visual', 'clue_717', ['support', 'supplement'],
+      '照片里的钟也停在 7:17——与「第七行」的说法互相印证。', 'link_visual717', ['photo_10']),
+    R('clue_717', 'letter_02', ['support', 'supplement'],
+      '周宁在信里说「布告贴在钟楼里，记住第七行」——7:17 与第七行是同一个提示。', 'link_717_letter02', ['letter_02']),
+    R('clue_row7', 'clue_717', ['support', 'supplement'],
+      '「记住，第七行」——第七行与钟面 7:17 指向同一处。', 'link_row7_717', ['letter_02']),
+    R('clue_row7', 'location_clocktower', ['support', 'supplement'],
+      '「布告贴在钟楼里」——这条提示把人指向钟楼。', 'link_row7_clocktower', ['letter_02']),
+    R('clue_date17', 'clue_317', ['support', 'supplement'],
+      '日记第二十篇写「今天是17号」——17 这个数字还会再出现。', 'link_date17_317', ['diary_20']),
+
+    /* —— 身份：线索里的名字 ↔ 人物 —— */
+    R('letter_03', 'clue_chen_name', ['support', 'supplement'],
+      '《家书》末尾的署名——那个总喊冷的「C」，叫陈川。', 'link_letter03_chenname', ['letter_03']),
+    R('letter_04', 'clue_li_name', ['support', 'supplement'],
+      '《照片编号说明》的落款——沉默的「L」，叫李禾。', 'link_letter04_liname', ['letter_04']),
+    R('clue_linyuan_self', 'person_linyuan', ['same', 'support'],
+      '单人照背面是「给自己。——远」——写这行字的人，是林远。', 'link_self_linyuan', ['photo_01']),
+
+    /* —— 时间冲突：三种「那一天」 —— */
+    R('diary_24', 'clue_conflict_sun', ['support', 'supplement'],
+      '日记其二十四：「天气很好」——可它记的到底是哪一天？', 'link_diary24_sun', ['diary_24']),
+    R('letter_02', 'clue_conflict_rain', ['support', 'supplement'],
+      '门缝信上写着：走的那天，下着雨。', 'link_letter02_rain', ['letter_02']),
+    R('letter_03', 'clue_cold_0316', ['support', 'supplement'],
+      '家书写于三月十六——「倒春寒，冷得很」。', 'link_letter03_cold', ['letter_03']),
+    R('photo_11', 'clue_rain_0318', ['support', 'supplement'],
+      '雨中空街的照片，背面标着 0318 与「雨」。', 'link_photo11_rain', ['photo_11']),
+    R('clue_conflict_sun', 'timeline', ['support', 'supplement'],
+      '「天气很好」这一条，被放进时间线，等交叉验证。', 'link_sun_timeline', ['diary_24']),
+    R('clue_conflict_rain', 'timeline', ['support', 'supplement'],
+      '「那天下着雨」这一条，被放进时间线，等交叉验证。', 'link_rain_timeline', ['letter_02']),
+    R('clue_rain_0318', 'timeline', ['support', 'supplement'],
+      '「0318 · 雨」是一条可核对的记录——交给时间线去对。', 'link_0318_timeline', ['photo_11']),
+
+    /* —— 编号 / 顺序 —— */
+    R('clue_0317_confirm', 'photo_09', ['support', 'supplement'],
+      '编号说明写的是「0317 那天，钟楼下」——正对上那张合影。', 'link_0317confirm_photo09', ['letter_04']),
+    R('letter_04', 'clue_photosort', ['support', 'supplement'],
+      '《照片编号说明》：编号即日期，月日在前、顺序在后。', 'link_letter04_photosort', ['letter_04']),
+    R('clue_photosort', 'photo_12', ['support', 'supplement'],
+      '按编号排序，最后一张是 12 号——一扇开着的门。', 'link_photosort_photo12', ['letter_04']),
+    R('clue_photoback', 'clue_photosort', ['support', 'supplement'],
+      '照片背面记着日期与天气——「编号即日期」这句话正由此而来。', 'link_photoback_sort', ['diary_11', 'letter_04']),
+    R('clue_photoback', 'photo_11', ['support', 'supplement'],
+      '雨街照片背面的落款，就是「背面有记录」的一个实例。', 'link_photoback_photo11', ['photo_11']),
+
+    /* —— 缺失页与最后一页 —— */
+    R('clue_page32_hint', 'page_032', ['support', 'supplement'],
+      '「最后一句，空着」——林远说，最后一句不该由他来说。', 'link_hint_032', ['diary_26']),
+    R('photo_12', 'clue_open_door', ['support', 'supplement'],
+      '最后一张照片：一扇开着的门。人未归，还是门为后来的人留着？', 'link_photo12_opendoor', ['photo_12']),
+    R('clue_open_door', 'page_032', ['support', 'supplement'],
+      '空着的最后一句，也许就等在那扇开着的门后面。', 'link_opendoor_032', ['photo_12', 'page_032']),
+
+    /* —— 《新芽》与夜校 —— */
+    R('diary_05', 'clue_xinya', ['support', 'supplement'],
+      '日记其五：周宁刻蜡纸印《新芽》，说「字比血重」。', 'link_diary05_xinya', ['diary_05']),
+    R('clue_xinya', 'photo_03', ['support', 'supplement'],
+      '照片《新芽》——一份手刻油印的小报。', 'link_xinya_photo03', ['photo_03']),
+    R('clue_xinya', 'photo_02', ['support', 'supplement'],
+      '油印机旁的那张照片，印的就是《新芽》。', 'link_xinya_photo02', ['photo_02']),
+    R('clue_xinya', 'person_zhou', ['support', 'supplement'],
+      '刻蜡纸、手上扎出血的人是周宁——她说，字比血重。', 'link_xinya_zhou', ['diary_05']),
+    R('photo_05', 'clue_nightschool', ['support', 'supplement'],
+      '夜校合影——码头上的识字班。', 'link_photo05_nightschool', ['photo_05']),
+    R('clue_nightschool', 'diary_15', ['support', 'supplement'],
+      '日记其十五：夜校最小的学生石头，今天学会了写「中国」。', 'link_nightschool_diary15', ['diary_15']),
+    R('clue_nightschool', 'diary_03', ['support', 'supplement'],
+      '日记其三：夜校开课，来了八个扛包的。', 'link_nightschool_diary03', ['diary_03']),
+    R('clue_nightschool', 'person_linyuan', ['support', 'supplement'],
+      '在夜校里教他们写字的人，是林远。', 'link_nightschool_linyuan', ['diary_03', 'diary_15']),
+
+    /* —— 渡口 —— */
+    R('photo_08', 'clue_ferry_boat', ['support', 'supplement'],
+      '渡船照片：0316 阴，晨雾中的船。', 'link_photo08_ferryboat', ['photo_08']),
+    R('clue_ferry_boat', 'location_ferry', ['support', 'supplement'],
+      '船在渡口——这条线索指向那个地点。', 'link_ferryboat_loc', ['photo_08']),
+    R('clue_ferry_boat', 'diary_04', ['support', 'supplement'],
+      '日记其四：天没亮就去渡口看船，晨雾大，三丈外看不见人。', 'link_ferryboat_diary04', ['diary_04']),
+    R('diary_04', 'clue_ferry_time', ['support', 'supplement'],
+      '日记其四：头班船，卯时三刻。', 'link_diary04_ferrytime', ['diary_04']),
+    R('clue_ferry_time', 'location_ferry', ['support', 'supplement'],
+      '被反复描深的那班船，木牌就立在渡口。', 'link_ferrytime_loc', ['diary_04'])
+  );
+})();
 
 /* 主线解锁要求：第三幕需要玩家亲手建立下面三条身份关系 */
 LP.data.reasonRequired = {
