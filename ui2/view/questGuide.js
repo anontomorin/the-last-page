@@ -64,18 +64,22 @@
     };
   }
 
-  /* ---------- ② render：vm + ctx → DOM（无状态、无副作用） ---------- */
-  function render(vm, ctx) {
+  /* ---------- ② render：vm + hosts + ctx → DOM（无状态、无副作用） ---------- */
+  function render(vm, hosts, ctx) {
     const el = LP.el;
+    const host = hosts.root;
+    host.innerHTML = '';
+    if (!vm || vm.visible === false) { host.hidden = true; return; }
+    host.hidden = false;
 
-    const card = el('div', { class: 'u2-qg-card' + (vm.allDone ? ' all-done' : '') });
+    const card = el('div', { class: 'qg-card' + (vm.allDone ? ' all-done' : '') });
 
     /* 头部：阶段 + 状态 + 折叠 */
-    const head = el('div', { class: 'u2-qg-head' });
-    head.appendChild(el('div', { class: 'u2-qg-kicker mono', text: vm.kicker }));
-    head.appendChild(el('span', { class: 'u2-qg-status mono ' + vm.status, text: vm.statusText }));
+    const head = el('div', { class: 'qg-head' });
+    head.appendChild(el('div', { class: 'qg-kicker mono', text: vm.kicker }));
+    head.appendChild(el('span', { class: 'qg-status mono ' + vm.status, text: vm.statusText }));
     const fold = el('button', {
-      class: 'u2-qg-fold mono', type: 'button',
+      class: 'qg-fold mono', type: 'button',
       text: vm.folded ? '展开 ▾' : '收起 ▴',
       'aria-label': vm.folded ? '展开任务卡' : '收起任务卡'
     });
@@ -84,22 +88,22 @@
     card.appendChild(head);
 
     if (!vm.folded) {
-      card.appendChild(el('div', { class: 'u2-qg-title serif', text: vm.title }));
-      card.appendChild(el('p', { class: 'u2-qg-why', text: vm.why }));
+      card.appendChild(el('div', { class: 'qg-title serif', text: vm.title }));
+      card.appendChild(el('p', { class: 'qg-why', text: vm.why }));
 
-      const list = el('ol', { class: 'u2-qg-steps' });
+      const list = el('ol', { class: 'qg-steps' });
       vm.steps.forEach(st => {
         list.appendChild(el('li', { class: st.done ? 'done' : st.cur ? 'cur' : '' }, [
-          el('span', { class: 'u2-qg-dot', text: st.done ? '✓' : String(st.n) }),
-          el('span', { class: 'u2-qg-step-text', text: st.text }),
-          st.wait ? el('span', { class: 'u2-qg-wait-flag mono', text: '搭档' }) : null
+          el('span', { class: 'qg-dot', text: st.done ? '✓' : String(st.n) }),
+          el('span', { class: 'qg-step-text', text: st.text }),
+          st.wait ? el('span', { class: 'qg-wait-flag mono', text: '搭档' }) : null
         ]));
       });
       card.appendChild(list);
 
       if (vm.action) {
         card.appendChild(el('button', {
-          class: 'btn-primary small u2-qg-go', type: 'button',
+          class: 'btn-primary small qg-go', type: 'button',
           text: vm.action.label,
           onclick: () => ctx.onAction(vm.action)
         }));
@@ -108,11 +112,11 @@
 
     /* 已完成的调查（此前各幕） */
     if (vm.doneQuests.length) {
-      const det = el('details', { class: 'u2-qg-done', open: vm.doneOpen ? '' : null });
+      const det = el('details', { class: 'qg-done', open: vm.doneOpen ? '' : null });
       det.appendChild(el('summary', { class: 'mono', text: `已完成的调查（${vm.doneQuests.length}）` }));
       vm.doneQuests.forEach(x => {
-        det.appendChild(el('div', { class: 'u2-qg-done-row' }, [
-          el('span', { class: 'u2-qg-done-check', text: '✓' }),
+        det.appendChild(el('div', { class: 'qg-done-row' }, [
+          el('span', { class: 'qg-done-check', text: '✓' }),
           el('span', { text: `${x.act}/6 · ${x.title}` })
         ]));
       });
@@ -120,7 +124,7 @@
       card.appendChild(det);
     }
 
-    return card;
+    host.appendChild(card);
   }
 
   LP.ui2.register('questGuide', viewModel, render);

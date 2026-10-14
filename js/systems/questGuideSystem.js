@@ -100,7 +100,7 @@ LP.quest = (function () {
   function render() {
     const box = LP.$('#quest-card');
     if (!box) return;
-    if (LP.ui2 && LP.ui2.mount('questGuide', box, nextCtx())) return;
+    if (LP.ui2 && LP.ui2.mount('questGuide', { root: box }, nextCtx())) return;
     renderLegacy(box);
   }
 

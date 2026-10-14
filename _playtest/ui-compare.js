@@ -38,17 +38,32 @@ const server = http.createServer((req, res) => {
   });
 });
 
-/* 任务卡一侧的真实状态（覆盖六幕 · A 卷等待 · 部分完成 · 折叠）
-   注意：必须包含「已完成若干步骤」的用例，
-   否则新旧壳的判定差异会被「全部未完成」掩盖成假绿。 */
+/* 真实状态用例（覆盖六幕 · A 卷等待 · 部分完成 · 折叠 · 查看器）
+   注意：必须包含「已完成若干步骤 / 已解锁若干资料」的用例，
+   否则新旧壳的判定差异会被「全未完成」掩盖成假绿。 */
 const CASES = [
+  /* ---- 主线任务卡 ---- */
   { name: 'act1_solo_partial', cfg: { act: 1, mode: 'solo', discoveredEvidence: ['clue_317'] } },
   { name: 'act2_A_wait', cfg: { act: 2, mode: 'A', completedPuzzles: ['bell7'] } },
   { name: 'act3_solo_reason', cfg: { act: 3, mode: 'solo', discoveredPeople: ['person_linyuan', 'person_zhou', 'person_chen', 'person_li'] } },
   { name: 'act3_solo_linked', cfg: { act: 3, mode: 'solo', discoveredPeople: ['person_linyuan', 'person_zhou', 'person_chen', 'person_li'], evidenceLinks: ['id_zhou', 'id_chen', 'id_li'] } },
   { name: 'act5_A', cfg: { act: 5, mode: 'A' } },
   { name: 'act6_solo_done', cfg: { act: 6, mode: 'solo', finalMessage: { q1: 'a', q2: 'b', q3: 'c' } } },
-  { name: 'act3_solo_folded', cfg: { act: 3, mode: 'solo' }, fold: true }
+  { name: 'act3_solo_folded', cfg: { act: 3, mode: 'solo' }, fold: true },
+
+  /* ---- 查看器：文档 / 信件 / 编目梗概 ---- */
+  { name: 'viewer_diary_solo', sel: '.viewer-frame', openDoc: 'diary_01', cfg: { act: 2, mode: 'solo' } },
+  { name: 'viewer_letter_solo', sel: '.viewer-frame', openDoc: 'letter_02', cfg: { act: 3, mode: 'solo' } },
+  { name: 'viewer_gist_B', sel: '.viewer-frame', openDoc: 'diary_01', cfg: { act: 2, mode: 'B' } },
+
+  /* ---- 查看器：PAGE_032 两态 ---- */
+  { name: 'viewer_p32_partial', sel: '.viewer-frame', openDoc: 'page_032', cfg: { act: 5, mode: 'solo', ocrFragments: ['f1', 'f2'] } },
+  { name: 'viewer_p32_final', sel: '.viewer-frame', openDoc: 'page_032', cfg: { act: 5, mode: 'solo', ocrFragments: ['f1', 'f2', 'f3', 'f4', 'f5'], completedPuzzles: ['page32'] } },
+
+  /* ---- 照片查看器 ---- */
+  { name: 'photo_group_solo', sel: '.viewer-frame', openPhoto: 'photo_09', cfg: { act: 2, mode: 'solo' } },
+  { name: 'photo_group_partial_ids', sel: '.viewer-frame', openPhoto: 'photo_09', cfg: { act: 2, mode: 'solo', discoveredPeople: ['person_zhou'] } },
+  { name: 'photo_11_B', sel: '.viewer-frame', openPhoto: 'photo_11', cfg: { act: 4, mode: 'B' } }
 ];
 
 async function clearNarrator(page) {
@@ -79,16 +94,27 @@ async function clearNarrator(page) {
     }, c.cfg);
     await clearNarrator(page);
 
+    if (c.openDoc) {
+      await page.evaluate(id => LP.doc.open(id), c.openDoc);
+      await page.waitForTimeout(900);              // 等纸页进场 + 段落显影
+      await clearNarrator(page);
+    }
+    if (c.openPhoto) {
+      await page.evaluate(id => LP.photo.open(id), c.openPhoto);
+      await page.waitForTimeout(700);              // 等照片就位
+      await clearNarrator(page);
+    }
     if (c.fold) {
       await page.locator('#quest-card button:has-text("收起")').click().catch(() => {});
     }
-    await page.waitForTimeout(760);                 // 等入场动画结束，取稳定态
-    await page.locator('#quest-card').screenshot({ path: path.join(outDir, c.name + '.png') });
+    await page.waitForTimeout((c.openDoc || c.openPhoto) ? 500 : 760);   // 等动画结束，取稳定态
+    await page.locator(c.sel || '#quest-card').screenshot({ path: path.join(outDir, c.name + '.png') });
   }
 
   for (const mode of [{ dir: DIR_LEGACY, tag: 'legacy' }, { dir: DIR_NEXT, tag: 'next' }]) {
-    for (const c of CASES) {
-      const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+  for (const c of CASES) {
+    if (process.env.ONLY && c.name.indexOf(process.env.ONLY) < 0) continue;   // 可按需只跑子集
+    const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
       const errs = [];
       page.on('pageerror', e => errs.push(e.message));
       const ui2err = [];

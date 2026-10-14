@@ -4,9 +4,14 @@
 window.LP = window.LP || {};
 LP.inv = (function () {
 
+  /* ---------------- 只读访问器 ----------------
+     全部支持可选的首参 state：旧调用（不传）行为不变；
+     ui2 视图层传入 state，从而做到「不直接读写 LP.state」。
+     （FRONTEND_REBUILD_PLAN §5.3 硬门禁） */
+
   /* 代号→真名替换：身份确认前显示代号，确认后显示姓名 */
-  function sub(text) {
-    const s = LP.state.get();
+  function sub(text, state) {
+    const s = state || LP.state.get();
     const known = pid => LP.data.people[pid].known || s.discoveredPeople.includes(pid);
     return String(text)
       .replace(/\{Z\}/g, known('person_zhou') ? '周宁' : 'Z')
@@ -15,15 +20,15 @@ LP.inv = (function () {
   }
 
   /* 卷别可见性：双人模式下过滤不属于本卷的资料 */
-  function docVisible(doc) {
-    const mode = LP.state.get().mode;
+  function docVisible(doc, state) {
+    const mode = (state || LP.state.get()).mode;
     if (mode === 'solo' || !doc.visibleIn) return true;
     return doc.visibleIn === mode;
   }
 
   /* 按卷取文案：B 卷有 contentB 则用 contentB；A 卷同理 */
-  function docContent(doc) {
-    const s = LP.state.get();
+  function docContent(doc, state) {
+    const s = state || LP.state.get();
     const mode = s.mode;
     if (mode === 'B') {
       return doc.contentB || doc.content;
@@ -37,8 +42,8 @@ LP.inv = (function () {
   }
 
   /* 记录者卷的日记只给「编目梗概」：摘要 + 纸面痕迹，不是正文 */
-  function isGist(doc) {
-    return LP.state.get().mode === 'B' && !!doc.gistInB;
+  function isGist(doc, state) {
+    return (state || LP.state.get()).mode === 'B' && !!doc.gistInB;
   }
 
   /* ---------------- 线索发现 ---------------- */

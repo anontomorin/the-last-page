@@ -41,18 +41,13 @@ LP.ui2 = (function () {
   }
 
   /* ---------- 挂载 ----------
-     把 viewModel → render 的结果挂到 host。
-     返回 true 表示「已由新壳接管（含 vm.visible === false 的隐藏态）」；
-     返回 false 表示新壳不适用，调用方应回退旧实现。 */
-  function mount(name, host, ctx) {
+     hosts 是「容器字典」，由各视图自行约定所需容器（如 { root } 或
+     { title, meta, stage, tools }）。清空与填充由 render 负责。
+     返回 true 表示新壳已接管；false 表示不适用，调用方应回退旧实现。 */
+  function mount(name, hosts, ctx) {
     if (!enabled(name)) return false;
     const vm = views[name](ctx.state, ctx.data, ctx.ui || {});
-    host.innerHTML = '';
-    if (!vm || vm.visible === false) { host.hidden = true; return true; }
-    const node = renders[name](vm, ctx);
-    if (node == null) { host.hidden = true; return true; }
-    host.hidden = false;
-    host.appendChild(node);
+    renders[name](vm, hosts, ctx);
     return true;
   }
 

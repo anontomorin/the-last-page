@@ -1,79 +1,19 @@
 /* ============================================================
    ui2 · 组件（components）
    ------------------------------------------------------------
-   与旧壳 css/quest-guide.css 视觉等价，但：
-     · 类名独立（u2- 前缀），新旧壳可并存、互不干扰；
-     · 颜色与时长全部走 css/tokens.css，不新增任何字面量
-       （棘轮约束见 STYLE_CONTRACT §8.2）。
+   【设计调整（P2 实施时确定）】
+   新壳的 **DOM 复用现有 CSS 类名**，因此组件视觉由既有样式表直接
+   提供，本文件不重复定义任何组件样式。
+
+   为什么不换类名前缀：
+     · 「保持风格不变」是本轮第一约束 —— 类名相同则样式必然相同，
+       零视觉风险，也无需为新壳重写数百行 CSS 再逐条做像素验证；
+     · 同一时刻只渲染一套 DOM（开关决定），新旧不会同时存在，
+       因而不需要靠命名空间隔离；
+     · ui2/ 的职责是**视图层 JS 重构**（state → viewModel → render），
+       而不是重画外观。
+
+   本文件保留为新壳「真正新增」样式的唯一落点：若某个视图引入了现有
+   样式表尚未覆盖的新结构，请在此追加（并遵循 STYLE_CONTRACT：
+   只用令牌，不写字面量）。
    ============================================================ */
-
-/* ---------- 当前调查 · 主线任务卡 ---------- */
-.u2-qg-card{
-  background:var(--c-panel);
-  border:1px solid var(--c-line);
-  border-left:4px solid var(--c-red);
-  padding:.9rem 1.1rem .8rem;
-  box-shadow:0 4px 18px rgba(var(--rgb-shadow),.06);
-  animation:cardIn var(--t-slow) ease;
-}
-.u2-qg-card.all-done{border-left-color:var(--c-ok)}
-
-.u2-qg-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.35rem}
-.u2-qg-kicker{font-size:.6rem;letter-spacing:.32em;color:var(--c-ink-soft)}
-.u2-qg-status{
-  margin-left:auto;font-size:.62rem;letter-spacing:.12em;padding:.14rem .55rem;
-  border:1px solid var(--c-line);color:var(--c-ink-soft);white-space:nowrap;
-}
-.u2-qg-status.live{border-color:var(--c-red);color:var(--c-red)}
-.u2-qg-status.wait{border-color:var(--c-gold);color:var(--c-gold);background:rgba(var(--rgb-gold-light),.14)}
-.u2-qg-status.done{border-color:var(--c-ok);color:var(--c-ok)}
-.u2-qg-fold{
-  background:none;border:none;cursor:pointer;font-size:.62rem;color:var(--c-ink-soft);
-  letter-spacing:.1em;padding:.3rem .2rem;
-}
-.u2-qg-fold:hover{color:var(--c-red)}
-
-.u2-qg-title{font-size:1.08rem;font-weight:600;letter-spacing:.04em;margin:.2rem 0 .2rem}
-.u2-qg-why{font-size:.76rem;color:var(--c-ink-soft);line-height:1.8;margin:0 0 .6rem}
-
-.u2-qg-steps{list-style:none;margin:0 0 .7rem;padding:0;display:grid;gap:.32rem}
-.u2-qg-steps li{
-  display:flex;align-items:baseline;gap:.55rem;font-size:.8rem;color:var(--c-ink-soft);
-  line-height:1.6;
-}
-.u2-qg-steps li.cur{color:var(--c-ink);font-weight:500}
-.u2-qg-steps li.done{color:var(--c-ink-soft);opacity:.62}
-.u2-qg-steps li.done .u2-qg-step-text{text-decoration:line-through;text-decoration-color:var(--c-line)}
-.u2-qg-dot{
-  flex:none;width:1.15em;text-align:center;font-size:.68rem;color:var(--c-red);
-  font-family:var(--font-mono);transform:translateY(-1px);
-}
-.u2-qg-steps li.done .u2-qg-dot{color:var(--c-ok)}
-.u2-qg-wait-flag{
-  flex:none;font-size:.58rem;letter-spacing:.14em;color:var(--c-gold);
-  border:1px solid var(--c-gold);padding:.05rem .35rem;transform:translateY(-1px);
-}
-
-.u2-qg-go{
-  width:100%;padding:.6rem 1rem;font-size:.85rem;letter-spacing:.22em;text-indent:.22em;
-  min-height:40px;
-}
-
-.u2-qg-done{margin-top:.6rem;border-top:1px dashed var(--c-line);padding-top:.4rem}
-.u2-qg-done summary{
-  cursor:pointer;font-size:.6rem;letter-spacing:.24em;color:var(--c-ink-soft);
-  padding:.25rem 0;list-style:none;
-}
-.u2-qg-done summary::-webkit-details-marker{display:none}
-.u2-qg-done summary::before{content:'▸ '}
-.u2-qg-done[open] summary::before{content:'▾ '}
-.u2-qg-done-row{
-  display:flex;gap:.5rem;align-items:baseline;font-size:.74rem;color:var(--c-ink-soft);
-  padding:.16rem 0 .16rem .4rem;
-}
-.u2-qg-done-check{color:var(--c-ok);font-size:.7rem}
-
-@media (max-width:640px){
-  .u2-qg-card{padding:.8rem .9rem .7rem}
-  .u2-qg-go{min-height:44px}
-}

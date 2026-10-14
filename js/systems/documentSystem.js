@@ -28,12 +28,56 @@ LP.doc = (function () {
     }
   }
 
+  /* ---------------- 新壳（ui2）接入 ---------------- */
+  function viewerHosts() {
+    return {
+      title: LP.$('#viewer-title'),
+      meta: LP.$('#viewer-meta'),
+      stage: LP.$('#viewer-stage'),
+      tools: LP.$('#viewer-tools')
+    };
+  }
+  function viewerCtx(doc) {
+    return {
+      state: LP.state.get(),
+      data: LP.data,
+      ui: { id: doc.id },
+      onDuo() { closeViewer(); LP.duo.openPanel(); },
+      onNavTimeline(cardId) {
+        LP.audio.click(); closeViewer();
+        LP.archive.setTab('timeline');
+        setTimeout(() => LP.timeline.focusCard(cardId), 160);
+      },
+      onNavEvidence(docId) {
+        LP.audio.click(); closeViewer();
+        LP.archive.setTab('evidence');
+        setTimeout(() => LP.evidence.focusNode(docId), 160);
+      },
+      onRestore(fragId) {
+        const f = LP.story.PAGE32.fragments.find(x => x.id === fragId);
+        if (f) tryRestore(f);
+      }
+    };
+  }
+
   function open(id) {
     const doc = LP.data.documents[id];
     if (!doc) return;
     if (doc.damaged) { openPage32(doc); return; }
 
     LP.audio.paper();
+    /* 新壳：viewModel → render 两个纯函数接管（标题与元信息由 vm 提供） */
+    if (LP.ui2 && LP.ui2.enabled('viewer')) {
+      openViewer('', '');                       // 记录焦点 + 显示容器
+      LP.ui2.mount('viewer', viewerHosts(), viewerCtx(doc));
+      LP.archive.markDocRead(doc);
+      return;
+    }
+    openLegacy(doc);
+  }
+
+  /* ---------- 旧壳渲染（保留，P6 验收后再删） ---------- */
+  function openLegacy(doc) {
     // 记录者卷的日记：只显示编目梗概，正文在执笔者卷
     const gist = LP.inv.isGist(doc);
     openViewer(
@@ -144,6 +188,46 @@ LP.doc = (function () {
   function openPage32(doc) {
     LP.audio.open();
     openViewer('PAGE_032.dat', '损坏文件 · 等待修复');
+    /* 新壳：页面由 ui2 渲染；结尾反转的副作用在 afterPage32 里补 */
+    if (LP.ui2 && LP.ui2.enabled('viewer')) {
+      LP.ui2.mount('viewer', viewerHosts(), viewerCtx(doc));
+      afterPage32();
+      LP.archive.markDocRead(doc);
+      return;
+    }
+    renderPage32Legacy(doc);
+  }
+
+  /* 新壳渲染后由业务层补的副作用：结尾反转（打字机 → 旁白 → 推进） */
+  function afterPage32() {
+    const fin = LP.$('.p32-final');
+    if (!fin) return;                                   // 本卷尚未修完 → 无结尾位
+    const s = LP.state.get();
+    if (!s.completedPuzzles.includes('page32')) {
+      // 反转：最后一句不是损坏，是留白
+      LP.anim.typewriter(fin, '　', 400, () => {
+        fin.textContent = '（这一页的结尾，是空白的。）';
+        LP.state.addTo('completedPuzzles', 'page32');
+        /* 这一刻整页才第一次完整（restored 段落刚走完 1s 的显影动画）。
+           旁白改用 soft —— 不虚化背景：默认的 blur 遮罩会把这页糊掉，
+           玩家根本没机会看清自己刚修好的东西。 */
+        LP.ui.narrate(LP.story.NARRATION.page32_twist, () => {
+          fin.textContent = LP.story.PAGE32.final;
+          closeViewer();
+          LP.inv.checkDeductions();
+        }, { soft: true });
+      });
+    } else {
+      fin.textContent = LP.story.PAGE32.final;
+      // 容错：若上次在旁白播放中途离开/刷新（谜题已完成但幕未推进），补触发跳转
+      if (LP.state.get().act === 5) {
+        setTimeout(() => LP.inv.checkDeductions(), 800);
+      }
+    }
+  }
+
+  /* ---------- 旧壳渲染 PAGE_032（保留，P6 验收后再删） ---------- */
+  function renderPage32Legacy(doc) {
     const stage = LP.$('#viewer-stage');
     const s = LP.state.get();
 

@@ -12,12 +12,66 @@ LP.photo = (function () {
   function open(id) {
     const doc = LP.data.documents[id];
     if (!doc) return;
-    if (!LP.inv.docVisible(doc)) {
+    if (!LP.inv.docVisible(doc, LP.state.get())) {
       LP.ui.toast('这一张不在你这一卷里 —— 让记录者把看到的念给你听。', 'gold');
       return;
     }
     LP.audio.open();
 
+    /* 新壳：viewModel → render 两个纯函数接管 */
+    if (LP.ui2 && LP.ui2.enabled('photo')) {
+      LP.ui2.mount('photo', {
+        title: LP.$('#viewer-title'), meta: LP.$('#viewer-meta'),
+        stage: LP.$('#viewer-stage'), tools: LP.$('#viewer-tools')
+      }, photoCtx(doc));
+      LP.$('#viewer').hidden = false;
+      return;
+    }
+    openLegacy(id, doc);
+  }
+
+  /* 新壳所需上下文：业务回调集中在此（视图层只负责画） */
+  function photoCtx(doc) {
+    return {
+      state: LP.state.get(),
+      data: LP.data,
+      ui: { id: doc.id },
+      /* 翻到背面 → 记录 + 发现线索（含 B 卷专属） */
+      onFlipped(docId) {
+        LP.state.addTo('photoFlipped', docId);
+        /* 背面小字：只要真的翻到写有日期的那一面，就记下这条线索 */
+        if (doc.back && /\d{4}/.test(doc.back.text || '')) {
+          LP.inv.discoverClue('clue_photoback');
+        }
+        // B 卷专属：照片 11 背面落款「送他们走」揭示记录者李禾
+        if (docId === 'photo_11' && LP.state.get().mode === 'B' &&
+            !LP.state.has('discoveredPeople', 'person_li')) {
+          setTimeout(() => {
+            LP.inv.discoverClue('clue_li_name');
+            LP.ui.narrate([
+              '照片背面，一行小字：「0318 雨 · 送他们走」。',
+              '把空街留下来的人，把所有人送出去的人——',
+              '是李禾。'
+            ]);
+          }, 500);
+        }
+      },
+      onCrease(backEl) { revealCrease(doc, backEl); },
+      onNavTimeline(cardId) {
+        LP.doc.closeViewer();
+        LP.archive.setTab('timeline');
+        setTimeout(() => LP.timeline.focusCard(cardId), 160);
+      },
+      onNavEvidence(docId) {
+        LP.doc.closeViewer();
+        LP.archive.setTab('evidence');
+        setTimeout(() => LP.evidence.focusNode(docId), 160);
+      }
+    };
+  }
+
+  /* ---------- 旧壳渲染（保留，P6 验收后再删） ---------- */
+  function openLegacy(id, doc) {
     LP.$('#viewer-title').textContent = LP.inv.sub(doc.title);
     LP.$('#viewer-meta').textContent = `${doc.meta.file} · ${doc.meta.size} · ${doc.meta.scan}`;
     const stage = LP.$('#viewer-stage');

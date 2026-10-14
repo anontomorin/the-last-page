@@ -1,35 +1,6 @@
 /* ============================================================
    ui2 · 基础件（primitives）
    ------------------------------------------------------------
-   只定义「新壳自有」的原子类（u2- 前缀），不覆盖旧壳任何选择器。
-   全部取值来自 css/tokens.css，禁止颜色/时长字面量。
+   同 components.css：新壳复用现有类名与样式，此处不重复定义，
+   仅承载「新壳新增」的原子类（当前为空）。
    ============================================================ */
-
-/* ---------- 纸面卡片：新壳统一的容器基线 ---------- */
-.u2-card {
-  background: var(--c-panel);
-  border: 1px solid var(--c-line);
-  box-shadow: 0 4px 18px rgba(var(--rgb-ink), .06);
-  padding: var(--s-5) var(--s-6);
-}
-
-/* ---------- 状态徽标（进行中 / 等待 / 完成） ---------- */
-.u2-badge {
-  display: inline-block;
-  font-family: var(--font-mono);
-  font-size: .62rem;
-  letter-spacing: .12em;
-  padding: .14rem .55rem;
-  border: 1px solid var(--c-line);
-  color: var(--c-ink-soft);
-  white-space: nowrap;
-}
-.u2-badge.is-live { border-color: var(--c-red); color: var(--c-red); }
-.u2-badge.is-wait { border-color: var(--c-gold); color: var(--c-gold); background: rgba(var(--rgb-gold-light), .14); }
-.u2-badge.is-done { border-color: var(--c-ok); color: var(--c-ok); }
-
-/* ---------- 焦点环（键盘可达的统一表现） ---------- */
-.u2-focusable:focus-visible {
-  outline: 2px solid var(--c-gold);
-  outline-offset: 2px;
-}
