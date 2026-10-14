@@ -98,7 +98,40 @@ LP.evidence = (function () {
   }
 
   /* ---------- 渲染 ---------- */
+  /* 新壳（?ui=next）：由 ui2/view/evidence.js 的 viewModel + render 接管；
+     旧壳完整保留为 renderLegacy。 */
   function render(container) {
+    if (LP.ui2 && LP.ui2.enabled('evidence')) {
+      LP.ui2.mount('evidence', { root: container }, evidenceCtx(container));
+      return;
+    }
+    renderLegacy(container);
+  }
+
+  /* 新壳所需上下文：判定与状态变更留在本模块，视图层通过它回调 */
+  function evidenceCtx(container) {
+    return {
+      state: LP.state.get(),
+      data: LP.data,
+      rerender() { render(container); },
+      openReasonDialog(a, b, labelA, labelB) {
+        openReasonDialog(a, b, container, { [a]: labelA, [b]: labelB });
+      }
+    };
+  }
+
+  /* 节点反馈：新壳下交给 ui2 的待播队列，旧壳下用本地节点表 */
+  function fx(id, cls) {
+    if (LP.ui2 && LP.ui2.enabled('evidence') && LP.ui2.evidence) return LP.ui2.evidence.queueFx(id, cls);
+    return queueFx(id, cls);
+  }
+  function resetSel() {
+    if (LP.ui2 && LP.ui2.enabled('evidence') && LP.ui2.evidence) return LP.ui2.evidence.resetSelection();
+    selFirst = null;
+  }
+
+  /* ---------- 旧壳渲染（保留，P6 验收后再删） ---------- */
+  function renderLegacy(container) {
     container.innerHTML = '';
     nodes.clear();
     selFirst = null;
@@ -256,9 +289,10 @@ LP.evidence = (function () {
   }
 
   /* 关系选择对话框：类型 + 理由（可选）+ 依据原件（可选） */
-  function openReasonDialog(a, b, container) {
-    const labelA = (nodes.get(a) && nodes.get(a).el.textContent) || a;
-    const labelB = (nodes.get(b) && nodes.get(b).el.textContent) || b;
+  function openReasonDialog(a, b, container, labels) {
+    const lab = id => (labels && labels[id]) || (nodes.get(id) && nodes.get(id).el.textContent) || id;
+    const labelA = lab(a);
+    const labelB = lab(b);
     const overlay = LP.el('div', { class: 'ev-overlay' });
     const panel = LP.el('div', { class: 'ev-dialog' });
     panel.appendChild(LP.el('div', { class: 'mono ev-dialog-head', text: 'ESTABLISH RELATION · 建立关系' }));
@@ -332,7 +366,7 @@ LP.evidence = (function () {
     /* 已经建立过 */
     if (rule && st.evidenceLinks.includes(rule.key)) {
       LP.ui.toast('这条关系已经建立过了。', 'gold');
-      selFirst = null; render(container); return;
+      resetSel(); render(container); return;
     }
 
     /* 连对：节点对存在规则，且所选类型在可接受集合内 */
@@ -341,8 +375,8 @@ LP.evidence = (function () {
       LP.audio.complete();
       LP.anim.flash();
       LP.ui.toast('推理成立：' + rule.why, 'gold');
-      queueFx(a, 'mo-glow'); queueFx(b, 'mo-glow');   // 两节点金环 + 连线墨画
-      selFirst = null;
+      fx(a, 'mo-glow'); fx(b, 'mo-glow');   // 两节点金环 + 连线墨画
+      resetSel();
       render(container);
       LP.inv.checkDeductions();
       return;
@@ -351,23 +385,23 @@ LP.evidence = (function () {
     /* 两端之间存在正确关系，但类型选错了 */
     if (rule) {
       LP.audio.error();
-      queueFx(a, 'mo-warn'); queueFx(b, 'mo-warn');
+      fx(a, 'mo-warn'); fx(b, 'mo-warn');
       LP.ui.toast(
         `这两者之间确实有关系，但你想的不是「${typeLabel(type)}」——再从它们各自说了什么想一想。`,
         'red'
       );
       recordTrial(a, b, type, rule.key);
-      selFirst = null; render(container);
+      resetSel(); render(container);
       return;
     }
 
     /* 完全不成立 */
     LP.audio.error();
-    queueFx(a, 'mo-warn'); queueFx(b, 'mo-warn');
+    fx(a, 'mo-warn'); fx(b, 'mo-warn');
     LP.anim.shake(LP.$('.ev-board', container));
     LP.ui.toast('这两条记录之间，暂时找不到能彼此印证的关联。', 'red');
     recordTrial(a, b, type, null);
-    selFirst = null; render(container);
+    resetSel(); render(container);
   }
 
   function recordTrial(a, b, type, matched) {
@@ -454,6 +488,8 @@ LP.evidence = (function () {
   }
 
   function focusNode(id) {
+    /* 新壳：节点在 ui2 模块内，转发过去 */
+    if (LP.ui2 && LP.ui2.enabled('evidence') && LP.ui2.evidence) return LP.ui2.evidence.focusNode(id);
     const n = nodes.get(id);
     if (!n) return;
     n.el.animate([

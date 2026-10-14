@@ -63,7 +63,33 @@ const CASES = [
   /* ---- 照片查看器 ---- */
   { name: 'photo_group_solo', sel: '.viewer-frame', openPhoto: 'photo_09', cfg: { act: 2, mode: 'solo' } },
   { name: 'photo_group_partial_ids', sel: '.viewer-frame', openPhoto: 'photo_09', cfg: { act: 2, mode: 'solo', discoveredPeople: ['person_zhou'] } },
-  { name: 'photo_11_B', sel: '.viewer-frame', openPhoto: 'photo_11', cfg: { act: 4, mode: 'B' } }
+  { name: 'photo_11_B', sel: '.viewer-frame', openPhoto: 'photo_11', cfg: { act: 4, mode: 'B' } },
+
+  /* ---- 证据板 ---- */
+  {
+    name: 'evidence_empty', sel: '#wb-preview', setTab: 'evidence',
+    cfg: { act: 1, mode: 'solo' }
+  },
+  {
+    name: 'evidence_act3', sel: '#wb-preview', setTab: 'evidence',
+    cfg: {
+      act: 3, mode: 'solo',
+      discoveredPeople: ['person_linyuan', 'person_zhou', 'person_chen', 'person_li'],
+      discoveredEvidence: ['clue_317', 'clue_zhou_name', 'clue_717'],
+      discoveredDocuments: ['diary_01', 'photo_09', 'letter_02'],
+      evidenceLinks: ['id_zhou']
+    }
+  },
+  {
+    name: 'evidence_linked3', sel: '#wb-preview', setTab: 'evidence',
+    cfg: {
+      act: 3, mode: 'solo',
+      discoveredPeople: ['person_linyuan', 'person_zhou', 'person_chen', 'person_li'],
+      discoveredEvidence: ['clue_317', 'clue_zhou_name', 'clue_717'],
+      discoveredDocuments: ['diary_01', 'photo_09', 'letter_02'],
+      evidenceLinks: ['id_zhou', 'id_chen', 'id_li']
+    }
+  }
 ];
 
 async function clearNarrator(page) {
@@ -104,10 +130,15 @@ async function clearNarrator(page) {
       await page.waitForTimeout(700);              // 等照片就位
       await clearNarrator(page);
     }
+    if (c.setTab) {
+      await page.evaluate(t => LP.archive.setTab(t), c.setTab);
+      await page.waitForTimeout(700);
+      await clearNarrator(page);
+    }
     if (c.fold) {
       await page.locator('#quest-card button:has-text("收起")').click().catch(() => {});
     }
-    await page.waitForTimeout((c.openDoc || c.openPhoto) ? 500 : 760);   // 等动画结束，取稳定态
+    await page.waitForTimeout((c.openDoc || c.openPhoto || c.setTab) ? 500 : 760);   // 等动画结束，取稳定态
     await page.locator(c.sel || '#quest-card').screenshot({ path: path.join(outDir, c.name + '.png') });
   }
 
