@@ -123,3 +123,13 @@
   .paper-doc{padding:1.3rem 1.1rem}
   .paper-doc p{font-size:.9rem}
 }
+
+/* ============ 查看器交互升级（2026-10） ============ */
+/* 纸片厚度的翻面：微抬升 + 阴影随翻转变换 */
+.photo-card{transition:transform .8s cubic-bezier(.3,.7,.3,1),box-shadow .8s}
+.photo-card.flipped{box-shadow:0 14px 40px rgba(0,0,0,.4)}
+/* 工具按钮按下反馈 */
+.viewer-tools .vt{transition:.15s}
+.viewer-tools .vt:active{transform:scale(.94)}
+/* 文档段落进入已有 fragIn（documentSystem 内联）；此处补查看器整体景深过渡 */
+.viewer-frame{transition:opacity .3s}

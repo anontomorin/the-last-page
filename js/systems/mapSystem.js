@@ -4,12 +4,46 @@
 window.LP = window.LP || {};
 LP.map = (function () {
 
-  /* ---------------- SVG 地图 ---------------- */
+  /* ---------------- SVG 手绘档案地图 ---------------- */
   const LINKS = [
     ['location_archive', 'location_clocktower'],
     ['location_clocktower', 'location_oldstreet'],
     ['location_oldstreet', 'location_ferry']
   ];
+
+  /* 各地点的手绘地标符号（SVG path，居中于节点上方） */
+  const LANDMARKS = {
+    location_archive:
+      'M-3.4 -1.6 L3.4 -1.6 L3.4 2.8 L-3.4 2.8 Z M-1.5 -1.6 L-1.5 -3.4 L1.5 -3.4 L1.5 -1.6 M-3.9 -3.4 L3.9 -3.4',
+    location_clocktower:
+      'M-3.2 2.4 L-3.2 -2.6 L-1.8 -2.6 L-1.8 -5.4 L1.8 -5.4 L1.8 -2.6 L3.2 -2.6 L3.2 2.4 ' +
+      'M0 -5.4 L0 -7.6 M-1.1 -1.4 A1.1 1.1 0 1 1 1.1 -1.4 A1.1 1.1 0 1 1 -1.1 -1.4 M0 -1.4 L0 -2.2 M0 -1.4 L.7 -.9',
+    location_oldstreet:
+      'M-4.4 .8 L-4.4 -2.6 L-2.6 -4.4 L-.8 -2.6 L-.8 .8 M.8 .8 L.8 -2.2 L2.4 -3.8 L4.2 -2.2 L4.2 .8 ' +
+      'M-5 -2.6 L-2.6 -5 L-.4 -2.6 M-3.2 -4 L.4 -4',
+    location_ferry:
+      'M-4 -1 L4 -1 L2.6 1.4 L-2.6 1.4 Z M0 -1 L0 -3.8 M-3.2 -4.6 C-1.6 -3.6 1.6 -3.6 3.2 -4.6 ' +
+      'M-4.4 3.2 C-2.2 2.4 2.2 2.4 4.4 3.2 M-3 4.6 C-1.4 4 1.4 4 3 4.6'
+  };
+
+  /* 街区块面 / 巷道 / 树丛 / 桥（纯装饰，与地点坐标协调） */
+  const MAP_DECOR = {
+    blocks: [
+      'M10 16 L24 14 L25 24 L11 26 Z',
+      'M38 12 L52 10 L53 20 L40 22 Z',
+      'M12 44 L26 42 L27 52 L13 54 Z',
+      'M60 44 L74 42 L75 52 L61 54 Z',
+      'M34 26 L44 25 L45 33 L35 34 Z'
+    ],
+    streets: [
+      'M6 32 Q24 30 40 33', 'M8 54 Q30 52 52 55', 'M56 28 Q70 26 84 28',
+      'M20 8 Q19 30 22 58', 'M58 8 Q60 34 62 60', 'M84 34 Q82 56 76 72'
+    ],
+    trees: [[15, 61], [18.5, 59], [63, 18], [66.5, 20], [88, 58], [85, 61.5], [44, 76]],
+    bridge: 'M58 79 Q64 75.5 70 80'
+  };
+
+  let mapSel = null;   // 记住玩家在地图上的选中地点（返回时恢复）
 
   /* ---------------- 现场走访的归属 ----------------
      双人模式下，现场只属于记录者（B）：ta 扛着相机跑现场。
@@ -21,6 +55,64 @@ LP.map = (function () {
     LP.audio.error();
     LP.ui.toast('现场由你的记录者走访 —— 让 ta 把看到的东西念给你听。', 'gold');
     setTimeout(() => { if (LP.duo) LP.duo.openPanel(); }, 260);
+  }
+
+  /* ---------------- 地点预览卡 ---------------- */
+  function mapPreviewEl() { return LP.$('#map-preview'); }
+
+  function showPreview(loc) {
+    const box = mapPreviewEl();
+    if (!box || !loc) return;
+    const s = LP.state.get();
+    const unlocked = LP.archive.locationUnlocked(loc);
+    const visited = LP.state.has('discoveredLocations', loc.id);
+    box.classList.remove('hidden');
+    box.innerHTML = '';
+
+    const glyph = LP.el('div', { class: 'mp-glyph' });
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const gsvg = document.createElementNS(svgNS, 'svg');
+    gsvg.setAttribute('viewBox', '-8 -9 16 15');
+    const gp = document.createElementNS(svgNS, 'path');
+    gp.setAttribute('d', LANDMARKS[loc.id] || 'M-3 0 L3 0');
+    gsvg.appendChild(gp);
+    glyph.appendChild(gsvg);
+
+    const info = LP.el('div', {}, [
+      LP.el('h4', { text: unlocked ? loc.name : '？？？' }),
+      LP.el('div', { class: 'mp-meta mono', text: unlocked ? ('ARCHIVE · ' + loc.year) : 'ARCHIVE · 未开放' }),
+      LP.el('p', {
+        class: 'mp-desc',
+        text: !unlocked ? '档案里还没有开放这处地点的记录。'
+          : loc.scene && loc.objects ? loc.desc
+          : loc.desc
+      })
+    ]);
+    if (!unlocked) {
+      info.appendChild(LP.el('span', { class: 'mp-status mono', text: '尚未开放' }));
+    } else if (visited) {
+      info.appendChild(LP.el('span', { class: 'mp-status done mono', text: '✓ 已勘察' }));
+    } else {
+      const st = LP.el('span', { class: 'mp-status open mono', text: '待勘察' });
+      info.appendChild(st);
+      if (loc.scene) {
+        if (canEnterScene()) {
+          info.appendChild(LP.el('span', {
+            class: 'mp-status open mono',
+            text: `${loc.objects.length} 处可调查 · 点击地图标记进入`,
+            style: 'margin-left:.4rem'
+          }));
+        } else {
+          info.appendChild(LP.el('span', {
+            class: 'mp-status mono',
+            text: '现场由记录者走访',
+            style: 'margin-left:.4rem'
+          }));
+        }
+      }
+    }
+    box.appendChild(glyph);
+    box.appendChild(info);
   }
 
   function renderMap(container) {
@@ -39,75 +131,248 @@ LP.map = (function () {
         LP.el('button', { class: 'btn-ghost small', text: '打开通话', onclick: () => LP.duo.openPanel() })
       ]));
     }
+
     const svgNS = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(svgNS, 'svg');
     svg.setAttribute('viewBox', '0 0 100 100');
     svg.classList.add('map-svg');
 
-    // 底纹：河流
-    const river = document.createElementNS(svgNS, 'path');
-    river.setAttribute('d', 'M0,78 Q30,72 52,80 T100,86');
-    river.setAttribute('stroke', 'rgba(142,27,27,.18)');
-    river.setAttribute('stroke-width', '5');
-    river.setAttribute('fill', 'none');
-    svg.appendChild(river);
+    /* 制图边框与角线 */
+    const frame = document.createElementNS(svgNS, 'rect');
+    frame.setAttribute('x', 2); frame.setAttribute('y', 2);
+    frame.setAttribute('width', 96); frame.setAttribute('height', 96);
+    frame.setAttribute('rx', 1);
+    frame.classList.add('map-frame');
+    svg.appendChild(frame);
+    [[2, 2, 1, 1], [98, 2, -1, 1], [2, 98, 1, -1], [98, 98, -1, -1]].forEach(([x, y, dx, dy]) => {
+      const t1 = document.createElementNS(svgNS, 'line');
+      t1.setAttribute('x1', x); t1.setAttribute('y1', y);
+      t1.setAttribute('x2', x + 3 * dx); t1.setAttribute('y2', y);
+      const t2 = document.createElementNS(svgNS, 'line');
+      t2.setAttribute('x1', x); t2.setAttribute('y1', y);
+      t2.setAttribute('x2', x); t2.setAttribute('y2', y + 3 * dy);
+      t1.classList.add('map-tick'); t2.classList.add('map-tick');
+      svg.appendChild(t1); svg.appendChild(t2);
+    });
 
-    // 连线（两端都解锁才画）
-    LINKS.forEach(([a, b]) => {
+    /* 方向罗盘（装饰，非真实测量） */
+    const compass = document.createElementNS(svgNS, 'g');
+    compass.setAttribute('transform', 'translate(90,11)');
+    compass.classList.add('map-compass');
+    const cc = document.createElementNS(svgNS, 'circle');
+    cc.setAttribute('r', 4.6); compass.appendChild(cc);
+    const needle = document.createElementNS(svgNS, 'path');
+    needle.setAttribute('d', 'M0 -3.6 L1.1 1 L0 .4 L-1.1 1 Z');
+    compass.appendChild(needle);
+    const cn = document.createElementNS(svgNS, 'text');
+    cn.setAttribute('y', -5.8); cn.textContent = '北';
+    compass.appendChild(cn);
+    svg.appendChild(compass);
+
+    /* 比例尺装饰 */
+    const scale = document.createElementNS(svgNS, 'g');
+    scale.setAttribute('transform', 'translate(7,92.5)');
+    scale.classList.add('map-scale');
+    const sb = document.createElementNS(svgNS, 'line');
+    sb.setAttribute('x1', 0); sb.setAttribute('x2', 14);
+    scale.appendChild(sb);
+    [0, 7, 14].forEach(x => {
+      const tk = document.createElementNS(svgNS, 'line');
+      tk.setAttribute('x1', x); tk.setAttribute('x2', x);
+      tk.setAttribute('y1', -1); tk.setAttribute('y2', 1);
+      tk.classList.add('tick');
+      scale.appendChild(tk);
+    });
+    const st = document.createElementNS(svgNS, 'text');
+    st.setAttribute('x', 16); st.setAttribute('y', .8);
+    st.textContent = '档案测绘 · 示意';
+    scale.appendChild(st);
+    svg.appendChild(scale);
+
+    /* 河流：三层手绘笔触 + 缓慢高光 */
+    const RIVER_D = 'M0,78 Q30,72 52,80 T100,86';
+    [['base', 0], ['mid', .8], ['hl', 1.6]].forEach(([cls, delay]) => {
+      const river = document.createElementNS(svgNS, 'path');
+      river.setAttribute('d', RIVER_D);
+      river.classList.add('map-river', cls);
+      river.style.animationDelay = delay + 's';
+      svg.appendChild(river);
+    });
+
+    /* 街区块面 / 巷道 / 树 / 桥 */
+    MAP_DECOR.blocks.forEach(d => {
+      const b = document.createElementNS(svgNS, 'path');
+      b.setAttribute('d', d);
+      b.classList.add('map-block');
+      svg.appendChild(b);
+    });
+    MAP_DECOR.streets.forEach(d => {
+      const st = document.createElementNS(svgNS, 'path');
+      st.setAttribute('d', d);
+      st.classList.add('map-street');
+      svg.appendChild(st);
+    });
+    MAP_DECOR.trees.forEach(([x, y]) => {
+      const t = document.createElementNS(svgNS, 'circle');
+      t.setAttribute('cx', x); t.setAttribute('cy', y);
+      t.setAttribute('r', 1.1);
+      t.classList.add('map-tree');
+      svg.appendChild(t);
+    });
+    const bridge = document.createElementNS(svgNS, 'path');
+    bridge.setAttribute('d', MAP_DECOR.bridge);
+    bridge.classList.add('map-bridge');
+    svg.appendChild(bridge);
+
+    /* 路线：墨水描画（pathLength 归一，长短路线节奏一致） */
+    LINKS.forEach(([a, b], i) => {
       const la = LP.data.locations[a], lb = LP.data.locations[b];
       if (!la || !lb) return;
       if (!LP.archive.locationUnlocked(la) || !LP.archive.locationUnlocked(lb)) return;
+      const d = `M${la.x},${la.y} Q${(la.x + lb.x) / 2},${(la.y + lb.y) / 2 - 6} ${lb.x},${lb.y}`;
       const line = document.createElementNS(svgNS, 'path');
-      line.setAttribute('d', `M${la.x},${la.y} Q${(la.x + lb.x) / 2},${(la.y + lb.y) / 2 - 6} ${lb.x},${lb.y}`);
+      line.setAttribute('d', d);
+      line.setAttribute('pathLength', '1');
       line.classList.add('map-path');
+      line.style.animationDelay = (0.5 + i * 0.35) + 's';
       svg.appendChild(line);
+      /* 两端都已走访：金色行进光点（流动一次后停止） */
+      if (LP.state.has('discoveredLocations', a) && LP.state.has('discoveredLocations', b)) {
+        const flow = document.createElementNS(svgNS, 'path');
+        flow.setAttribute('d', d);
+        flow.setAttribute('pathLength', '1');
+        flow.classList.add('map-flow');
+        flow.style.animationDelay = (0.9 + i * 0.35) + 's';
+        svg.appendChild(flow);
+      }
     });
 
-    // 节点
+    /* 节点：错峰入场 + 状态（锁定 / 待勘察 / 已勘察 / 新解锁 / 选中） */
+    let nodeIdx = 0;
     Object.values(LP.data.locations).forEach(loc => {
       const unlocked = LP.archive.locationUnlocked(loc);
+      const isNew = unlocked && !LP.state.has('discoveredLocations', loc.id) && loc.id !== 'location_archive';
+      const visited = unlocked && LP.state.has('discoveredLocations', loc.id);
       const g = document.createElementNS(svgNS, 'g');
       g.classList.add('map-node');
       if (!unlocked) g.classList.add('locked');
-      else if (!LP.state.has('discoveredLocations', loc.id) && loc.id !== 'location_archive') g.classList.add('new');
+      if (isNew) g.classList.add('new');
+      if (visited) g.classList.add('visited');
+      if (mapSel === loc.id) g.classList.add('sel');
+      g.style.animationDelay = (0.3 + nodeIdx * 0.13) + 's';
+      nodeIdx++;
+      g.setAttribute('tabindex', unlocked ? '0' : '-1');
+      g.setAttribute('role', 'button');
+      g.setAttribute('aria-label', unlocked ? loc.name : '未开放的地点');
+
+      /* 触控热区（比可见节点大） */
+      const hit = document.createElementNS(svgNS, 'circle');
+      hit.setAttribute('cx', loc.x); hit.setAttribute('cy', loc.y);
+      hit.setAttribute('r', 7);
+      hit.classList.add('hit');
+      g.appendChild(hit);
+
+      /* 新解锁：落印章扩散环（一次性） */
+      if (isNew) {
+        const ring = document.createElementNS(svgNS, 'circle');
+        ring.setAttribute('cx', loc.x); ring.setAttribute('cy', loc.y);
+        ring.setAttribute('r', 4);
+        ring.classList.add('stamp-ring');
+        g.appendChild(ring);
+      }
+
+      /* 地标符号 */
+      const lm = document.createElementNS(svgNS, 'g');
+      lm.setAttribute('transform', `translate(${loc.x},${loc.y - 7.5})`);
+      lm.classList.add('map-landmark');
+      const lp = document.createElementNS(svgNS, 'path');
+      lp.setAttribute('d', LANDMARKS[loc.id] || 'M-3 0 L3 0');
+      lm.appendChild(lp);
+      g.appendChild(lm);
 
       const c = document.createElementNS(svgNS, 'circle');
       c.setAttribute('cx', loc.x); c.setAttribute('cy', loc.y);
-      c.setAttribute('r', loc.modern ? 3.4 : 2.6);
+      c.setAttribute('r', loc.modern ? 2.2 : 1.9);
       c.classList.add('circle');
       g.appendChild(c);
 
+      /* 选中环 */
+      const sr = document.createElementNS(svgNS, 'circle');
+      sr.setAttribute('cx', loc.x); sr.setAttribute('cy', loc.y);
+      sr.setAttribute('r', 3.6);
+      sr.classList.add('sel-ring');
+      g.appendChild(sr);
+
+      /* 已勘察记点 */
+      if (visited) {
+        const vm = document.createElementNS(svgNS, 'circle');
+        vm.setAttribute('cx', loc.x + 3); vm.setAttribute('cy', loc.y - 3);
+        vm.setAttribute('r', .9);
+        vm.classList.add('visited-mark');
+        g.appendChild(vm);
+      }
+
       const t = document.createElementNS(svgNS, 'text');
-      t.setAttribute('x', loc.x); t.setAttribute('y', loc.y - 5);
+      t.setAttribute('x', loc.x); t.setAttribute('y', loc.y + 5.6);
       t.textContent = unlocked ? loc.name : '？？？';
       g.appendChild(t);
 
       const yr = document.createElementNS(svgNS, 'text');
-      yr.setAttribute('x', loc.x); yr.setAttribute('y', loc.y + 6.5);
+      yr.setAttribute('x', loc.x); yr.setAttribute('y', loc.y + 9.2);
       yr.classList.add('yr');
       yr.textContent = unlocked ? loc.year : '——';
       g.appendChild(yr);
 
-      if (unlocked) {
-        g.addEventListener('click', () => {
-          LP.audio.click();
-          if (loc.scene) {
-            if (!canEnterScene()) return tellNoScene(loc.name);
-            LP.state.addTo('discoveredLocations', loc.id);
-            openScene(loc.id);
-          } else {
-            LP.ui.toast(loc.desc);
-          }
-        });
-      }
+      /* 预览（悬停/聚焦） + 选中 + 进入（保持原有单击进入习惯与测试兼容） */
+      g.addEventListener('mouseenter', () => showPreview(loc));
+      g.addEventListener('focus', () => showPreview(loc));
+      g.addEventListener('click', () => {
+        LP.audio.click();
+        mapSel = loc.id;
+        LP.$$('.map-node', svg).forEach(n => n.classList.toggle('sel', n === g));
+        showPreview(loc);
+        if (!unlocked) { LP.ui.toast('这处地点还没有在档案中开放。'); return; }
+        if (loc.scene) {
+          if (!canEnterScene()) return tellNoScene(loc.name);
+          LP.state.addTo('discoveredLocations', loc.id);
+          openScene(loc.id);
+        } else {
+          LP.ui.toast(loc.desc);
+        }
+      });
+      g.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); g.dispatchEvent(new Event('click')); }
+      });
       svg.appendChild(g);
     });
 
     wrap.appendChild(svg);
-    const legend = canEnterScene()
-      ? ['◦ 红圈标记：与档案相关的地点', '◦ 虚线圈：尚未发现', '◦ 点击已解锁地点进入现场']
-      : ['◦ 红圈标记：与档案相关的地点', '◦ 虚线圈：尚未发现', '◦ 现场由记录者走访 —— 你只能听 ta 描述'];
-    wrap.appendChild(LP.el('div', { class: 'map-legend' }, legend.map(t => LP.el('span', { text: t }))));
+
+    /* 地点预览卡（默认显示当前选中或档案馆） */
+    const preview = LP.el('div', { class: 'map-preview hidden', id: 'map-preview', 'aria-live': 'polite' });
+    wrap.appendChild(preview);
+    const defLoc = LP.data.locations[mapSel] || LP.data.locations.location_archive;
+    showPreview(defLoc);
+    if (mapSel) {
+      const g = svg.querySelector('.map-node.sel');
+      if (g) g.classList.add('sel');
+    }
+
+    /* 图例（可折叠） */
+    const lg = LP.el('details', { class: 'map-legend' });
+    lg.appendChild(LP.el('summary', { text: '图 例' }));
+    const row = (icoHtml, txt) => LP.el('div', { class: 'lg-row' }, [
+      LP.el('span', { class: 'lg-ico', html: icoHtml }),
+      LP.el('span', { text: txt })
+    ]);
+    const dot = color => `<svg viewBox="0 0 20 10" width="20" height="10"><circle cx="10" cy="5" r="3" fill="#FDFBF4" stroke="${color}" stroke-width="1.4"/></svg>`;
+    lg.appendChild(row(dot('#B85E52'), '可调查地点（点击进入现场）'));
+    lg.appendChild(row('<svg viewBox="0 0 20 10" width="20" height="10"><circle cx="10" cy="5" r="3" fill="#F2EEE1" stroke="#A79E8A" stroke-width="1.2" stroke-dasharray="1.6 1.2"/></svg>', '尚未开放的地点'));
+    lg.appendChild(row('<svg viewBox="0 0 20 10" width="20" height="10"><circle cx="10" cy="5" r="3" fill="none" stroke="#A97F26" stroke-width="1.2"/><circle cx="14" cy="2.6" r="1.4" fill="#A97F26"/></svg>', '已勘察（金点记档）'));
+    lg.appendChild(row('<svg viewBox="0 0 20 10" width="20" height="10"><path d="M2 7 Q10 2 18 6" fill="none" stroke="#B85E52" stroke-width="1.2"/></svg>', '线索路线（墨水描画）'));
+    lg.appendChild(row('<svg viewBox="0 0 20 10" width="20" height="10"><path d="M2 6 Q10 3 18 5" fill="none" stroke="#A97F26" stroke-width="1.6" stroke-dasharray="1.5 2.5"/></svg>', '已走访路段（金色流光）'));
+    wrap.appendChild(lg);
+
     /* 阅览室场景图：档案馆所在的旧阅览室 */
     wrap.appendChild(LP.el('figure', { class: 'map-room' }, [
       LP.el('img', { src: 'assets/images/scene_reading_room.webp', alt: '旧阅览室的木桌、卷宗与窗光', loading: 'lazy' }),
@@ -142,6 +407,14 @@ LP.map = (function () {
     return svg;
   }
 
+  /* 物件的持久「已勘察」状态映射（来自真实 completedPuzzles） */
+  const OBJ_DONE_PUZZLE = {
+    obj_bell: 'bell7',
+    obj_board: 'board_row7',
+    obj_door: 'clocktower_door',
+    obj_bench: 'bench_paper'
+  };
+
   function openScene(locId) {
     const loc = LP.data.locations[locId];
     if (!loc || !loc.scene) return;
@@ -163,18 +436,65 @@ LP.map = (function () {
         alt: loc.name + '的旧照片'
       }));
     }
+    /* 环境动态层：低密度的漂移光斑与尘粒 */
+    stage.appendChild(LP.el('div', { class: 'scene-dust', 'aria-hidden': 'true' }));
 
+    const svgNS = 'http://www.w3.org/2000/svg';
     (loc.objects || []).forEach(obj => {
-      const el = LP.el('div', { class: 'scene-obj', 'data-pos': obj.pos, 'data-obj': obj.id }, [
+      const el = LP.el('div', {
+        class: 'scene-obj', 'data-pos': obj.pos, 'data-obj': obj.id,
+        tabindex: '0', role: 'button', 'aria-label': '检查：' + obj.name
+      }, [
         objIcon(obj.id),
-        LP.el('div', { class: 'obj-label', text: obj.name })
+        LP.el('div', { class: 'obj-label', text: obj.name }),
+        LP.el('span', { class: 'obj-pulse', 'aria-hidden': 'true' }),
+        /* 已勘察记号（真实状态，刷新后仍正确） */
+        (() => {
+          const chk = document.createElementNS(svgNS, 'svg');
+          chk.setAttribute('viewBox', '0 0 16 16');
+          chk.classList.add('obj-check');
+          const c = document.createElementNS(svgNS, 'circle');
+          c.setAttribute('cx', 8); c.setAttribute('cy', 8); c.setAttribute('r', 7);
+          const p = document.createElementNS(svgNS, 'path');
+          p.setAttribute('d', 'M4.5 8.2 L7 10.6 L11.5 5.6');
+          chk.appendChild(c); chk.appendChild(p);
+          return chk;
+        })()
       ]);
-      el.addEventListener('click', () => handleObject(loc.scene, obj.id, el, msgBox, stage));
+      /* 已勘察物件恢复记号（依据真实 completedPuzzles） */
+      const donePuzzle = OBJ_DONE_PUZZLE[obj.id];
+      if (donePuzzle && LP.state.has('completedPuzzles', donePuzzle)) el.classList.add('done');
+      el.addEventListener('click', e => {
+        /* 检查反馈：柔和扩散环 + 专属动效，随后走原有故事逻辑 */
+        el.classList.remove('pulsing'); void el.offsetWidth; el.classList.add('pulsing');
+        if (obj.id === 'obj_river') spawnRipples(stage, e);
+        if (obj.id === 'obj_sign') {
+          el.classList.remove('swing'); void el.offsetWidth; el.classList.add('swing');
+        }
+        handleObject(loc.scene, obj.id, el, msgBox, stage);
+      });
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
+      });
       stage.appendChild(el);
     });
 
     body.appendChild(stage);
     body.appendChild(msgBox);
+  }
+
+  /* 渡口：点击水面位置扩散同心波纹（自动消散） */
+  function spawnRipples(stage, e) {
+    const r = stage.getBoundingClientRect();
+    const x = (e.clientX || r.left + r.width / 2) - r.left;
+    const y = (e.clientY || r.top + r.height / 2) - r.top;
+    ['', 'r2'].forEach(cls => {
+      const rip = LP.el('span', { class: 'river-ripple ' + cls, 'aria-hidden': 'true' });
+      rip.style.left = x + 'px';
+      rip.style.top = y + 'px';
+      stage.appendChild(rip);
+      setTimeout(() => rip.remove(), 1400);
+    });
   }
 
   function setMsg(box, text) {
@@ -251,6 +571,15 @@ LP.map = (function () {
     LP.anim.flash();
     clockEl.classList.remove('ringing'); void clockEl.offsetWidth; clockEl.classList.add('ringing');
 
+    /* 钟声波：两层环形扩散，随后自动消散 */
+    [0, 220].forEach(delay => {
+      setTimeout(() => {
+        const wave = LP.el('span', { class: 'bell-wave', 'aria-hidden': 'true' });
+        stage.appendChild(wave);
+        setTimeout(() => wave.remove(), 1100);
+      }, delay);
+    });
+
     // 双人 B 卷：不报"第几声"，只给钟声本身，让玩家口头数给搭档听
     if (s.mode === 'B') {
       setMsg(msgBox, n >= 7 ? C.after : '咚——');
@@ -261,6 +590,13 @@ LP.map = (function () {
     if (n >= 7) {
       LP.inv.completePuzzle('bell7');
       LP.inv.discoverClue('clue_717');
+      /* 第七声高潮：场景低幅震动 + 金门微光（铁索拉动的视觉暗示） */
+      stage.classList.remove('quake'); void stage.offsetWidth; stage.classList.add('quake');
+      const doorEl = LP.$('.scene-obj[data-obj="obj_door"]', stage);
+      if (doorEl) {
+        doorEl.classList.add('door-glow');
+        setTimeout(() => doorEl.classList.remove('door-glow'), 2600);
+      }
       // 钟面始终停在照片记录的 7:17；七声只触发连到门闩的铁索。
       if (s.mode === 'B') {
         setTimeout(() => setMsg(msgBox,

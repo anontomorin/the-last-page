@@ -181,3 +181,24 @@
 .person-card .pphoto img{width:100%;height:100%;object-fit:cover;filter:sepia(.15)}
 .person-card .pphoto-q{font-size:2.6rem;color:var(--line)}
 .person-card.unknown .pphoto{border-style:dashed}
+
+/* ============ 交互反馈升级（2026-10） ============ */
+/* 标签页：墨线描画式下划线 */
+.wb-tab{position:relative;transition:color .2s}
+.wb-tab::after{content:'';position:absolute;left:12%;right:12%;bottom:-1px;height:2px;
+  background:var(--red);transform:scaleX(0);transform-origin:left;transition:transform .3s ease}
+.wb-tab:hover::after{transform:scaleX(.45)}
+.wb-tab.active::after{transform:scaleX(1)}
+.wb-tab.active{animation:tabIn .3s ease}
+@keyframes tabIn{from{opacity:.55}to{opacity:1}}
+/* 中央内容区轻柔进入 */
+.wb-main .doc-card,.wb-main .person-grid{animation:mainIn .38s ease}
+@keyframes mainIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* 资料项：过渡与按下手感 */
+.doc-item{transition:background .18s,border-color .18s,transform .12s;cursor:pointer}
+.doc-item:active{transform:scale(.985)}
+.doc-item .new-flag{animation:newFlagPulse 1.6s ease 3}
+@keyframes newFlagPulse{0%,100%{box-shadow:0 0 0 0 rgba(184,94,82,.5)}50%{box-shadow:0 0 0 5px rgba(184,94,82,0)}}
+/* 检索框 focus */
+.wb-search input{transition:border-color .2s,box-shadow .2s}
+.wb-search input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(184,94,82,.14)}

@@ -94,3 +94,12 @@
   .ev-dialog{padding:1rem}
   .ev-log-row{flex-direction:column;gap:.15rem}
 }
+
+/* ============ 证据板交互升级（2026-10） ============ */
+.ev-node{transition:border-color .2s,box-shadow .2s,transform .15s}
+.ev-node:active{cursor:grabbing;transform:translate(-50%,-50%) scale(1.03)}
+.ev-node.picked{border-color:var(--gold);box-shadow:0 0 0 3px rgba(185,138,47,.3)}
+.ev-type{transition:.15s}
+.ev-type:active{transform:scale(.97)}
+/* 关系对话框按钮按下手感 */
+.ev-dialog-acts .btn-primary:active,.ev-dialog-acts .btn-ghost:active{transform:scale(.97)}

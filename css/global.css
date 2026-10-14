@@ -175,3 +175,12 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{
   #print-page,#print-page *{visibility:visible}
   #print-page{position:fixed;inset:0;background:#fff}
 }
+
+/* ============ 交互反馈升级（2026-10） ============ */
+/* 按钮按下手感 */
+.btn-primary,.btn-ghost{transition:transform .15s,box-shadow .2s,background .2s,border-color .2s,color .2s}
+.btn-primary:active,.btn-ghost:active{transform:translateY(1px) scale(.985)}
+/* Toast 语义化进入/退出 */
+.toast{animation:toastIn .35s ease}
+.toast.red{border-left:4px solid #E9CD91}
+.toast.gold{border-left:4px solid var(--red)}
