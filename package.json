@@ -7,9 +7,17 @@
     "serve": "node _playtest/serve.js",
     "test": "node _playtest/harness.js",
     "test:dictation": "node _playtest/dictation.test.js",
-    "test:playthrough": "node _playtest/playthrough.js"
+    "test:playthrough": "node _playtest/playthrough.js",
+    "demo": "node _playtest/demo_solo.js",
+    "demo:fast": "node _playtest/demo_solo.js fast"
   },
-  "keywords": ["arg", "puzzle", "narrative", "game", "pure-frontend"],
+  "keywords": [
+    "arg",
+    "puzzle",
+    "narrative",
+    "game",
+    "pure-frontend"
+  ],
   "license": "MIT",
   "devDependencies": {
     "playwright-core": "^1.56.0"

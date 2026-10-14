@@ -10,12 +10,14 @@
    · 所有关键帧只使用 transform / opacity / stroke 类可控属性。
    ============================================================ */
 :root{
+  --t-micro:180ms;
   --t-fast:160ms;
   --t-base:320ms;
   --t-slow:600ms;
-  --t-reveal:1000ms;
+  --t-reveal:900ms;
+  --t-narr:1200ms;
   --ease-out:cubic-bezier(.2,.9,.3,1);
-  --ease-soft:ease;
+  --ease-soft:cubic-bezier(.22,.61,.36,1);
 }
 
 /* ---------- 通用关键帧（mo 前缀） ---------- */
@@ -112,3 +114,88 @@
 .person-grid .person-card:nth-child(2){animation-delay:90ms}
 .person-grid .person-card:nth-child(3){animation-delay:180ms}
 .person-grid .person-card:nth-child(4){animation-delay:270ms}
+
+/* ============================================================
+   第三轮：地图 / 实地探索 / 线索入档 专用关键帧（2026-10-14）
+   仅使用 transform / opacity / stroke，尽量不触发布局重排
+   ============================================================ */
+
+/* 点击扩散环（热点/节点按下） */
+@keyframes moRing{
+  0%{opacity:.55;transform:scale(.55)}
+  100%{opacity:0;transform:scale(1.9)}
+}
+.mo-ring{animation:moRing 360ms var(--ease-out) forwards}
+
+/* 墨线描画（SVG 路线 / 证据连线）：由 JS 设 pathLength/dashoffset */
+@keyframes moInkDraw{ from{stroke-dashoffset:1} to{stroke-dashoffset:0} }
+
+/* 一次性落印章 */
+.mo-stamp{animation:moStamp var(--t-reveal) var(--ease-out) both}
+
+/* 地图进入现场：节点聚焦放大后淡出（过场遮罩用） */
+@keyframes moFocusZoom{
+  0%{opacity:0;transform:scale(1.06)}
+  100%{opacity:1;transform:scale(1)}
+}
+.mo-focus-zoom{animation:moFocusZoom 420ms var(--ease-out) both}
+
+/* 折痕处的斜向侧光扫过一次 */
+@keyframes moSweep{
+  0%{opacity:0;transform:translateX(-16%)}
+  35%{opacity:.7}
+  100%{opacity:0;transform:translateX(16%)}
+}
+.mo-sweep{animation:moSweep 700ms var(--ease-out) both}
+
+/* 公告栏/纸页目标行的显影（水渍退去 + 文字浮现） */
+@keyframes moRevealLine{
+  0%{opacity:.25;filter:blur(1.4px)}
+  60%{opacity:.85;filter:blur(.2px)}
+  100%{opacity:1;filter:none}
+}
+.mo-reveal-line{animation:moRevealLine 720ms var(--ease-out) both}
+
+/* 环境尘粒缓慢漂移（极低对比，可见时才运行） */
+@keyframes moDust{
+  0%{transform:translate3d(0,0,0)}
+  50%{transform:translate3d(-1.2%,-1.6%,0)}
+  100%{transform:translate3d(0,0,0)}
+}
+.mo-dust{animation:moDust 22s ease-in-out infinite}
+
+/* 水面一次波纹扩散（渡口） */
+@keyframes moRipple{
+  0%{opacity:.5;transform:translate(-50%,-50%) scale(.2)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1)}
+}
+.mo-ripple{animation:moRipple 900ms var(--ease-out) forwards}
+
+/* 木牌/钟摆轻微摆动（互动时一次） */
+@keyframes moSwingOnce{
+  0%,100%{transform:rotate(0)}
+  25%{transform:rotate(-2.2deg)}
+  60%{transform:rotate(1.6deg)}
+}
+.mo-swing{animation:moSwingOnce 760ms var(--ease-out) both}
+
+/* 线索卡入档：纸条落位 */
+@keyframes moClipDrop{
+  0%{opacity:0;transform:translateY(-10px) rotate(-1.5deg)}
+  70%{opacity:1;transform:translateY(0) rotate(.4deg)}
+  100%{opacity:1;transform:none}
+}
+.mo-clip{animation:moClipDrop 480ms var(--ease-out) both}
+
+/* ============================================================
+   减少动态效果：在最后加载的 motion.css 中再兜底一次
+   （global.css 的 !important 规则已生效，这里强化环境循环与长演出）
+   ============================================================ */
+@media (prefers-reduced-motion:reduce){
+  .mo-dust,.mo-swing,.mo-ripple,.mo-ring,
+  #fx-noise{animation:none!important}
+  #fx-noise{animation:none!important;opacity:.012}
+  .mo-ring,.mo-sweep,.mo-reveal-line,.mo-clip{opacity:1;transform:none}
+  .mo-focus-zoom{animation:none!important}
+  .scene-stage.quake{animation:none!important}
+}

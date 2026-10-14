@@ -15,11 +15,11 @@ body.theme-bright{ --paper:#FDFCF8; --paper-deep:#F2EEE2; }
 .screen.active{opacity:1;visibility:visible;pointer-events:auto}
 
 /* ============ 覆盖特效层 ============ */
-#fx-scanlines{position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.05;
+#fx-scanlines{position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.014;
   background:repeating-linear-gradient(0deg,transparent 0 2px,#000 2px 3px)}
-#fx-noise{position:fixed;inset:-50%;pointer-events:none;z-index:61;opacity:.05;
+#fx-noise{position:fixed;inset:-50%;pointer-events:none;z-index:61;opacity:.018;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
-  animation:noiseShift 1.2s steps(3) infinite}
+  animation:noiseShift 3.2s steps(3) infinite}
 @keyframes noiseShift{0%{transform:translate(0,0)}33%{transform:translate(-2%,1%)}66%{transform:translate(1%,-2%)}100%{transform:translate(0,0)}}
 #fx-flash{position:fixed;inset:0;background:#FFF6E0;opacity:0;pointer-events:none;z-index:200}
 #fx-flash.on{animation:flashOnce .55s ease}
