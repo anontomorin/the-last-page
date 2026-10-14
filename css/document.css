@@ -53,9 +53,9 @@
 @keyframes scanMove{0%{top:4%}50%{top:94%}100%{top:4%}}
 .ocr-frag{color:#33302a}
 .ocr-frag.garbled{color:#9a8f78;font-family:var(--font-mono);letter-spacing:.15em;cursor:pointer;
-  background:repeating-linear-gradient(45deg,rgba(var(--rgb-red-deep),.08) 0 6px,transparent 6px 12px);
+  background:repeating-linear-gradient(45deg,rgba(var(--rgb-red),.08) 0 6px,transparent 6px 12px);
   border-bottom:1px dashed var(--red);padding:0 .2em}
-.ocr-frag.garbled:hover{background:rgba(var(--rgb-red-deep),.15)}
+.ocr-frag.garbled:hover{background:rgba(var(--rgb-red),.15)}
 .ocr-frag.garbled.partner{color:#b8ac92;border-bottom-style:dotted;background:none;cursor:default}
 
 /* ---- 照片 ---- */
@@ -85,7 +85,7 @@
 @keyframes creaseGlow{0%,100%{box-shadow:inset -2px -2px 8px rgba(var(--rgb-gold),0)}50%{box-shadow:inset -3px -3px 14px rgba(var(--rgb-gold),.7)}}
 /* 折痕放大后的数字 */
 .crease-reveal{font-family:var(--font-mono);font-size:2.6rem;color:var(--red);letter-spacing:.3em;
-  text-shadow:0 2px 8px rgba(var(--rgb-red-deep),.3);animation:cardIn .5s ease}
+  text-shadow:0 2px 8px rgba(var(--rgb-red),.3);animation:cardIn .5s ease}
 /* 合影姓名条（身份随剧情逐步揭示） */
 .photo-col{display:flex;flex-direction:column;align-items:center;gap:.9rem}
 .photo-caption{font-family:var(--font-doc);font-size:.92rem;color:#e8e0c8;letter-spacing:.12em;
@@ -112,7 +112,7 @@
 .ps-card{width:130px;border:1px solid var(--line);background:#FFFDF6;padding:.55rem .65rem;
   cursor:pointer;transition:.2s;box-shadow:0 3px 10px rgba(var(--rgb-ink),.1);user-select:none}
 .ps-card:hover{transform:translateY(-2px);border-color:var(--gold)}
-.ps-card.picked{border-color:var(--red);box-shadow:0 0 0 3px rgba(var(--rgb-red-deep),.25);transform:translateY(-3px)}
+.ps-card.picked{border-color:var(--red);box-shadow:0 0 0 3px rgba(var(--rgb-red),.25);transform:translateY(-3px)}
 .ps-card .ps-file{font-size:.62rem;color:var(--red);letter-spacing:.08em}
 .ps-card .ps-title{font-family:var(--font-doc);font-size:.82rem;font-weight:700;margin-top:.25rem}
 .ps-actions{display:flex;gap:.7rem;justify-content:center}

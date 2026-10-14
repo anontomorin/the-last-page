@@ -78,8 +78,8 @@
 .tl-actions{display:flex;justify-content:center;gap:.8rem;align-items:center;flex-wrap:wrap}
 /* 分级反馈：说清哪一层推理出错 */
 .tl-conflict{text-align:left;color:var(--red);font-family:var(--font-doc);font-size:.82rem;
-  margin-top:1rem;line-height:1.9;animation:cardIn .4s;border:1px solid rgba(var(--rgb-red-deep),.35);
-  background:rgba(var(--rgb-red-deep),.05);padding:.8rem 1rem;max-width:620px;margin-left:auto;margin-right:auto}
+  margin-top:1rem;line-height:1.9;animation:cardIn .4s;border:1px solid rgba(var(--rgb-red),.35);
+  background:rgba(var(--rgb-red),.05);padding:.8rem 1rem;max-width:620px;margin-left:auto;margin-right:auto}
 .tl-conflict .tc-title{font-weight:700;font-size:.9rem;margin-bottom:.35rem;letter-spacing:.05em}
 .tl-conflict p{margin:0 0 .4rem}
 .tl-conflict .tc-fix{font-size:.62rem;color:var(--gold);letter-spacing:.08em}

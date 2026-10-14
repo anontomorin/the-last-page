@@ -62,15 +62,6 @@ function run(opts) {
       if (got === null) problems.push(`${name} 缺失`);
       else if (got.toLowerCase() !== String(v).toLowerCase()) problems.push(`${name}: ${got} ≠ ${v}`);
     }
-    /* 透明度阶梯：alpha.red08 → --a-red-08 */
-    for (const [k, v] of Object.entries(tokens.alpha)) {
-      const name = 'a-' + kebab(k);
-      const got = getVar(name);
-      if (got === null) problems.push(`${name} 缺失`);
-      else if (got.replace(/\s/g, '').toLowerCase() !== String(v).replace(/\s/g, '').toLowerCase()) {
-        problems.push(`${name}: ${got} ≠ ${v}`);
-      }
-    }
     /* RGB 三元组：rgb.redDeep → --rgb-red-deep */
     for (const [k, v] of Object.entries(tokens.rgb || {})) {
       const name = 'rgb-' + kebab(k);

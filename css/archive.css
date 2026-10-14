@@ -28,8 +28,8 @@
 .wb-list{flex:1;overflow-y:auto;padding:.5rem}
 
 /* 主线谜题索引：开局即呈现冲突，答案仍由档案探索补全 */
-.case-index{margin:.7rem .55rem .25rem;padding:.7rem .75rem;border:1px solid rgba(var(--rgb-red-deep),.35);
-  background:linear-gradient(135deg,rgba(var(--rgb-red-deep),.055),transparent 72%);font-family:var(--font-doc)}
+.case-index{margin:.7rem .55rem .25rem;padding:.7rem .75rem;border:1px solid rgba(var(--rgb-red),.35);
+  background:linear-gradient(135deg,rgba(var(--rgb-red),.055),transparent 72%);font-family:var(--font-doc)}
 .case-index-head{font-size:.62rem;letter-spacing:.14em;color:var(--red);margin-bottom:.45rem}
 .case-index p{font-size:.69rem;line-height:1.65;color:var(--ink-soft);margin:0}
 .case-weather{display:flex;justify-content:space-between;gap:.25rem;margin:.45rem 0;font-size:.64rem;color:var(--ink)}
@@ -92,7 +92,7 @@
 .clue-card:last-child{margin-bottom:0}
 .clue-card::before{content:'';position:absolute;right:.55rem;top:.55rem;width:9px;height:9px;
   border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--red-bright),var(--red));
-  box-shadow:0 1px 3px rgba(var(--rgb-red-deep),.4)}
+  box-shadow:0 1px 3px rgba(var(--rgb-red),.4)}
 @keyframes clueIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
 .clue-card .l{font-size:.82rem;font-family:var(--font-doc);font-weight:600}
 .clue-card .d{font-size:.68rem;color:var(--ink-soft);margin-top:.25rem;line-height:1.6}
@@ -206,7 +206,7 @@
 /* ============ 第三轮：线索入档一次性反馈（2026-10-14） ============ */
 /* 新线索以纸条落位方式进入侧栏，仅首次发现时播放 */
 .clue-card.new{animation:moClipDrop 480ms var(--ease-out) both;
-  box-shadow:0 6px 18px rgba(var(--rgb-red-deep),.14)}
+  box-shadow:0 6px 18px rgba(var(--rgb-red),.14)}
 .clue-card.new::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
   background:linear-gradient(180deg,var(--gold),transparent)}
 #clue-count.bump{animation:moCountBump 420ms var(--ease-out)}

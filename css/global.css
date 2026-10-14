@@ -31,7 +31,7 @@ body.theme-bright{ --paper:#FDFCF8; --paper-deep:#F2EEE2; }
   font-family:var(--font-mono);letter-spacing:.3em;text-indent:.3em;font-size:.95rem;
   border:1px solid var(--red);transition:transform .2s,box-shadow .2s,background .2s;
 }
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(var(--rgb-red-deep),.35);background:var(--red-bright)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(var(--rgb-red),.35);background:var(--red-bright)}
 .btn-primary:active{transform:translateY(0)}
 .btn-ghost{
   display:inline-block;padding:.55rem 1.2rem;border:1px solid var(--line);
