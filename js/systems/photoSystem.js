@@ -33,8 +33,9 @@ LP.photo = (function () {
     const img = LP.el('img', { src: doc.src, alt: doc.title, draggable: 'false' });
     face.appendChild(img);
 
-    /* 背面 */
+    /* 背面（带折痕的照片：使用生成的合影背面细节图作衬底） */
     const back = LP.el('div', { class: 'photo-back' });
+    if (doc.back.crease) back.classList.add('crease-bg');
     const btext = LP.el('div', { class: 'btext', text: LP.inv.sub(doc.back.text) });
     back.appendChild(btext);
 

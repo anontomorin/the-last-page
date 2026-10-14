@@ -30,6 +30,7 @@ LP.doc = (function () {
 
     const content = LP.inv.docContent(doc);
     const paper = LP.el('div', { class: 'paper-doc' });
+    if (doc.type === 'letter') paper.classList.add('letter-bg');
     paper.appendChild(LP.el('h3', { text: LP.inv.sub(doc.title) }));
     paper.appendChild(LP.el('div', { class: 'pdate', text: gist ? '编目摘要' : doc.date }));
     if (gist) {
@@ -146,6 +147,8 @@ LP.doc = (function () {
     ]));
 
     const paper = LP.el('div', { class: 'p32-doc' });
+    // 衬底随状态切换：本卷段落未修完=损坏纸页，全部修复=晨光中的完整纸页
+    paper.classList.add(myRestored >= myFrags.length ? 'p32-restored' : 'p32-damaged');
     if (myRestored < myFrags.length) paper.appendChild(LP.el('div', { class: 'ocr-scan' }));
 
     LP.story.PAGE32.fragments.forEach(f => {

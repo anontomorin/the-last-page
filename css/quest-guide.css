@@ -1,0 +1,77 @@
+/* ============================================================
+   当前调查 · 主线任务卡
+   ============================================================ */
+#quest-card{margin-bottom:1rem}
+.qg-card{
+  background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--red);
+  padding:.9rem 1.1rem .8rem;box-shadow:0 4px 18px rgba(40,52,58,.06);
+  animation:cardIn .5s ease;
+}
+.qg-card.all-done{border-left-color:var(--ok)}
+
+.qg-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.35rem}
+.qg-kicker{font-size:.6rem;letter-spacing:.32em;color:var(--ink-soft)}
+.qg-status{
+  margin-left:auto;font-size:.62rem;letter-spacing:.12em;padding:.14rem .55rem;
+  border:1px solid var(--line);color:var(--ink-soft);white-space:nowrap;
+}
+.qg-status.live{border-color:var(--red);color:var(--red)}
+.qg-status.wait{border-color:var(--gold);color:var(--gold);background:rgba(233,205,145,.14)}
+.qg-status.done{border-color:var(--ok);color:var(--ok)}
+.qg-fold{
+  background:none;border:none;cursor:pointer;font-size:.62rem;color:var(--ink-soft);
+  letter-spacing:.1em;padding:.3rem .2rem;
+}
+.qg-fold:hover{color:var(--red)}
+
+.qg-title{font-size:1.08rem;font-weight:600;letter-spacing:.04em;margin:.2rem 0 .2rem}
+.qg-why{font-size:.76rem;color:var(--ink-soft);line-height:1.8;margin:0 0 .6rem}
+
+.qg-steps{list-style:none;margin:0 0 .7rem;padding:0;display:grid;gap:.32rem}
+.qg-steps li{
+  display:flex;align-items:baseline;gap:.55rem;font-size:.8rem;color:var(--ink-soft);
+  line-height:1.6;
+}
+.qg-steps li.cur{color:var(--ink);font-weight:500}
+.qg-steps li.done{color:var(--ink-soft);opacity:.62}
+.qg-steps li.done .qg-step-text{text-decoration:line-through;text-decoration-color:var(--line)}
+.qg-dot{
+  flex:none;width:1.15em;text-align:center;font-size:.68rem;color:var(--red);
+  font-family:var(--font-mono);transform:translateY(-1px);
+}
+.qg-steps li.done .qg-dot{color:var(--ok)}
+.qg-wait-flag{
+  flex:none;font-size:.58rem;letter-spacing:.14em;color:var(--gold);
+  border:1px solid var(--sun);padding:.05rem .35rem;transform:translateY(-1px);
+}
+
+.qg-go{
+  width:100%;padding:.6rem 1rem;font-size:.85rem;letter-spacing:.22em;text-indent:.22em;
+  min-height:40px;
+}
+
+.qg-done{margin-top:.6rem;border-top:1px dashed var(--line);padding-top:.4rem}
+.qg-done summary{
+  cursor:pointer;font-size:.6rem;letter-spacing:.24em;color:var(--ink-soft);
+  padding:.25rem 0;list-style:none;
+}
+.qg-done summary::-webkit-details-marker{display:none}
+.qg-done summary::before{content:'▸ '}
+.qg-done[open] summary::before{content:'▾ '}
+.qg-done-row{
+  display:flex;gap:.5rem;align-items:baseline;font-size:.74rem;color:var(--ink-soft);
+  padding:.16rem 0 .16rem .4rem;
+}
+.qg-done-check{color:var(--ok);font-size:.7rem}
+
+/* 「前往目标」后的短暂高亮 */
+.doc-item.qg-target{
+  outline:2px solid var(--red);outline-offset:-2px;
+  animation:qgFlash 1.2s ease 2;
+}
+@keyframes qgFlash{0%,100%{background:transparent}50%{background:rgba(184,94,82,.10)}}
+
+@media (max-width:640px){
+  .qg-card{padding:.8rem .9rem .7rem}
+  .qg-go{min-height:44px}
+}

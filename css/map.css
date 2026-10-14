@@ -28,11 +28,16 @@
 .scene-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;
   justify-content:center;padding:1.5rem;gap:1.2rem}
 
-.scene-stage{position:relative;width:min(680px,94vw);min-height:380px;
+.scene-stage{position:relative;width:min(680px,94vw);min-height:380px;overflow:hidden;
   border:1px solid var(--line);background:
     linear-gradient(180deg,rgba(244,241,234,.7),rgba(226,218,196,.9)),
     repeating-linear-gradient(90deg,transparent 0 46px,rgba(150,130,90,.06) 46px 48px);
   box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center}
+/* 场景老照片衬底：压在热点下层，做旧白纱保证热点标签可读 */
+.scene-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  filter:sepia(.22) brightness(1.06);opacity:.5;pointer-events:none}
+.scene-stage::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(247,245,238,.25),rgba(247,245,238,.05) 40%,rgba(247,245,238,.3))}
 
 .scene-obj{position:absolute;display:flex;flex-direction:column;align-items:center;gap:.4rem;
   cursor:pointer;transition:transform .25s;padding:.4rem}
@@ -53,9 +58,11 @@
 .scene-obj[data-pos="top"]:hover{transform:translateX(-50%) translateY(-3px)}
 .scene-obj[data-pos="bottom"]:hover{transform:translateX(-50%) translateY(-3px)}
 
-/* 钟面 */
+/* 钟面：生成的老钟面照片衬底 + HTML 指针叠加（答案以页面标注为准） */
 .clock-face{width:120px;height:120px;border-radius:50%;border:3px solid var(--ink-soft);
-  background:radial-gradient(circle,#F6F1E0 60%,#E4DCc5);position:relative;box-shadow:inset 0 0 20px rgba(0,0,0,.12)}
+  background:radial-gradient(circle,rgba(246,241,224,.85) 55%,rgba(228,220,197,.88)),
+    url('../assets/images/detail_clock_0717.webp') center/cover no-repeat;
+  position:relative;box-shadow:inset 0 0 20px rgba(0,0,0,.12),0 6px 18px rgba(0,0,0,.25)}
 .clock-hand{position:absolute;left:50%;bottom:50%;transform-origin:50% 100%;background:var(--ink)}
 .clock-hand.h{width:4px;height:30px;margin-left:-2px}
 .clock-hand.m{width:2.5px;height:44px;margin-left:-1.25px}
@@ -74,6 +81,11 @@
 .board-line.blurred .lt{filter:blur(4px);user-select:none}
 .board-line.revealed .lt{color:var(--red);font-weight:700;animation:cardIn .6s}
 
+/* 公告栏（钟楼）：生成的旧公告纸照片衬底 + 白纱保证真实文字可读 */
+.board-paper.board-photo{background:
+    linear-gradient(rgba(245,239,221,.88),rgba(245,239,221,.88)),
+    url('../assets/images/detail_notice_row7.webp') center/cover no-repeat #F5EFDD}
+
 .scene-msg{max-width:520px;text-align:center;font-family:var(--font-doc);font-size:.95rem;
   line-height:2.1;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--gold);
   padding:1.1rem 1.4rem;box-shadow:var(--shadow);animation:cardIn .5s;white-space:pre-wrap}
@@ -85,3 +97,10 @@
   .clock-face{width:92px;height:92px}
   .clock-hand.h{height:23px}.clock-hand.m{height:34px}
 }
+
+/* 地图页：旧阅览室场景图 */
+.map-room{margin:1.2rem auto 0;max-width:520px;border:1px solid var(--line);
+  background:var(--panel);padding:.6rem;box-shadow:var(--shadow)}
+.map-room img{width:100%;display:block;filter:sepia(.18)}
+.map-room figcaption{text-align:center;font-size:.6rem;letter-spacing:.3em;
+  color:var(--ink-soft);padding:.5rem 0 .2rem}

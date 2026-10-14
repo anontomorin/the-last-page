@@ -5,7 +5,9 @@
    全程通过真实 UI 操作推进：点击、输入、选择、提交。
    仅在断言时使用 page.evaluate 读取状态。
    ============================================================ */
-const { chromium } = require('playwright-core');
+/* 允许从任意位置加载（CI / 换机）：解析失败时交给下方 PW_PATH 兜底，不在此处中断 */
+let chromium = null;
+try { ({ chromium } = require('playwright-core')); } catch (e) { /* 见下方 PW_PATH */ }
 const fs = require('fs');
 const path = require('path');
 
@@ -143,10 +145,18 @@ async function exchange(fromPage, fromRole, toPage, toRole, topicId, answer) {
 }
 
 /* ---------- 证据板：主动建立关系（P0） ---------- */
+/* 移除可能残留的关系对话框遮罩。
+   注意必须先用 count() 判断：对话框在建立关系前并不存在，
+   直接对 locator 调 evaluate() 会空等 playwright 默认超时 30s（每次调用都白等一次）。 */
+async function dropEvidenceOverlay(page) {
+  const ov = page.locator('.ev-overlay');
+  if (await ov.count()) await ov.first().evaluate(el => el.remove()).catch(() => {});
+}
+
 async function linkEvidence(page, role, nodeA, nodeB, typeLabel) {
   await goTab(page, 'evidence');
   await page.waitForTimeout(400);
-  await page.locator('.ev-overlay').first().evaluate(el => el.remove()).catch(() => {});
+  await dropEvidenceOverlay(page);
   // 打开「建立关系」模式
   const modeBtn = page.locator('.ev-modebar .btn-ghost').first();
   const on = await modeBtn.evaluate(el => el.classList.contains('on')).catch(() => false);
@@ -173,7 +183,7 @@ async function linkEvidence(page, role, nodeA, nodeB, typeLabel) {
   await page.waitForTimeout(600);
   await clearNarrator(page);
   // 关闭可能残留的对话框
-  await page.locator('.ev-overlay').first().evaluate(el => el.remove()).catch(() => {});
+  await dropEvidenceOverlay(page);
 }
 
 /* ---------- 时间线 ---------- */
@@ -339,8 +349,10 @@ async function ensureServer() {
   await A.waitForSelector('#boot-card:not([hidden])', { timeout: 25000 });
   await B.waitForSelector('#boot-card:not([hidden])', { timeout: 25000 });
 
-  /* ---------- 开局：两卷分别入场 ---------- */
+  /* ---------- 开局：两卷分别入场（双人入口为次级折叠项，先展开） ---------- */
   head('开局 · 双人入场');
+  await A.click('#btn-duo-toggle'); await A.waitForTimeout(150);
+  await B.click('#btn-duo-toggle'); await B.waitForTimeout(150);
   await A.click('#btn-mode-a'); await A.waitForTimeout(400); await clearNarrator(A);
   await B.click('#btn-mode-b'); await B.waitForTimeout(400); await clearNarrator(B);
   const s0A = await A.evaluate(() => LP.state.get());

@@ -21,10 +21,18 @@
 .viewer-tools .vt.on{background:var(--red);color:#fff;border-color:var(--red)}
 .viewer-tools .sep{flex:1}
 
-/* ---- 文档纸张 ---- */
-.paper-doc{background:linear-gradient(175deg,#FBF7EC,#F3EDDC);border:1px solid #DCD3BC;
+/* ---- 文档纸张（低对比纸纹理衬底） ---- */
+.paper-doc{background:
+    linear-gradient(175deg,rgba(251,247,236,.9),rgba(243,237,220,.92)),
+    url('../assets/images/texture_paper_light.webp') repeat;
+  background-size:auto,480px;
+  border:1px solid #DCD3BC;
   padding:2rem 2.2rem;max-width:600px;width:100%;box-shadow:0 6px 30px rgba(60,50,30,.18);
   position:relative;font-family:var(--font-doc);animation:paperIn .6s ease}
+/* 信件：生成的旧信纸特写衬底 */
+.paper-doc.letter-bg{background:
+    linear-gradient(175deg,rgba(251,247,236,.86),rgba(243,237,220,.9)),
+    url('../assets/images/detail_letter.webp') center/cover no-repeat}
 @keyframes paperIn{from{opacity:0;transform:rotate(-.6deg) translateY(10px)}to{opacity:1;transform:none}}
 .paper-doc::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.5;
   background:repeating-linear-gradient(0deg,transparent 0 27px,rgba(150,130,90,.08) 27px 28px)}
@@ -63,6 +71,10 @@
   background:linear-gradient(160deg,#F2EBD8,#E6DDC4);border:8px solid #F7F2E4;
   box-shadow:0 10px 36px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;
   padding:1.5rem;text-align:center}
+/* 合影背面：生成的折痕细节图衬底（折痕热点仍由 HTML 叠加） */
+.photo-back.crease-bg{background:
+    linear-gradient(rgba(242,235,216,.72),rgba(230,221,196,.78)),
+    url('../assets/images/detail_fold_mark.webp') center/cover no-repeat}
 .photo-back .btext{font-family:var(--font-doc);color:#6d6350;font-size:.9rem;line-height:2}
 /* 折痕 */
 .photo-crease{position:absolute;right:6px;bottom:6px;width:52px;height:52px;cursor:pointer;

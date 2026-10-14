@@ -133,14 +133,25 @@ LP.archive = (function () {
     LP.$('#btn-back-ending').hidden = !(s.ending || (s.act >= 6 && s.finalMessage));
     document.body.dataset.act = s.act;
     if (s.act >= 1) LP.$('#wb-act-title').textContent = LP.story.ACT_TITLES[Math.min(s.act, 6)];
+    const ap = LP.$('#wb-act-progress');
+    if (ap) ap.textContent = Math.max(1, Math.min(s.act || 1, 6));
   }
 
   /* ---------------- 启动画面 ---------------- */
   function initBoot() {
     const log = LP.$('#boot-log');
     const lines = LP.story.BOOT_LOG;
-    let i = 0;
+    let i = 0, finished = false;
+
+    function finish() {
+      if (finished) return;
+      finished = true;
+      LP.$('#boot-load').hidden = true;
+      LP.$('#boot-card').hidden = false;
+      if (LP.save.hasSave()) LP.$('#btn-continue').hidden = false;
+    }
     (function next() {
+      if (finished) return;
       if (i < lines.length) {
         const div = LP.el('div', {
           html: LP.escapeHtml(lines[i])
@@ -149,15 +160,24 @@ LP.archive = (function () {
         log.appendChild(div);
         LP.audio.write();
         i++;
-        setTimeout(next, 420);
+        setTimeout(next, 260);
       } else {
-        setTimeout(() => {
-          LP.$('#boot-card').hidden = false;
-          LP.anim.countUp(LP.$('#boot-percent'), 0, 96.7, 1600, v => v.toFixed(1) + '%');
-          if (LP.save.hasSave()) LP.$('#btn-continue').hidden = false;
-        }, 350);
+        setTimeout(finish, 300);
       }
     })();
+    // 跳过载入（尊重 prefers-reduced-motion：减少动态时直接出卡片）
+    LP.$('#btn-skip-load').addEventListener('click', () => { LP.audio.click(); finish(); });
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setTimeout(finish, 150);
+    }
+
+    /* 双人入口：次级选项，展开后再选卷别 */
+    LP.$('#btn-duo-toggle').addEventListener('click', function () {
+      LP.audio.click();
+      const row = LP.$('#boot-duo-row');
+      row.hidden = !row.hidden;
+      this.textContent = row.hidden ? '双人拼卷 · 两人各领一卷' : '收起双人选项';
+    });
 
     LP.$('#btn-start').addEventListener('click', () => startGame('solo'));
     LP.$('#btn-mode-a').addEventListener('click', () => startGame('A'));
@@ -458,6 +478,14 @@ LP.archive = (function () {
   }
 
   /* ---------------- 人物 ---------------- */
+  /* 人物肖像（本地生成的 sepia 老照片，与档案原件同风格） */
+  const PORTRAITS = {
+    person_linyuan: 'portrait_linyuan',
+    person_zhou: 'portrait_zhou_ning',
+    person_chen: 'portrait_chen_chuan',
+    person_li: 'portrait_li_he'
+  };
+
   function renderPersonGrid() {
     const main = LP.$('#wb-empty');
     const prev = LP.$('#wb-preview');
@@ -467,6 +495,17 @@ LP.archive = (function () {
     Object.values(LP.data.people).forEach(p => {
       const known = p.known || LP.state.has('discoveredPeople', p.id);
       const card = LP.el('div', { class: 'person-card' + (known ? '' : ' unknown') });
+      /* 肖像：已确认身份显示生成肖像；未确认显示留白相框，不剧透身份 */
+      const photoBox = LP.el('div', { class: 'pphoto' });
+      if (known && PORTRAITS[p.id]) {
+        photoBox.appendChild(LP.el('img', {
+          src: 'assets/images/' + PORTRAITS[p.id] + '.webp',
+          alt: p.name + '的肖像'
+        }));
+      } else {
+        photoBox.appendChild(LP.el('span', { class: 'pphoto-q mono', text: '？' }));
+      }
+      card.appendChild(photoBox);
       card.appendChild(LP.el('div', { class: 'pno', text: p.no }));
       card.appendChild(LP.el('div', {
         class: 'pname',
@@ -545,6 +584,7 @@ LP.archive = (function () {
   function init() {
     initBoot();
     initTabs();
+    if (LP.quest) LP.quest.init();
     LP.$('#btn-back-ending').addEventListener('click', () => {
       LP.audio.click();
       LP.ending.resume();

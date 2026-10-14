@@ -173,3 +173,11 @@
   .wb-act{font-size:.85rem}
   .wb-tab{padding:.55rem .9rem;font-size:.78rem}
 }
+
+/* 人物肖像卡（生成 sepia 肖像 / 未确认留白相框） */
+.person-card .pphoto{width:100%;aspect-ratio:3/4;overflow:hidden;border:1px solid var(--line);
+  background:linear-gradient(160deg,#EFEAE0,#E4DED0);margin-bottom:.7rem;
+  display:flex;align-items:center;justify-content:center}
+.person-card .pphoto img{width:100%;height:100%;object-fit:cover;filter:sepia(.15)}
+.person-card .pphoto-q{font-size:2.6rem;color:var(--line)}
+.person-card.unknown .pphoto{border-style:dashed}

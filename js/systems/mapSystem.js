@@ -108,6 +108,11 @@ LP.map = (function () {
       ? ['◦ 红圈标记：与档案相关的地点', '◦ 虚线圈：尚未发现', '◦ 点击已解锁地点进入现场']
       : ['◦ 红圈标记：与档案相关的地点', '◦ 虚线圈：尚未发现', '◦ 现场由记录者走访 —— 你只能听 ta 描述'];
     wrap.appendChild(LP.el('div', { class: 'map-legend' }, legend.map(t => LP.el('span', { text: t }))));
+    /* 阅览室场景图：档案馆所在的旧阅览室 */
+    wrap.appendChild(LP.el('figure', { class: 'map-room' }, [
+      LP.el('img', { src: 'assets/images/scene_reading_room.webp', alt: '旧阅览室的木桌、卷宗与窗光', loading: 'lazy' }),
+      LP.el('figcaption', { class: 'mono', text: '数字档案馆 · 旧阅览室' })
+    ]));
     container.appendChild(wrap);
   }
 
@@ -149,6 +154,15 @@ LP.map = (function () {
 
     const stage = LP.el('div', { class: 'scene-stage' });
     const msgBox = LP.el('div', { class: 'scene-msg', text: loc.desc });
+
+    /* 场景宽幅老照片（本地生成， sepia 与档案原件一致） */
+    const SCENE_IMG = { clocktower: 'scene_clocktower', oldstreet: 'scene_oldstreet', ferry: 'scene_ferry' };
+    if (SCENE_IMG[loc.scene]) {
+      stage.appendChild(LP.el('img', {
+        class: 'scene-photo', src: 'assets/images/' + SCENE_IMG[loc.scene] + '.webp',
+        alt: loc.name + '的旧照片'
+      }));
+    }
 
     (loc.objects || []).forEach(obj => {
       const el = LP.el('div', { class: 'scene-obj', 'data-pos': obj.pos, 'data-obj': obj.id }, [
@@ -266,7 +280,7 @@ LP.map = (function () {
     const has717 = LP.state.has('discoveredEvidence', 'clue_717');
     const revealed = LP.state.has('completedPuzzles', 'board_row7');
 
-    const paper = LP.el('div', { class: 'board-paper' });
+    const paper = LP.el('div', { class: 'board-paper board-photo' });
     paper.appendChild(LP.el('h4', { text: '阅览室轮值通知' }));
     const lines = ['正月 初一　李　禾', '正月 十五　陈　川', '二月 初二　林　远', '二月 十六　周　宁',
       '三月 初一　李　禾', '三月 初十　陈　川', '联络人　周　宁', '三月 十七　林　远',

@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>最后一页没有写完 —— 青年数字档案 ARG</title>
-<meta name="description" content="叙事型 ARG / 数字档案探索解谜。ARCHIVE A-017《林远个人档案》等待整理。">
+<title>第32页：写给未来的信 —— 叙事型数字档案 ARG</title>
+<meta name="description" content="《第32页：写给未来的信》（PAGE 032 — A Letter to the Future）：叙事型 ARG / 数字档案探索解谜。ARCHIVE A-017《林远个人档案》等待整理。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23F7F5EE'/%3E%3Ctext x='16' y='22' font-size='14' text-anchor='middle' fill='%23B85E52' font-family='serif'%3E32%3C/text%3E%3C/svg%3E">
 <!-- ARCHIVE FRAGMENT 01 : 有些东西不在页面上，在页面背后。 -->
 <!-- ARCHIVE FRAGMENT 02 : 试试这条路 /archive/A-017/page/032 -->
 <link rel="stylesheet" href="css/reset.css">
@@ -16,6 +17,7 @@
 <link rel="stylesheet" href="css/timeline.css">
 <link rel="stylesheet" href="css/evidence.css">
 <link rel="stylesheet" href="css/ending.css">
+<link rel="stylesheet" href="css/quest-guide.css">
 </head>
 <body data-act="0">
 
@@ -26,38 +28,45 @@
 <!-- 红色旗带：随幕数推进逐渐点亮 -->
 <div id="red-ribbon" aria-hidden="true"></div>
 
-<!-- ============ 启动画面（第一幕入口） ============ -->
+<!-- ============ 启动画面（封面入口） ============ -->
 <section id="screen-boot" class="screen active">
+  <div class="boot-visual" aria-hidden="true">
+    <img src="assets/images/cover_archive.webp" alt="" loading="eager">
+  </div>
   <div class="boot-inner">
-    <div class="boot-sys mono" id="boot-log"></div>
+    <!-- 档案载入过场（短暂、可跳过） -->
+    <div class="boot-load" id="boot-load">
+      <div class="boot-sys mono" id="boot-log"></div>
+      <button id="btn-skip-load" class="btn-ghost small" type="button">跳过载入 ›</button>
+    </div>
     <div class="boot-card" id="boot-card" hidden>
-      <div class="boot-card-head mono">DIGITAL MEMORY ARCHIVE</div>
-      <div class="boot-card-sub">青年数字档案计划</div>
-      <div class="boot-archive-no mono">ARCHIVE <span class="red">A-017</span></div>
-      <h1 class="boot-title serif">《林远个人档案》</h1>
-      <ul class="boot-stats mono">
-        <li><span>日记</span><b>31</b></li>
-        <li><span>照片</span><b>12</b></li>
-        <li><span>书信</span><b>4</b></li>
-        <li><span>地图</span><b>1</b></li>
-      </ul>
-      <div class="boot-progress mono">
-        <span>完整度</span>
-        <b id="boot-percent">96.7%</b>
-      </div>
+      <div class="boot-kicker mono">ARCHIVE A-017 · 青年数字档案</div>
+      <h1 class="boot-title serif">第32页：写给未来的信</h1>
+      <div class="boot-en mono">PAGE 032 — A LETTER TO THE FUTURE</div>
+      <p class="boot-tag serif">有些故事没有结尾，只是把最后一句留给了未来。</p>
+      <ol class="boot-steps">
+        <li><b>查看原件</b><span>读日记、翻照片、看信件</span></li>
+        <li><b>发现与关联</b><span>提取线索，在证据板上建立关系</span></li>
+        <li><b>交叉验证</b><span>把互相矛盾的记录放回时间里</span></li>
+      </ol>
       <div class="boot-anomaly mono">
-        <span>异常</span>
-        <b class="red blink">PAGE_032</b>
+        <span>异常记录 <b class="red blink">PAGE_032</b></span>
+        <span>档案完整度 96.7%</span>
       </div>
       <div class="boot-entries">
-        <div class="boot-entries-head mono">选择你要领走的那一卷</div>
-        <button id="btn-start" class="btn-primary">独自整理</button>
-        <div class="boot-entries-row">
-          <button id="btn-mode-a" class="btn-primary">执笔者卷（A）</button>
-          <button id="btn-mode-b" class="btn-primary">记录者卷（B）</button>
+        <button id="btn-start" class="btn-primary" type="button">开始调查</button>
+        <button id="btn-continue" class="btn-primary" type="button" hidden>继续整理</button>
+      </div>
+      <div class="boot-duo">
+        <button id="btn-duo-toggle" class="btn-ghost" type="button">双人拼卷 · 两人各领一卷</button>
+        <div id="boot-duo-row" hidden>
+          <p class="boot-duo-note">你们看到不同的资料：一卷以文字为主，一卷以照片与地图为主。需要通话交换线索，才能一起修复这份档案。</p>
+          <div class="boot-entries-row">
+            <button id="btn-mode-a" class="btn-ghost" type="button">执笔者卷（A）</button>
+            <button id="btn-mode-b" class="btn-ghost" type="button">记录者卷（B）</button>
+          </div>
         </div>
       </div>
-      <button id="btn-continue" class="btn-ghost" hidden>继续上次的整理</button>
       <p class="boot-note mono">本作品人物均为虚构 · 纯前端运行 · 进度自动保存在本机</p>
     </div>
   </div>
@@ -72,6 +81,7 @@
       <span id="wb-mode-badge" class="wb-mode-badge" hidden></span>
       <button id="btn-duo" class="btn-ghost small" hidden>通话 · 口述／听写</button>
       <button id="btn-back-ending" class="btn-ghost small" hidden>返回结束页</button>
+      <span class="wb-act-progress mono">主线 <b id="wb-act-progress">1</b>/6</span>
       <span class="wb-percent">完整度 <b id="wb-percent">0%</b></span>
     </div>
   </header>
@@ -100,6 +110,7 @@
       <div class="wb-list" id="wb-list"></div>
     </aside>
     <main class="wb-main" id="wb-main">
+      <div id="quest-card" hidden></div>
       <div class="wb-empty mono" id="wb-empty">
         <p>选择左侧资料开始整理。</p>
         <p class="dim">所有谜题都藏在档案里 —— 阅读、观察、关联、验证。</p>
@@ -174,6 +185,7 @@
 <script src="js/data/timeline.js"></script>
 <script src="js/data/story.js"></script>
 <script src="js/data/duoScript.js"></script>
+<script src="js/data/questGuide.js"></script>
 <script src="js/systems/archiveSystem.js"></script>
 <script src="js/systems/documentSystem.js"></script>
 <script src="js/systems/photoSystem.js"></script>
@@ -183,6 +195,7 @@
 <script src="js/systems/mapSystem.js"></script>
 <script src="js/systems/timelineSystem.js"></script>
 <script src="js/systems/endingSystem.js"></script>
+<script src="js/systems/questGuideSystem.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

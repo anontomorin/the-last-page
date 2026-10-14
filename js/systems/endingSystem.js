@@ -24,6 +24,12 @@ LP.ending = (function () {
     const roleLine = mode === 'A' ? '执笔者卷 · 你的三问'
       : mode === 'B' ? '记录者卷 · 你的三问' : null;
 
+    /* 结局氛围主视觉（生成：春日清晨的窗台与远处的老镇） */
+    stage.appendChild(LP.el('img', {
+      class: 'end-hero', src: 'assets/images/ending_spring_morning.webp',
+      alt: '春日清晨的窗台，窗外是旧镇与远处的钟楼'
+    }));
+
     stage.appendChild(LP.el('div', { class: 'end-q-head' }, [
       LP.el('div', { class: 'mono', text: 'ARCHIVE A-017 · FINAL PAGE' + (mode !== 'solo' ? ' · DUO' : '') }),
       LP.el('h2', { text: '第六幕 · 写给未来' }),
