@@ -47,6 +47,8 @@ LP.photo = (function () {
         revealCrease(doc, back);
       });
       back.appendChild(crease);
+      /* 折痕处的斜向侧光层（点击后扫过一次） */
+      back.appendChild(LP.el('span', { class: 'crease-sweep', 'aria-hidden': 'true' }));
     }
 
     card.appendChild(face); card.appendChild(back);
@@ -145,46 +147,54 @@ LP.photo = (function () {
       LP.ui.toast('折痕里压着的字迹，你已经辨读过了。');
       return;
     }
-    back.innerHTML = '';
-    const mode = LP.state.get().mode;
-    if (mode === 'B') {
-      // 双人 B 卷：不直接给答案，只给需要口头描述的形状
-      back.appendChild(LP.el('div', { class: 'crease-reveal', text: '3 – 1 7', style: 'filter:blur(1.5px);opacity:.75' }));
-      back.appendChild(LP.el('div', {
-        class: 'btext',
-        text: '折痕里压着两个手写的符号：像是三，又像是一和七挨在一起，第二笔有点花。',
-        style: 'margin-top:1rem'
-      }));
-      back.appendChild(LP.el('div', {
-        class: 'btext',
-        text: '——把它描述给你的执笔者听。答案在 ta 的日记里。',
-        style: 'margin-top:.6rem;color:var(--gold)'
-      }));
-    } else {
-      back.appendChild(LP.el('div', { class: 'crease-reveal', text: '3 – 1 7' }));
-      back.appendChild(LP.el('div', {
-        class: 'btext', text: '折痕里，压着两个手写的数字。',
-        style: 'margin-top:1rem'
-      }));
-    }
-    LP.audio.complete();
-    LP.anim.flash();
-    setTimeout(() => {
-      LP.inv.discoverClue(doc.back.creaseClue);
+    /* 先让斜向侧光沿折线扫过一次，勾勒出折痕走向，再落定显示内容 */
+    const sweep = LP.$('.crease-sweep', back);
+    if (sweep) { sweep.classList.remove('play'); void sweep.offsetWidth; sweep.classList.add('play'); }
+    const paint = () => {
+      back.innerHTML = '';
+      const mode = LP.state.get().mode;
       if (mode === 'B') {
-        LP.ui.narrate([
-          '你把这个形状记在了心里。',
-          '也许是「3-17」，也许不是。',
-          '让你的执笔者去日记里查——这两个字，只有 ta 能对上。'
-        ]);
+        // 双人 B 卷：不直接给答案，只给需要口头描述的形状
+        back.appendChild(LP.el('div', { class: 'crease-reveal', text: '3 – 1 7', style: 'filter:blur(1.5px);opacity:.75' }));
+        back.appendChild(LP.el('div', {
+          class: 'btext',
+          text: '折痕里压着两个手写的符号：像是三，又像是一和七挨在一起，第二笔有点花。',
+          style: 'margin-top:1rem'
+        }));
+        back.appendChild(LP.el('div', {
+          class: 'btext',
+          text: '——把它描述给你的执笔者听。答案在 ta 的日记里。',
+          style: 'margin-top:.6rem;color:var(--gold)'
+        }));
       } else {
-        LP.ui.narrate([
-          '3-17。',
-          '三月十七日？还是……某个编号？',
-          '也许，日记里有答案。'
-        ]);
+        back.appendChild(LP.el('div', { class: 'crease-reveal', text: '3 – 1 7' }));
+        back.appendChild(LP.el('div', {
+          class: 'btext', text: '折痕里，压着两个手写的数字。',
+          style: 'margin-top:1rem'
+        }));
       }
-    }, 900);
+      LP.audio.complete();
+      LP.inv.discoverClue(doc.back.creaseClue);   // 侧光落定即入档（不延迟业务状态）
+      if (LP.anim.after) LP.anim.after(back, () => {
+        if (mode === 'B') {
+          LP.ui.narrate([
+            '你把这个形状记在了心里。',
+            '也许是「3-17」，也许不是。',
+            '让你的执笔者去日记里查——这两个字，只有 ta 能对上。'
+          ]);
+        } else {
+          LP.ui.narrate([
+            '3-17。',
+            '三月十七日？还是……某个编号？',
+            '也许，日记里有答案。'
+          ]);
+        }
+      }, 240);
+    };
+    /* 侧光扫过（~700ms）后再显示内容；减少动态效果下直接显示 */
+    if (LP.anim.reducedMotion && LP.anim.reducedMotion()) return paint();
+    if (LP.anim.after) LP.anim.after(back, paint, 620);
+    else setTimeout(paint, 620);
   }
 
   /* 元信息面板（含隐藏 ARG 文件名 IMG_0317.jpg） */

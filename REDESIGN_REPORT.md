@@ -150,3 +150,80 @@
 
 - `npm test` 全过（含双开 A/B 六幕通关，修复后复跑确认）
 - 新增验收截图：`evidence_ink_draw.png`（连线墨画+任务卡 1/3 动态计数）、`ending_print_skip.png`（跳过书写按钮）
+
+---
+
+# 第三轮：资源引用修复 · 统一动效规范 · 地图与实地探索精修（2026-10-14）
+
+> 定位：保留原有视觉语言的精修升级。P0 = 地图与实地探索；P1 = 线索/工作台/证据板/时间线；P2 = PAGE_032 与结局。
+> 全部改动均不触碰剧情、谜题答案、线索/地点 ID、解锁规则、A/B 信息隔离、隐藏 ARG 入口与存档关键字段。
+
+## 一、阶段 0 · 基线与备份
+
+- 分支 `main`；基线提交 `bd7df88`；本轮起于检查点提交 `9b3f0ef`。
+- 修改前运行 `npm test`（含 `_playtest/harness.js`）：**全部通过**（29 JS 语法 / 数据一致性 / 87 听写向量 / 冒烟 / 双开六幕通关）。
+
+## 二、阶段 1 · 资源引用与动效规范（纯工程/视觉）
+
+| 文件 | 改动 |
+|---|---|
+| `index.html` | **修正 39 处 CSS/JS 资源 URL**：把版本参数从属性引号外（`href="css/global.css"?v=…`）移到引号内（`href="css/global.css?v=…`），统一为 `20261014d`；在 `quest-guide.css` 之后接入 `css/motion.css` |
+| `css/global.css` | `#fx-scanlines` 透明度 `.05 → .014`；`#fx-noise` `.05 → .018`，噪点动画 `1.2s → 3.2s`；`#fx-flash` 峰值 `.9 → .3`（避免全屏闪白） |
+| `css/motion.css` | 补全令牌（`--t-micro 180ms`、`--t-reveal 900ms`、`--ease-soft` 曲线）；新增本轮关键帧（moRing/moSweep/moRevealLine/moDust/moRipple/moSwingOnce/moClipDrop/moFocusZoom 等）；末尾追加 `prefers-reduced-motion` 兜底 |
+| `js/utils/animation.js` | 向后兼容增强：`countUp` 返回取消函数并自动取消同节点旧动画；新增 `reducedMotion()` / `after(node,fn,ms)` / `cleanup(root)` / `playOnce(node,cls)` / `cancel(node)`；`typewriter`/`flash`/`shake` 在减少动态效果下降级 |
+
+## 三、阶段 2 · 地图与进入现场过场
+
+- `.map-wrap` 桌面最大宽度 `860px → 980px`（规格 940–1040 区间）。
+- 新增 `sceneTransition()`：**先 `openScene` 建好目标内容，再叠加纸张过场**（`pointer-events:none`、约 520ms、可被清理），不延迟建场、不阻塞交互与测试。
+- **地图完整入场动画只在首次播放**：二次进入加 `.map-wrap.no-intro`，跳过纸面淡入/边框描画/路线描画/节点错峰，但保留「新解锁」的一次性印章扩散环。
+- 节点状态机、预览卡、路线墨画、已勘察金点、返回恢复选中 —— 沿用并保持。
+
+## 四、阶段 3 · 实地探索（本轮最高优先级）
+
+- `.scene-stage`：`min(760px,94vw)` → **`min(960px,94vw)`**，高度 `min(72vh,640px)`，最小 420px；移动端 `min(60vh,480px)`、最小 340px。分层：照片衬底 → 尘粒环境层 → 遮罩/白纱 → 热点 → 反馈面板。
+- **环境动效生命周期**：`bindSceneLifecycle()` 用 `IntersectionObserver` 在场景不可见时暂停尘粒；离开场景（返回工作台）时 `cleanup` 清除定时器/水波/过场遮罩。
+- **热点统一手感**：默认安静 → hover/focus 微上移+描边+焦点环 → 按下扩散环+压感 → 已勘察金色勾记（来自真实 `completedPuzzles`）→ 首次发现一次聚焦入档（`found`）；键盘 Enter/Space 等价。
+- **钟楼第七声**：前六声只做钟面回应 + 双层声波（不再每声全屏闪白）；第七声一次柔和暖光 + 场景低幅震动 + 木门金边微光，与叙事文本同步；`bellRings ≥ 7` 时提前 return，**不会重放高潮**；A/B 规则不变。
+- **公告栏第七行**：点对目标行后 `moRevealLine` 700ms 渐显（水渍退去），再落金色底线；点错只给局部提示，不清空其他状态。
+- **照片折痕**：翻面不变；点击折痕先由 `moSweep` 侧光沿折线扫过（620ms），落定后**立即入档**并显示线索卡；减少动态效果下直接显示。
+- **渡口水波**：同一时刻最多 6 个涟漪，连点不堆叠；波纹定时器登记清理。**老街**：摊位/青石板点击触发局部聚焦（`focus-in`），不给整幅背景加强滤镜。
+
+## 五、阶段 4–5 · 线索入档 / 工作台 / 证据板 / 时间线
+
+- **线索入档**（`investigationSystem.js`）：`discoverClue` 仅首次入档时置 `pendingNewClue`，`renderClues` 对新线索卡播放一次 `moClipDrop` 纸条落位并让线索计数 `bump`；重复渲染不重播。
+- **查看器**（`documentSystem.js`）：保留 Esc 关闭与纸片动画；新增**关闭后焦点交还**打开查看器的元素（`closeViewerAndRestore`）。
+- **证据板**（`evidenceSystem.js`）：新增节点拖拽 `dragging` 抬起态（松开平滑落位、不改存储坐标）；新增**独立 SVG 连线预览层**，连线模式下从起点跟随指针画虚线（不被重绘清除）；正确=墨线描画+双节点金环+文字说明，错误=局部朱红+文字说明（不靠颜色单独传递）。
+- **时间线**（`timelineSystem.js`）：成功演出收紧到 **≤900ms**（落位 600ms + 0/120/240ms 错峰）；点选放置的选中态由内联 outline 改为 `.picked` 类 + 槽位 `:focus-within` 温和高亮；失败仅标错字段、保留已填内容与点选放置。
+
+## 六、阶段 6 · PAGE_032 与结局
+
+- **修复了「跳过书写」可能二次触发结局的隐患**：新增完成守卫 `finished`，跳过与逐行两条路径都汇入 `finish()`，保证印章/完整度流程只执行一次；跳过时 `LP.anim.cancel(page)` 取消打字机与登记定时器后补齐全部行，不漏行、不重复。
+- 最终页首次修复加 `fp-enter`（`moPaper` 纸页落位）；`resume()` 恢复时**不**加该类，不重放首次修复动画、不修改玩家输入。
+- 结尾行用 `moFadeUp` 稳定淡入；`#print-page::before` 纸边淡金光为静态（不循环）；打印媒体下隐藏跳过按钮与装饰（截图 `r3_ending_print_1366` 仅输出最终页）。
+
+## 七、测试与截图
+
+- `npm test`（阶段 2–6 改动后复跑）：**全部通过** —— 29 JS 语法 / 数据一致性 / 87 听写向量 / 冒烟（隐藏 ARG `css_032`、焦点样式）/ **双开 A/B 六幕通关**，零运行期错误。
+- 新增 `_playtest/shots4.js`（支持 `ONLY=名字` 子集运行），产出 20 张第三轮验收截图于 `_playtest/shots/`：
+  - 启动页：`r3_boot_desktop_1920`、`r3_boot_mobile_390`、`r3_boot_mobile_320`
+  - 地图：`r3_map_enter_1366`（新解锁）、`r3_map_unlock_1366`（已勘察+预览）、`r3_map_desktop_1920`、`r3_map_mobile_390`
+  - 钟楼：`r3_scene_bell7_1366`（第七声）、`r3_scene_board_row7_1366`（第七行显影）、`r3_scene_desktop_1920`、`r3_scene_mobile_390`
+  - 渡口/老街：`r3_scene_ferry_fx_1366`、`r3_scene_oldstreet_fx_1366`
+  - 推理：`r3_evidence_1366`（连线+进度）、`r3_timeline_fail_1366`（字段/分组失败）、`r3_timeline_done_1366`
+  - 结局：`r3_p32_recovery_1366`、`r3_ending_write_1366`（含跳过）、`r3_ending_resume_1366`、`r3_ending_print_1366`（打印）
+- 双人卷别下的活动流程由既有 `playthrough.js` 覆盖（A 卷不可进入现场、B 卷现场探索、碎片码合卷、隐藏结局）。
+
+## 八、已知问题与剩余风险
+
+1. `css/document.css` / `motion.css` 中的 `.red-mark`（红标批注显影）在当前剧情数据里**没有被使用**——文档正文未标记该类，故该动画实际无触发点（保留样式，未伪造正文标记）。
+2. 生成钟面照片自带罗马数字与约 10:08 指针，与 HTML 权威指针（7:17）在白纱下仍略有叠影；HTML 指针为权威呈现。
+3. 时间线仍未提供「键盘拖放」替代（现有点选放置已覆盖无拖放场景，键盘用户可用点选）。
+4. 打印样张通过 `emulateMedia('print')` 校验；未在真实系统打印对话框中人工核对页边距。
+
+## 九、明确未改动
+
+- 剧情文本、谜题答案与同义答案、线索/地点/人物 ID、六幕节点与通关条件；
+- A/B 双人信息隔离、通话/口述/听写、碎片码交换、合卷与署名逻辑；
+- 隐藏 ARG 路径 `#/archive/A-017/page/032`、键入 `0-3-2`、`--missing-page` 线索；
+- `LP` 命名空间、系统初始化顺序、`localStorage` 存档键与结构（证据板位置仍用独立键 `lp_evpos_v1`）。

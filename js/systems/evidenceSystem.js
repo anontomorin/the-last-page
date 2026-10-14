@@ -139,6 +139,10 @@ LP.evidence = (function () {
     const svg = document.createElementNS(svgNS, 'svg');
     svg.classList.add('ev-lines');
     board.appendChild(svg);
+    /* 连线预览层：独立的 SVG，避免被 drawLines 的清空覆盖 */
+    const psvg = document.createElementNS(svgNS, 'svg');
+    psvg.classList.add('ev-lines', 'ev-preview-layer');
+    board.appendChild(psvg);
 
     const visible = collectVisible();
     if (!visible.size) {
@@ -180,6 +184,30 @@ LP.evidence = (function () {
     /* 已建立的推理记录 */
     wrap.appendChild(reasonLog(container));
     container.appendChild(wrap);
+
+    /* 连线预览：连线模式下，从已选起点跟随指针画一条虚线 */
+    if (linkMode) {
+      const prev = document.createElementNS(svgNS, 'line');
+      prev.classList.add('ev-preview');
+      prev.style.display = 'none';
+      psvg.appendChild(prev);
+      const upd = ev => {
+        if (!selFirst) { prev.style.display = 'none'; return; }
+        const n = nodes.get(selFirst);
+        if (!n) { prev.style.display = 'none'; return; }
+        const br = board.getBoundingClientRect();
+        const ra = n.el.getBoundingClientRect();
+        prev.setAttribute('x1', ra.left + ra.width / 2 - br.left);
+        prev.setAttribute('y1', ra.top + ra.height / 2 - br.top);
+        prev.setAttribute('x2', ev.clientX - br.left);
+        prev.setAttribute('y2', ev.clientY - br.top);
+        prev.style.display = '';
+      };
+      board.addEventListener('pointermove', upd);
+      board.addEventListener('pointerleave', () => { prev.style.display = 'none'; });
+      /* 指针在节点上按下/抬起时也更新一次，避免预览卡在旧位置 */
+      board.addEventListener('pointerdown', upd);
+    }
     requestAnimationFrame(() => requestAnimationFrame(() => drawLines(svg, true)));
   }
 
@@ -292,7 +320,8 @@ LP.evidence = (function () {
     const n = nodes.get(id);
     if (!n) return;
     n.el.classList.remove(cls); void n.el.offsetWidth; n.el.classList.add(cls);
-    setTimeout(() => n.el.classList.remove(cls), 2200);
+    if (LP.anim.after) LP.anim.after(n.el, () => n.el.classList.remove(cls), 2200);
+    else setTimeout(() => n.el.classList.remove(cls), 2200);
   }
 
   /* 判定：连对记入 evidenceLinks；连错给出分层反馈 */
@@ -395,6 +424,7 @@ LP.evidence = (function () {
     let sx, sy, ox, oy, dragging = false, moved = false;
     el.addEventListener('pointerdown', e => {
       dragging = true; moved = false;
+      el.classList.add('dragging');            // 轻微抬起（视觉），不改存储坐标
       const br = board.getBoundingClientRect();
       const r = el.getBoundingClientRect();
       sx = e.clientX; sy = e.clientY;
@@ -413,9 +443,14 @@ LP.evidence = (function () {
       el.style.top = (ny / br.height * 100) + '%';
       onMove && onMove();
     });
-    el.addEventListener('pointerup', () => {
-      dragging = false; if (moved) { LP.audio.click(); savePositions(); }
-    });
+    const end = () => {
+      if (!dragging) return;
+      dragging = false;
+      el.classList.remove('dragging');         // 松开后平滑落位
+      if (moved) { LP.audio.click(); savePositions(); }
+    };
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
   }
 
   function focusNode(id) {

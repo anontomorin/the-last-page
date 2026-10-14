@@ -222,8 +222,8 @@ LP.timeline = (function () {
         moveCard(c.id, null, container);
       } else {
         selected = (selected === c.id) ? null : c.id;
-        LP.$$('.tl-card').forEach(x => x.style.outline = '');
-        if (selected) el.style.outline = '2px solid var(--gold)';
+        LP.$$('.tl-card').forEach(x => x.classList.remove('picked'));
+        if (selected) el.classList.add('picked');
       }
     });
     return el;

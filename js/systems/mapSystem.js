@@ -44,6 +44,7 @@ LP.map = (function () {
   };
 
   let mapSel = null;   // 记住玩家在地图上的选中地点（返回时恢复）
+  let mapIntroPlayed = false;   // 完整入场（纸面淡入/边框描画/路线/节点错峰）只播一次
 
   /* ---------------- 现场走访的归属 ----------------
      双人模式下，现场只属于记录者（B）：ta 扛着相机跑现场。
@@ -55,6 +56,31 @@ LP.map = (function () {
     LP.audio.error();
     LP.ui.toast('现场由你的记录者走访 —— 让 ta 把看到的东西念给你听。', 'gold');
     setTimeout(() => { if (LP.duo) LP.duo.openPanel(); }, 260);
+  }
+
+  /* ------------- 地图 → 实地的纸张过场 -------------
+     纯装饰层：pointer-events:none，不延迟建场、不阻塞交互；
+     过场期间场景已可点击，测试与快速操作均不受影响。 */
+  let veilTimer = null;
+  function sceneTransition(loc) {
+    const old = LP.$('.scene-transition');
+    if (old) old.remove();
+    if (LP.anim.reducedMotion && LP.anim.reducedMotion()) return;
+    const veil = LP.el('div', { class: 'scene-transition', 'aria-hidden': 'true' });
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const gsvg = document.createElementNS(svgNS, 'svg');
+    gsvg.setAttribute('viewBox', '-8 -9 16 15');
+    gsvg.classList.add('st-glyph');
+    const gp = document.createElementNS(svgNS, 'path');
+    gp.setAttribute('d', LANDMARKS[loc.id] || 'M-3 0 L3 0');
+    gsvg.appendChild(gp);
+    veil.appendChild(LP.el('div', { class: 'st-label' }, [
+      gsvg,
+      LP.el('span', { text: (loc.name || '') + ' · 前往现场' })
+    ]));
+    document.body.appendChild(veil);
+    clearTimeout(veilTimer);
+    veilTimer = setTimeout(() => { veil.remove(); veilTimer = null; }, 600);
   }
 
   /* ---------------- 地点预览卡 ---------------- */
@@ -119,6 +145,9 @@ LP.map = (function () {
     container.innerHTML = '';
     const s = LP.state.get();
     const wrap = LP.el('div', { class: 'map-wrap' });
+    /* 二次进入不再重播完整长动画（仅保留一次性的新解锁印章） */
+    if (mapIntroPlayed) wrap.classList.add('no-intro');
+    else mapIntroPlayed = true;
 
     // 执笔者卷：地图只是纸上的位置，现场不属于 ta
     if (!canEnterScene()) {
@@ -335,7 +364,8 @@ LP.map = (function () {
         if (loc.scene) {
           if (!canEnterScene()) return tellNoScene(loc.name);
           LP.state.addTo('discoveredLocations', loc.id);
-          openScene(loc.id);
+          openScene(loc.id);          // 先建好目标内容
+          sceneTransition(loc);       // 再用纸张过场揭示（不阻塞）
         } else {
           LP.ui.toast(loc.desc);
         }
@@ -423,6 +453,7 @@ LP.map = (function () {
     LP.$('#scene-title').textContent = loc.name;
     LP.$('#scene-sub').textContent = loc.desc;
     const body = LP.$('#scene-body');
+    if (body.__cleanup) body.__cleanup();      // 释放上一场景遗留的定时器/动画
     body.innerHTML = '';
 
     const stage = LP.el('div', { class: 'scene-stage' });
@@ -465,13 +496,30 @@ LP.map = (function () {
       const donePuzzle = OBJ_DONE_PUZZLE[obj.id];
       if (donePuzzle && LP.state.has('completedPuzzles', donePuzzle)) el.classList.add('done');
       el.addEventListener('click', e => {
-        /* 检查反馈：柔和扩散环 + 专属动效，随后走原有故事逻辑 */
+        /* 检查反馈：柔和扩散环 + 局部聚焦 + 专属动效，随后走原有故事逻辑 */
         el.classList.remove('pulsing'); void el.offsetWidth; el.classList.add('pulsing');
+        el.classList.add('pressed');
+        el.classList.remove('focus-in'); void el.offsetWidth; el.classList.add('focus-in');
+        if (LP.anim.after) {
+          LP.anim.after(el, () => el.classList.remove('pressed'), 260);
+          LP.anim.after(el, () => el.classList.remove('focus-in'), 700);
+        } else {
+          setTimeout(() => el.classList.remove('pressed'), 260);
+          setTimeout(() => el.classList.remove('focus-in'), 700);
+        }
         if (obj.id === 'obj_river') spawnRipples(stage, e);
         if (obj.id === 'obj_sign') {
           el.classList.remove('swing'); void el.offsetWidth; el.classList.add('swing');
         }
+        const beforeDone = donePuzzle ? LP.state.has('completedPuzzles', donePuzzle) : false;
         handleObject(loc.scene, obj.id, el, msgBox, stage);
+        /* 首次发现：仅当真实状态由未完成 → 完成时播放一次聚焦入档反馈 */
+        const afterDone = donePuzzle ? LP.state.has('completedPuzzles', donePuzzle) : false;
+        if (!beforeDone && afterDone) {
+          el.classList.add('done', 'found');
+          if (LP.anim.after) LP.anim.after(el, () => el.classList.remove('found'), 700);
+          else setTimeout(() => el.classList.remove('found'), 700);
+        }
       });
       el.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
@@ -481,10 +529,38 @@ LP.map = (function () {
 
     body.appendChild(stage);
     body.appendChild(msgBox);
+    bindSceneLifecycle(body, stage);
   }
 
-  /* 渡口：点击水面位置扩散同心波纹（自动消散） */
+  /* 场景生命周期：离开时停止环境动效、清除临时动画与定时器（避免堆叠/串场） */
+  function bindSceneLifecycle(body, stage) {
+    if (LP.anim.reducedMotion && LP.anim.reducedMotion()) {
+      const d0 = LP.$('.scene-dust', stage);
+      if (d0) d0.style.animation = 'none';
+    }
+    let io = null;
+    if ('IntersectionObserver' in window) {
+      io = new IntersectionObserver(es => {
+        const d = LP.$('.scene-dust', stage);
+        if (!d) return;
+        es.forEach(en => { d.style.animationPlayState = en.isIntersecting ? 'running' : 'paused'; });
+      }, { threshold: 0 });
+      io.observe(stage);
+    }
+    body.__cleanup = () => {
+      if (io) io.disconnect();
+      clearTimeout(veilTimer); veilTimer = null;
+      const veil = LP.$('.scene-transition'); if (veil) veil.remove();
+      if (LP.anim.cleanup) LP.anim.cleanup(body);
+    };
+  }
+
+  /* 渡口：点击水面位置扩散同心波纹（自动消散，限制并发） */
   function spawnRipples(stage, e) {
+    if (LP.anim.reducedMotion && LP.anim.reducedMotion()) return;
+    /* 同一时刻最多 6 个涟漪，连点时不堆叠 */
+    const existing = stage.querySelectorAll('.river-ripple');
+    if (existing.length >= 6) existing[0].remove();
     const r = stage.getBoundingClientRect();
     const x = (e.clientX || r.left + r.width / 2) - r.left;
     const y = (e.clientY || r.top + r.height / 2) - r.top;
@@ -493,7 +569,8 @@ LP.map = (function () {
       rip.style.left = x + 'px';
       rip.style.top = y + 'px';
       stage.appendChild(rip);
-      setTimeout(() => rip.remove(), 1400);
+      if (LP.anim.after) LP.anim.after(rip, () => rip.remove(), 1400);
+      else setTimeout(() => rip.remove(), 1400);
     });
   }
 
@@ -568,12 +645,18 @@ LP.map = (function () {
     const n = s.bellRings + 1;
     LP.state.set({ bellRings: n });
     LP.audio.clock();
-    LP.anim.flash();
+    /* 前六声只做钟面回应与声波，不做全屏闪白，避免喧宾夺主 */
     clockEl.classList.remove('ringing'); void clockEl.offsetWidth; clockEl.classList.add('ringing');
 
-    /* 钟声波：两层环形扩散，随后自动消散 */
+    /* 钟声波：两层环形扩散，随后自动消散（登记以便离开场景时清理） */
     [0, 220].forEach(delay => {
-      setTimeout(() => {
+      if (LP.anim.after) LP.anim.after(stage, () => {
+        const wave = LP.el('span', { class: 'bell-wave', 'aria-hidden': 'true' });
+        stage.appendChild(wave);
+        if (LP.anim.after) LP.anim.after(wave, () => wave.remove(), 1100);
+        else setTimeout(() => wave.remove(), 1100);
+      }, delay);
+      else setTimeout(() => {
         const wave = LP.el('span', { class: 'bell-wave', 'aria-hidden': 'true' });
         stage.appendChild(wave);
         setTimeout(() => wave.remove(), 1100);
@@ -590,12 +673,15 @@ LP.map = (function () {
     if (n >= 7) {
       LP.inv.completePuzzle('bell7');
       LP.inv.discoverClue('clue_717');
-      /* 第七声高潮：场景低幅震动 + 金门微光（铁索拉动的视觉暗示） */
+      /* 第七声高潮：一次柔和暖光 + 场景低幅震动 + 金门微光（铁索拉动的视觉暗示）
+         仅此一次；再次点击钟时上面已提前 return，不会重放高潮演出。 */
+      LP.anim.flash();
       stage.classList.remove('quake'); void stage.offsetWidth; stage.classList.add('quake');
       const doorEl = LP.$('.scene-obj[data-obj="obj_door"]', stage);
       if (doorEl) {
         doorEl.classList.add('door-glow');
-        setTimeout(() => doorEl.classList.remove('door-glow'), 2600);
+        if (LP.anim.after) LP.anim.after(stage, () => doorEl.classList.remove('door-glow'), 2600);
+        else setTimeout(() => doorEl.classList.remove('door-glow'), 2600);
       }
       // 钟面始终停在照片记录的 7:17；七声只触发连到门闩的铁索。
       if (s.mode === 'B') {
@@ -635,11 +721,15 @@ LP.map = (function () {
         if (isRow7 && revealed) return setMsg(msgBox, obj.row7);
         if (!has717) { LP.audio.error(); return setMsg(msgBox, obj.needClue); }
         if (!isRow7) { LP.audio.click(); return setMsg(msgBox, obj.wrongRow); }
-        // 第七行 + 已知 7:17 → 揭示
+        // 第七行 + 已知 7:17 → 分段显影：水渍先退去（~700ms），随后加金色底线
         line.classList.remove('blurred');
-        line.classList.add('revealed');
+        line.classList.add('revealing');
+        if (LP.anim.after) LP.anim.after(line, () => {
+          line.classList.remove('revealing');
+          line.classList.add('revealed', 'correct');
+        }, 700);
+        else { line.classList.remove('revealing'); line.classList.add('revealed', 'correct'); }
         LP.audio.complete();
-        LP.anim.flash();
         markDone(el);
         LP.inv.completePuzzle('board_row7');
         setMsg(msgBox, obj.row7);
@@ -733,6 +823,8 @@ LP.map = (function () {
   function init() {
     LP.$('#btn-scene-back').addEventListener('click', () => {
       LP.audio.click();
+      const body = LP.$('#scene-body');
+      if (body && body.__cleanup) { body.__cleanup(); body.__cleanup = null; }
       LP.router.go('archive');
       LP.archive.refreshAll();
     });

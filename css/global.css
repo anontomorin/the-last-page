@@ -23,7 +23,7 @@ body.theme-bright{ --paper:#FDFCF8; --paper-deep:#F2EEE2; }
 @keyframes noiseShift{0%{transform:translate(0,0)}33%{transform:translate(-2%,1%)}66%{transform:translate(1%,-2%)}100%{transform:translate(0,0)}}
 #fx-flash{position:fixed;inset:0;background:#FFF6E0;opacity:0;pointer-events:none;z-index:200}
 #fx-flash.on{animation:flashOnce .55s ease}
-@keyframes flashOnce{0%{opacity:0}15%{opacity:.9}100%{opacity:0}}
+@keyframes flashOnce{0%{opacity:0}15%{opacity:.3}100%{opacity:0}}
 
 /* ============ 按钮 ============ */
 .btn-primary{

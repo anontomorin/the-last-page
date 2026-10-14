@@ -131,7 +131,7 @@ LP.ending = (function () {
   /* 打印动画：逐行「印」到最终页上（可跳过，跳过直接进入最终状态） */
   function printFinalPage(stage) {
     stage.innerHTML = '';
-    const page = LP.el('div', { id: 'print-page' });
+    const page = LP.el('div', { id: 'print-page', class: 'fp-enter' });
     page.appendChild(LP.el('div', { class: 'fp-head' }, [
       LP.el('span', { text: 'ARCHIVE A-017' }),
       LP.el('span', { text: 'PAGE 032 · 补写页' })
@@ -139,31 +139,42 @@ LP.ending = (function () {
     stage.appendChild(page);
 
     const lines = finalPageLines();
-    let i = 0, cancelType = null;
+    let i = 0, cancelType = null, finished = false;
+
+    /* 完成守卫：跳过与逐行两条路径都汇入这里，保证印章/进度只执行一次 */
+    function finish() {
+      if (finished) return;
+      finished = true;
+      afterPrint(stage, page);
+    }
 
     const skipBtn = LP.el('button', {
       class: 'btn-ghost small fp-skip', type: 'button', text: '跳过书写 ›'
     });
     skipBtn.addEventListener('click', () => {
+      if (finished) return;
       LP.audio.click();
+      LP.anim.cancel(page);                       // 取消打字机与登记在页上的定时器
       if (cancelType) { cancelType(); cancelType = null; }
       while (i < lines.length) {
         page.appendChild(LP.el('div', { class: 'fp-line ' + lines[i].cls, text: lines[i].text }));
         i++;
       }
       skipBtn.remove();
-      afterPrint(stage, page);
+      finish();
     });
     stage.appendChild(skipBtn);
 
     (function next() {
-      if (i >= lines.length) { skipBtn.remove(); return afterPrint(stage, page); }
+      if (finished) return;
+      if (i >= lines.length) { skipBtn.remove(); return finish(); }
       const row = LP.el('div', { class: 'fp-line ' + lines[i].cls });
       page.appendChild(row);
       cancelType = LP.anim.typewriter(row, lines[i].text, lines[i].cls === 'user' ? 34 : 22, () => {
         cancelType = null;
         i++;
-        setTimeout(next, 220);
+        if (LP.anim.after) LP.anim.after(page, next, 220);
+        else setTimeout(next, 220);
       });
     })();
   }

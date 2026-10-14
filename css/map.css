@@ -2,7 +2,7 @@
    地图系统 + 地点场景（2026-10 交互升级）
    旧城区手绘调查地图：纸底、墨线、图章节点、墨水路线
    ============================================================ */
-.map-wrap{max-width:860px;margin:0 auto;position:relative}
+.map-wrap{max-width:980px;margin:0 auto;position:relative}
 
 /* ---- 地图纸张 ---- */
 .map-svg{width:100%;height:auto;display:block;border:1px solid var(--line);
@@ -129,7 +129,7 @@
 .scene-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;
   justify-content:center;padding:1.5rem;gap:1.2rem}
 
-.scene-stage{position:relative;width:min(760px,94vw);min-height:420px;overflow:hidden;
+.scene-stage{position:relative;width:min(960px,94vw);height:min(72vh,640px);min-height:420px;overflow:hidden;
   border:1px solid var(--line);background:
     linear-gradient(180deg,rgba(244,241,234,.55),rgba(226,218,196,.75)),
     repeating-linear-gradient(90deg,transparent 0 46px,rgba(150,130,90,.06) 46px 48px);
@@ -241,10 +241,65 @@
   padding:1.1rem 1.4rem;box-shadow:var(--shadow);animation:cardIn .5s;white-space:pre-wrap}
 
 @media (max-width:640px){
-  .scene-stage{min-height:360px}
+  .scene-stage{height:min(60vh,480px);min-height:340px}
   .scene-obj svg{width:48px;height:48px}
   .scene-obj .obj-label{font-size:.72rem;padding:.2rem .55rem}
   .clock-face{width:92px;height:92px}
   .clock-hand.h{height:23px}.clock-hand.m{height:34px}
   .map-node text{font-size:3.6px}
+}
+
+/* ============================================================
+   第三轮：地图→实地过场 / 热点统一手感 / 目标行显影（2026-10-14）
+   过场为纯装饰层：pointer-events:none，不延迟建场、不阻塞交互
+   ============================================================ */
+.scene-transition{position:fixed;inset:0;z-index:120;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 50% 45%,rgba(255,253,248,.0),rgba(240,233,216,.55) 72%),
+    var(--paper);
+  opacity:0;animation:sceneVeil 520ms var(--ease-out) forwards}
+@keyframes sceneVeil{0%{opacity:0}38%{opacity:.92}62%{opacity:.92}100%{opacity:0}}
+.scene-transition .st-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-family:var(--font-mono);font-size:.66rem;letter-spacing:.4em;color:var(--red)}
+.scene-transition .st-label .st-glyph{display:block;width:46px;height:46px;margin:0 auto .7rem}
+.scene-transition .st-label .st-glyph path{fill:none;stroke:var(--red);stroke-width:1.4;
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* 热点：键盘焦点环与按下（命中区域不因位移漂移，用内层做视觉） */
+.scene-obj:focus-visible{outline:none}
+.scene-obj:focus-visible .obj-label{outline:2px solid var(--gold);outline-offset:2px}
+.scene-obj:active{transform:translateY(1px)}
+.scene-obj[data-pos="top"]:active,.scene-obj[data-pos="bottom"]:active{transform:translateX(-50%) translateY(1px)}
+.scene-obj.pressed .obj-label{border-color:var(--red)}
+/* 首次发现：热点一次轻微聚焦（不改命中） */
+.scene-obj.found svg{animation:objFound 620ms var(--ease-out)}
+@keyframes objFound{0%{transform:scale(1)}35%{transform:scale(1.12)}100%{transform:scale(1)}}
+
+/* 公告栏：目标行 500–800ms 显影（水渍退去 → 加金色底线） */
+.board-line.revealing{animation:moRevealLine 700ms var(--ease-out) both}
+.board-line.revealing .lt{filter:none}
+.board-line.correct .lt{color:var(--red);font-weight:700;
+  background:linear-gradient(transparent 64%,rgba(233,205,145,.62) 64%)}
+
+/* 渡口波纹：限制并发数量 */
+.river-ripple{will-change:transform,opacity}
+
+/* 老街/渡口热点的局部聚焦（不整幅加滤镜） */
+.scene-obj.focus-in svg{filter:drop-shadow(0 0 6px rgba(185,138,47,.55))}
+
+/* ============================================================
+   地图二次进入：跳过完整入场动画（保留新解锁印章 ring）
+   ============================================================ */
+.map-wrap.no-intro .map-svg{animation:none}
+.map-wrap.no-intro .map-frame{animation:none;stroke-dashoffset:0}
+.map-wrap.no-intro .map-path{animation:none;stroke-dashoffset:0}
+.map-wrap.no-intro .map-flow{animation:none;opacity:0}
+.map-wrap.no-intro .map-node{animation:none}
+.map-wrap.no-intro .map-node .stamp-ring{animation:none;opacity:0}
+
+/* 移动端场景头：标题与说明换行排布，避免标题被挤成竖排 */
+@media (max-width:640px){
+  .scene-top{flex-wrap:wrap;gap:.35rem .7rem}
+  .scene-title{flex:1 1 auto;min-width:0}
+  .scene-sub{flex:1 1 100%;text-align:center}
 }

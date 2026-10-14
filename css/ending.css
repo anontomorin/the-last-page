@@ -89,3 +89,9 @@
 /* 结局主视觉（生成：春日窗台与远处的旧镇） */
 .end-hero{width:100%;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--line);
   box-shadow:var(--shadow);margin-bottom:2rem;animation:cardIn 1s ease}
+
+/* ============ 第三轮：最终页入场与稳定态（2026-10-14） ============ */
+/* 纸页由轻到重落位；仅首次修复时播放（resume 不加该 class，不重放） */
+#print-page.fp-enter{animation:moPaper 620ms var(--ease-out) both}
+/* 结局正文行稳定可读，避免长延迟 */
+.end-lines p{opacity:0;animation:moFadeUp 520ms var(--ease-out) forwards}

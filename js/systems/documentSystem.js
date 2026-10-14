@@ -4,7 +4,14 @@
 window.LP = window.LP || {};
 LP.doc = (function () {
 
+  /* 关闭后把焦点交还给打开查看器的那个元素（可达性） */
+  let lastFocus = null;
+
   function openViewer(title, meta) {
+    if (LP.$('#viewer').hidden) {
+      const ae = document.activeElement;
+      if (ae && ae !== document.body && ae.focus) lastFocus = ae;
+    }
     LP.$('#viewer-title').textContent = title;
     LP.$('#viewer-meta').textContent = meta || '';
     LP.$('#viewer-stage').innerHTML = '';
@@ -12,6 +19,14 @@ LP.doc = (function () {
     LP.$('#viewer').hidden = false;
   }
   function closeViewer() { LP.$('#viewer').hidden = true; }
+  /* 手动关闭（按钮 / Esc / 点遮罩）：关闭并交还焦点 */
+  function closeViewerAndRestore() {
+    const wasOpen = !LP.$('#viewer').hidden;
+    closeViewer();
+    if (wasOpen && lastFocus && lastFocus.isConnected && lastFocus.focus) {
+      try { lastFocus.focus(); } catch (e) { /* 忽略 */ }
+    }
+  }
 
   function open(id) {
     const doc = LP.data.documents[id];
@@ -258,12 +273,12 @@ LP.doc = (function () {
 
   /* ---------------- 查看器公共事件 ---------------- */
   function init() {
-    LP.$('#viewer-close').addEventListener('click', () => { LP.audio.click(); closeViewer(); });
+    LP.$('#viewer-close').addEventListener('click', () => { LP.audio.click(); closeViewerAndRestore(); });
     LP.$('#viewer').addEventListener('click', e => {
-      if (e.target.id === 'viewer') closeViewer();
+      if (e.target.id === 'viewer') closeViewerAndRestore();
     });
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') closeViewer();
+      if (e.key === 'Escape') closeViewerAndRestore();
     });
   }
 

@@ -42,10 +42,14 @@ LP.inv = (function () {
   }
 
   /* ---------------- 线索发现 ---------------- */
+  /* 仅首次发现时入档播放完整动画；重复渲染/重复阅读不再重播 */
+  let pendingNewClue = null;
+
   function discoverClue(clueId, silent) {
     const clue = LP.data.clues[clueId];
     if (!clue) return;
-    if (!LP.state.addTo('discoveredEvidence', clueId)) return; // 已发现
+    if (!LP.state.addTo('discoveredEvidence', clueId)) return; // 已发现 → 不重复
+    pendingNewClue = clueId;                                    // 交给 renderClues 做一次入档
     if (!silent) {
       LP.audio.complete();
       LP.ui.toast(`发现线索：${clue.label}`, 'red');
@@ -73,7 +77,8 @@ LP.inv = (function () {
     s.discoveredEvidence.forEach(cid => {
       const c = LP.data.clues[cid];
       if (!c) return;
-      const card = LP.el('div', { class: 'clue-card' }, [
+      const isNew = cid === pendingNewClue;
+      const card = LP.el('div', { class: 'clue-card' + (isNew ? ' new' : '') }, [
         LP.el('div', { class: 'l', text: c.label }),
         LP.el('div', { class: 'd', text: c.desc })
       ]);
@@ -84,7 +89,12 @@ LP.inv = (function () {
       });
       box.appendChild(card);
     });
-    LP.$('#clue-count').textContent = s.discoveredEvidence.length;
+    const cnt = LP.$('#clue-count');
+    if (cnt) {
+      cnt.textContent = s.discoveredEvidence.length;
+      if (pendingNewClue) { cnt.classList.remove('bump'); void cnt.offsetWidth; cnt.classList.add('bump'); }
+    }
+    pendingNewClue = null;   // 入档动画只此一次
   }
 
   /* ---------------- 资料阅读后的钩子 ---------------- */

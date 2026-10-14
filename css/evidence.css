@@ -103,3 +103,12 @@
 .ev-type:active{transform:scale(.97)}
 /* 关系对话框按钮按下手感 */
 .ev-dialog-acts .btn-primary:active,.ev-dialog-acts .btn-ghost:active{transform:scale(.97)}
+
+/* ============ 第三轮：拖拽抬起 + 连线预览（2026-10-14） ============ */
+/* 拖动时轻微抬起，松开平滑落位；不改存储坐标 */
+.ev-node.dragging{z-index:20;box-shadow:0 14px 28px rgba(36,36,36,.26);
+  transform:translate(-50%,-50%) scale(1.05);transition:transform .12s ease,box-shadow .12s ease}
+.ev-node{transition:transform .18s var(--ease-soft, ease),box-shadow .18s, border-color .2s}
+/* 连线预览层：跟随指针的虚线，不参与命中 */
+.ev-preview-layer{pointer-events:none}
+.ev-preview{stroke:var(--red);stroke-width:1.4;stroke-dasharray:5 4;opacity:.7}

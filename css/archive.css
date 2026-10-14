@@ -202,3 +202,12 @@
 /* 检索框 focus */
 .wb-search input{transition:border-color .2s,box-shadow .2s}
 .wb-search input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(184,94,82,.14)}
+
+/* ============ 第三轮：线索入档一次性反馈（2026-10-14） ============ */
+/* 新线索以纸条落位方式进入侧栏，仅首次发现时播放 */
+.clue-card.new{animation:moClipDrop 480ms var(--ease-out) both;
+  box-shadow:0 6px 18px rgba(142,27,27,.14)}
+.clue-card.new::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--gold),transparent)}
+#clue-count.bump{animation:moCountBump 420ms var(--ease-out)}
+@keyframes moCountBump{0%{transform:scale(1)}40%{transform:scale(1.35);color:var(--red)}100%{transform:scale(1)}}

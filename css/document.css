@@ -133,3 +133,14 @@
 .viewer-tools .vt:active{transform:scale(.94)}
 /* 文档段落进入已有 fragIn（documentSystem 内联）；此处补查看器整体景深过渡 */
 .viewer-frame{transition:opacity .3s}
+
+/* ============ 第三轮：折痕侧光扫过 + 折痕数字显影（2026-10-14） ============ */
+/* 点击折痕：斜向侧光扫过一次，然后落定（不重播强制动画） */
+.crease-sweep{position:absolute;right:-10%;bottom:-10%;width:70%;height:70%;pointer-events:none;z-index:3;
+  background:linear-gradient(135deg,transparent 44%,rgba(255,250,230,.55) 50%,transparent 56%)}
+.crease-sweep.play{animation:moSweep 700ms var(--ease-out) both}
+/* 折痕里的数字：先侧光勾勒，再稳定显现 */
+.crease-reveal{position:relative}
+.crease-reveal::after{content:'';position:absolute;left:0;right:0;bottom:-6px;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(185,138,47,.7),transparent);
+  opacity:0;animation:moEmphasis 900ms var(--ease-out) 200ms both 1}

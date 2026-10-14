@@ -105,3 +105,10 @@
 /* 卡片落入槽位的吸附感 */
 .tl-slot .tl-card{animation:cardSettle .3s ease}
 @keyframes cardSettle{from{transform:translateY(-6px);opacity:.6}to{transform:none;opacity:1}}
+
+/* ============ 第三轮：点选放置的选中态（2026-10-14） ============ */
+/* 点击卡片选中（非拖放）时的温和抬起 + 金色轮廓，与拖拽抬起区分 */
+.tl-card.picked{outline:2px solid var(--gold);outline-offset:2px;
+  box-shadow:0 10px 22px rgba(36,36,36,.2);transform:translateY(-2px)}
+/* 槽位获得焦点：温和高亮（不闪烁） */
+.tl-slot:focus-within{box-shadow:inset 0 0 0 2px rgba(185,138,47,.28)}
