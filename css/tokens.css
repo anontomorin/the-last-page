@@ -52,6 +52,18 @@
   --a-gold-55:  rgba(185,138,47,.55);
   --a-ink-12:   rgba(36,36,36,.12);
 
+  /* ============ RGB 三元组色基（供 rgba() 复用） ============
+     用法：rgba(var(--rgb-red), .55)
+     目的：把「色基」收敛为令牌，同时保留调用处的精确透明度，
+     避免为每一个一次性透明度都造一个令牌（那会造成令牌爆炸）。
+     改色基即全局生效——这是 D1 能一次切换的关键。            */
+  --rgb-red:        184,94,82;    /* = #B85E52 主红 */
+  --rgb-red-deep:   142,27,27;    /* = #8E1B1B 深红 */
+  --rgb-gold:       185,138,47;   /* = #B98A2F 金 */
+  --rgb-gold-light: 233,205,145;  /* 淡金：显影 / 纸边光 */
+  --rgb-ink:        36,36,36;     /* = #242424 墨 */
+  --rgb-paper-hi:   247,245,238;  /* 高光纸色：遮罩 / 白纱 */
+
   /* ============ 字体 ============ */
   --font-ui:   "PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
   --font-doc:  "Noto Serif SC","Songti SC","STSong","SimSun",serif;

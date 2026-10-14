@@ -48,7 +48,7 @@
 .end-submit{text-align:center;margin:2.2rem 0}
 
 /* 最终页 */
-#print-page{background:#FFFEFB;border:1px solid var(--line);box-shadow:0 12px 50px rgba(36,36,36,.14);
+#print-page{background:#FFFEFB;border:1px solid var(--line);box-shadow:0 12px 50px rgba(var(--rgb-ink),.14);
   padding:2.6rem 2.8rem;font-family:var(--font-doc);position:relative}
 #print-page .fp-head{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.3em;
   color:var(--ink-soft);display:flex;justify-content:space-between;

@@ -142,14 +142,14 @@
 .scene-stage::after{content:'';position:absolute;inset:0;pointer-events:none;
   background:
     radial-gradient(ellipse at 50% 42%,transparent 55%,rgba(60,50,30,.18)),
-    linear-gradient(180deg,rgba(247,245,238,.18),rgba(247,245,238,.03) 40%,rgba(247,245,238,.22))}
+    linear-gradient(180deg,rgba(var(--rgb-paper-hi),.18),rgba(var(--rgb-paper-hi),.03) 40%,rgba(var(--rgb-paper-hi),.22))}
 /* 环境动态层：缓慢漂移的光斑与尘粒（低密度、低对比） */
 .scene-dust{position:absolute;inset:-10%;pointer-events:none;z-index:1;opacity:.5;
   background:
-    radial-gradient(circle at 22% 30%,rgba(233,205,145,.28) 0 1.5%,transparent 2.5%),
-    radial-gradient(circle at 68% 22%,rgba(233,205,145,.22) 0 1%,transparent 2%),
+    radial-gradient(circle at 22% 30%,rgba(var(--rgb-gold-light),.28) 0 1.5%,transparent 2.5%),
+    radial-gradient(circle at 68% 22%,rgba(var(--rgb-gold-light),.22) 0 1%,transparent 2%),
     radial-gradient(circle at 45% 62%,rgba(255,250,235,.3) 0 1.2%,transparent 2.2%),
-    radial-gradient(circle at 82% 55%,rgba(233,205,145,.18) 0 .9%,transparent 1.8%);
+    radial-gradient(circle at 82% 55%,rgba(var(--rgb-gold-light),.18) 0 .9%,transparent 1.8%);
   animation:dustDrift 26s ease-in-out infinite alternate}
 @keyframes dustDrift{from{transform:translate3d(-1.5%,-1%,0)}to{transform:translate3d(1.5%,1%,0)}}
 
@@ -165,7 +165,7 @@
 .scene-obj:hover .obj-label,.scene-obj:focus-visible .obj-label{border-color:var(--red);color:var(--red)}
 .scene-obj.done .obj-label{border-color:var(--gold);color:var(--gold)}
 .scene-obj svg{width:64px;height:64px;stroke:var(--ink-soft);fill:none;stroke-width:1.4;transition:.22s}
-.scene-obj:hover svg,.scene-obj:focus-visible svg{stroke:var(--red);filter:drop-shadow(0 3px 5px rgba(184,94,82,.35))}
+.scene-obj:hover svg,.scene-obj:focus-visible svg{stroke:var(--red);filter:drop-shadow(0 3px 5px rgba(var(--rgb-red),.35))}
 .scene-obj.done svg{stroke:var(--gold)}
 .scene-obj:focus-visible .obj-label{outline:2px solid var(--gold);outline-offset:2px}
 /* 点击检查反馈：柔和扩散环 */
@@ -189,13 +189,13 @@
 
 /* 敲钟声波 */
 .bell-wave{position:absolute;top:14%;left:50%;width:120px;height:120px;margin:-60px;
-  border:2px solid rgba(184,94,82,.55);border-radius:50%;pointer-events:none;z-index:2;
+  border:2px solid rgba(var(--rgb-red),.55);border-radius:50%;pointer-events:none;z-index:2;
   animation:bellWave 1s ease-out forwards}
 @keyframes bellWave{0%{opacity:.8;transform:scale(.4)}100%{opacity:0;transform:scale(2.6)}}
 /* 第七声：场景低幅震动 + 金门提示 */
 .scene-stage.quake{animation:stageQuake .6s ease}
 @keyframes stageQuake{0%,100%{transform:none}20%{transform:translate(2px,1px)}40%{transform:translate(-2px,-1px)}60%{transform:translate(1px,1px)}80%{transform:translate(-1px,0)}}
-.scene-obj.door-glow .obj-label{border-color:var(--gold);color:var(--gold);box-shadow:0 0 14px rgba(185,138,47,.5)}
+.scene-obj.door-glow .obj-label{border-color:var(--gold);color:var(--gold);box-shadow:0 0 14px rgba(var(--rgb-gold),.5)}
 
 /* 渡口点击波纹 */
 .river-ripple{position:absolute;width:14px;height:14px;margin:-7px;border:2px solid rgba(120,140,150,.6);
@@ -227,7 +227,7 @@
 .board-paper h4{text-align:center;font-size:1rem;letter-spacing:.3em;margin-bottom:.8rem}
 .board-line{display:flex;gap:.7rem;font-size:.86rem;line-height:2;cursor:pointer;padding:.05rem .3rem;
   border-radius:2px;transition:.2s}
-.board-line:hover{background:rgba(185,138,47,.12)}
+.board-line:hover{background:rgba(var(--rgb-gold),.12)}
 .board-line .ln{font-family:var(--font-mono);font-size:.62rem;color:var(--ink-soft);width:2em;padding-top:.45em}
 .board-line.blurred .lt{filter:blur(4px);user-select:none}
 .board-line.revealed .lt{color:var(--red);font-weight:700;animation:cardIn .6s}
@@ -279,13 +279,13 @@
 .board-line.revealing{animation:moRevealLine 700ms var(--ease-out) both}
 .board-line.revealing .lt{filter:none}
 .board-line.correct .lt{color:var(--red);font-weight:700;
-  background:linear-gradient(transparent 64%,rgba(233,205,145,.62) 64%)}
+  background:linear-gradient(transparent 64%,rgba(var(--rgb-gold-light),.62) 64%)}
 
 /* 渡口波纹：限制并发数量 */
 .river-ripple{will-change:transform,opacity}
 
 /* 老街/渡口热点的局部聚焦（不整幅加滤镜） */
-.scene-obj.focus-in svg{filter:drop-shadow(0 0 6px rgba(185,138,47,.55))}
+.scene-obj.focus-in svg{filter:drop-shadow(0 0 6px rgba(var(--rgb-gold),.55))}
 
 /* ============================================================
    地图二次进入：跳过完整入场动画（保留新解锁印章 ring）

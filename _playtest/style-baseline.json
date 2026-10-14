@@ -2,11 +2,11 @@
   "generatedAt": "2026-10-14",
   "note": "棘轮基线：这些数量只能下降，不能上升。P1 收编令牌后用 --update-baseline 下调。",
   "counts": {
-    "colorHexLiterals": 90,
-    "colorRgbaLiterals": 135,
-    "colorLiteralsTotal": 225,
+    "colorHexLiterals": 87,
+    "colorRgbaLiterals": 64,
+    "colorLiteralsTotal": 151,
     "durationLiterals": 166,
     "varDurationRefs": 8,
-    "distinctHex": 55
+    "distinctHex": 53
   }
 }

@@ -5,7 +5,7 @@
 .ev-head p{font-size:.75rem;color:var(--ink-soft)}
 .ev-board{position:relative;height:480px;border:1px solid var(--line);overflow:hidden;
   background:
-    radial-gradient(circle at 30% 20%,rgba(185,138,47,.05),transparent 50%),
+    radial-gradient(circle at 30% 20%,rgba(var(--rgb-gold),.05),transparent 50%),
     repeating-linear-gradient(0deg,transparent 0 31px,rgba(150,130,90,.1) 31px 32px),
     repeating-linear-gradient(90deg,transparent 0 31px,rgba(150,130,90,.1) 31px 32px),
     #EFE9D8;
@@ -31,8 +31,8 @@
 .ev-progress b{color:var(--red);font-size:.85rem;margin:0 .15rem}
 .ev-progress .dim{opacity:.7}
 .ev-modebar{display:flex;align-items:center;gap:.7rem;justify-content:center;margin-bottom:.7rem;flex-wrap:wrap}
-.btn-ghost.on{border-color:var(--red);color:var(--red);background:rgba(142,27,27,.06)}
-.ev-node.picked{border-color:var(--red);box-shadow:0 0 0 3px rgba(142,27,27,.25),0 6px 16px rgba(36,36,36,.22);z-index:6}
+.btn-ghost.on{border-color:var(--red);color:var(--red);background:rgba(var(--rgb-red-deep),.06)}
+.ev-node.picked{border-color:var(--red);box-shadow:0 0 0 3px rgba(var(--rgb-red-deep),.25),0 6px 16px rgba(var(--rgb-ink),.22);z-index:6}
 
 /* ---------- 推理记录 ---------- */
 .ev-log{margin-top:1rem;border-top:1px dashed var(--line);padding-top:.7rem}
@@ -61,7 +61,7 @@
   border:1px solid var(--line);background:var(--panel);padding:.5rem .6rem;
   font-family:inherit;transition:border-color .15s,background .15s}
 .ev-type:hover{border-color:var(--red)}
-.ev-type.on{border-color:var(--red);background:rgba(142,27,27,.07)}
+.ev-type.on{border-color:var(--red);background:rgba(var(--rgb-red-deep),.07)}
 .ev-type b{font-size:.76rem;font-family:var(--font-doc);letter-spacing:.05em}
 .ev-type span{font-size:.62rem;color:var(--ink-soft);line-height:1.35}
 .ev-why{width:100%;resize:vertical;font-family:inherit;font-size:.74rem;line-height:1.6;
@@ -71,10 +71,10 @@
 
 .ev-node{position:absolute;transform:translate(-50%,-50%);cursor:grab;
   padding:.45rem .8rem;font-size:.72rem;font-family:var(--font-doc);font-weight:600;
-  border:1px solid var(--line);background:var(--panel);box-shadow:0 3px 10px rgba(36,36,36,.15);
+  border:1px solid var(--line);background:var(--panel);box-shadow:0 3px 10px rgba(var(--rgb-ink),.15);
   transition:box-shadow .2s,border-color .2s;user-select:none;max-width:150px;text-align:center;
   line-height:1.5;touch-action:none}
-.ev-node:hover{border-color:var(--red);box-shadow:0 6px 16px rgba(36,36,36,.22);z-index:5}
+.ev-node:hover{border-color:var(--red);box-shadow:0 6px 16px rgba(var(--rgb-ink),.22);z-index:5}
 .ev-node:active{cursor:grabbing}
 .ev-node.kind-clue{border-left:3px solid var(--red);color:var(--red)}
 .ev-node.kind-doc{border-left:3px solid var(--ink-soft);color:var(--ink)}
@@ -98,7 +98,7 @@
 /* ============ 证据板交互升级（2026-10） ============ */
 .ev-node{transition:border-color .2s,box-shadow .2s,transform .15s}
 .ev-node:active{cursor:grabbing;transform:translate(-50%,-50%) scale(1.03)}
-.ev-node.picked{border-color:var(--gold);box-shadow:0 0 0 3px rgba(185,138,47,.3)}
+.ev-node.picked{border-color:var(--gold);box-shadow:0 0 0 3px rgba(var(--rgb-gold),.3)}
 .ev-type{transition:.15s}
 .ev-type:active{transform:scale(.97)}
 /* 关系对话框按钮按下手感 */
@@ -106,7 +106,7 @@
 
 /* ============ 第三轮：拖拽抬起 + 连线预览（2026-10-14） ============ */
 /* 拖动时轻微抬起，松开平滑落位；不改存储坐标 */
-.ev-node.dragging{z-index:20;box-shadow:0 14px 28px rgba(36,36,36,.26);
+.ev-node.dragging{z-index:20;box-shadow:0 14px 28px rgba(var(--rgb-ink),.26);
   transform:translate(-50%,-50%) scale(1.05);transition:transform .12s ease,box-shadow .12s ease}
 .ev-node{transition:transform .18s var(--ease-soft, ease),box-shadow .18s, border-color .2s}
 /* 连线预览层：跟随指针的虚线，不参与命中 */

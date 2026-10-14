@@ -16,7 +16,7 @@
   border:1px solid var(--line);color:var(--ink-soft);white-space:nowrap;
 }
 .qg-status.live{border-color:var(--red);color:var(--red)}
-.qg-status.wait{border-color:var(--gold);color:var(--gold);background:rgba(233,205,145,.14)}
+.qg-status.wait{border-color:var(--gold);color:var(--gold);background:rgba(var(--rgb-gold-light),.14)}
 .qg-status.done{border-color:var(--ok);color:var(--ok)}
 .qg-fold{
   background:none;border:none;cursor:pointer;font-size:.62rem;color:var(--ink-soft);
@@ -69,7 +69,7 @@
   outline:2px solid var(--red);outline-offset:-2px;
   animation:qgFlash 1.2s ease 2;
 }
-@keyframes qgFlash{0%,100%{background:transparent}50%{background:rgba(184,94,82,.10)}}
+@keyframes qgFlash{0%,100%{background:transparent}50%{background:rgba(var(--rgb-red),.10)}}
 
 @media (max-width:640px){
   .qg-card{padding:.8rem .9rem .7rem}

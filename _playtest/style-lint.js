@@ -71,6 +71,13 @@ function run(opts) {
         problems.push(`${name}: ${got} ≠ ${v}`);
       }
     }
+    /* RGB 三元组：rgb.redDeep → --rgb-red-deep */
+    for (const [k, v] of Object.entries(tokens.rgb || {})) {
+      const name = 'rgb-' + kebab(k);
+      const got = getVar(name);
+      if (got === null) problems.push(`${name} 缺失`);
+      else if (got.replace(/\s/g, '') !== String(v).replace(/\s/g, '')) problems.push(`${name}: ${got} ≠ ${v}`);
+    }
     /* 时长：duration.micro → --t-micro: 180ms */
     for (const [k, v] of Object.entries(tokens.duration)) {
       const name = 't-' + kebab(k);
@@ -164,7 +171,9 @@ function run(opts) {
       const hex = t.match(/#[0-9a-fA-F]{3,8}\b/g) || [];
       colorHex += hex.length;
       hex.forEach(h => distinct.add(h.toLowerCase()));
-      colorRgba += (t.match(/rgba?\s*\(/g) || []).length;
+      /* 只统计「字面量」颜色：rgb/rgba 的第一个参数是数字。
+         形如 rgba(var(--rgb-red), .55) 属于已令牌化，不计入棘轮。 */
+      colorRgba += (t.match(/rgba?\(\s*[0-9]/g) || []).length;
       durLiterals += (t.match(/[0-9.]+m?s\b/g) || []).length;
       varDur += (t.match(/var\(--t-/g) || []).length;
     }

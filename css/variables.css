@@ -17,7 +17,7 @@
 
   /* ⚠️ 决策 D1 的唯一切换点 ——
      P0（当前）：保持历史渲染，指向 --c-red-deep (#8E1B1B)。
-     P1（收编）：改为 var(--c-red) (#B85E52)，并替换各处 #B85E52 / rgba(184,94,82,…) 字面量。 */
+     P1（收编）：改为 var(--c-red)，并把各处主红字面量替换为 var(--rgb-red)。 */
   --red:        var(--c-red-deep);
   --red-bright: var(--c-red-bright);
   --gold:       var(--c-gold);
