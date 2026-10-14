@@ -9,7 +9,10 @@ const CHROME = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Applic
 const { chromium } = require(PW);
 
 const ROOT = path.resolve(__dirname, '..');
-const OUT = path.join(__dirname, 'shots');
+/* 输出目录：--baseline 写入视觉基线目录；也可用 SHOTS_DIR 覆盖 */
+const OUT = process.argv.includes('--baseline')
+  ? path.join(__dirname, 'baseline')
+  : (process.env.SHOTS_DIR ? path.resolve(process.env.SHOTS_DIR) : path.join(__dirname, 'shots'));
 fs.mkdirSync(OUT, { recursive: true });
 const MIME = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.webp': 'image/webp', '.jpg': 'image/jpeg' };
 const server = http.createServer((req, res) => {

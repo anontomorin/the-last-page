@@ -7,7 +7,12 @@
     "serve": "node _playtest/serve.js",
     "test": "node _playtest/harness.js",
     "test:dictation": "node _playtest/dictation.test.js",
+    "test:style": "node _playtest/style-lint.js",
+    "test:contract": "node _playtest/contract.test.js",
     "test:playthrough": "node _playtest/playthrough.js",
+    "shots": "node _playtest/shots4.js",
+    "shots:baseline": "node _playtest/shots4.js --baseline",
+    "test:visual": "node _playtest/visual-diff.js",
     "demo": "node _playtest/demo_solo.js",
     "demo:fast": "node _playtest/demo_solo.js fast"
   },

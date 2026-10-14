@@ -8,3 +8,7 @@ node_modules/
 package-lock.json
 .DS_Store
 Thumbs.db
+
+# 视觉回归产物（基线可随时用 npm run shots:baseline 重建）
+_playtest/baseline/
+_playtest/visual-report/

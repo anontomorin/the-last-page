@@ -5,9 +5,11 @@
      1. 语法自检       —— 遍历 js 目录下全部 .js，node --check
      2. 数据一致性自检 —— 线索/关系/时间线引用的 id 是否都存在
      3. 听写校验测试   —— _playtest/dictation.test.js（离线，必跑）
-     4. 六幕通关实测   —— _playtest/playthrough.js（需本机 Chrome，可选）
+     4. 风格 lint      —— _playtest/style-lint.js（离线，STYLE_CONTRACT.md）
+     5. 逻辑契约测试   —— _playtest/contract.test.js（离线，CONTRACT.md）
+     6. 六幕通关实测   —— _playtest/playthrough.js（需本机 Chrome，可选）
    任一层失败都会让 npm test 以非零码退出。
-   可用 SKIP_PLAYTHROUGH=1 跳过第 4 层。
+   可用 SKIP_PLAYTHROUGH=1 跳过第 6 层。
    ============================================================ */
 const fs = require('fs');
 const path = require('path');
@@ -113,7 +115,27 @@ section('听写校验测试');
   } catch (e) { bad('听写测试无法运行', e.message); }
 })();
 
-/* ---------- 4. 冒烟 + 六幕通关实测（可选） ---------- */
+/* ---------- 4. 风格 lint（离线） ---------- */
+section('风格 lint');
+(function styleLint() {
+  try {
+    const r = require('./style-lint.js').run();
+    if (r.fail === 0) ok('令牌一致 / 引用合规 / 透明度达标 / 棘轮无新增', `(通过 ${r.pass})`);
+    else { bad('风格 lint 存在失败项', `(失败 ${r.fail})`); process.stdout.write(r.output + '\n'); }
+  } catch (e) { bad('风格 lint 无法运行', e.message); }
+})();
+
+/* ---------- 5. 逻辑契约（离线） ---------- */
+section('逻辑契约');
+(function contract() {
+  try {
+    const r = require('./contract.test.js').run();
+    if (r.fail === 0) ok('存档键 / 隐藏 ARG / 数据基线 / 加载顺序 全部未变', `(通过 ${r.pass})`);
+    else { bad('契约测试存在失败项', `(失败 ${r.fail})`); process.stdout.write(r.output + '\n'); }
+  } catch (e) { bad('契约测试无法运行', e.message); }
+})();
+
+/* ---------- 6. 冒烟 + 六幕通关实测（可选） ---------- */
 section('浏览器冒烟 / 六幕通关实测（可选）');
 const pwPath = process.env.PLAYWRIGHT_PATH ||
   'C:/Users/郭家兴/.workbuddy/binaries/node/workspace/node_modules/playwright-core';

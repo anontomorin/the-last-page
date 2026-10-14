@@ -1,24 +1,21 @@
 /* ============================================================
-   动效系统规范（2026-10 第二轮 · 第六/七章）
+   动效系统规范
    ------------------------------------------------------------
-   · 统一时长与缓动变量；关键帧以 mo 前缀集中管理，避免散落重复。
-   · 规范值（参考任务书 7.1）：
-       --t-fast  160ms  hover / focus / pressed
-       --t-base  320ms  组件进入/关闭、卡片切换
-       --t-slow  600ms  翻面 / 描画 / 物件检查
-       --t-reveal 1000ms 线索发现 / 场景转场 / 局部聚焦
+   · 时长与缓动令牌（--t-* / --ease-*）已在 css/tokens.css 定义，
+     本文件不再重复定义（唯一来源原则，见 STYLE_CONTRACT.md §3.6）。
+   · 关键帧以 mo 前缀集中管理，避免与 global.css 的 cardIn / flashOnce
+     等既有名称冲突。
    · 所有关键帧只使用 transform / opacity / stroke 类可控属性。
    ============================================================ */
-:root{
-  --t-micro:180ms;
-  --t-fast:160ms;
-  --t-base:320ms;
-  --t-slow:600ms;
-  --t-reveal:900ms;
-  --t-narr:1200ms;
-  --ease-out:cubic-bezier(.2,.9,.3,1);
-  --ease-soft:cubic-bezier(.22,.61,.36,1);
-}
+
+/* 令牌速查（值定义在 tokens.css）：
+     --t-micro  180ms  hover / focus / pressed
+     --t-fast   160ms
+     --t-base   320ms  组件进入/关闭、卡片切换
+     --t-slow   600ms  翻面 / 描画 / 物件检查
+     --t-reveal 900ms  线索发现 / 场景转场 / 局部聚焦
+     --t-narr   1200ms 关键叙事
+*/
 
 /* ---------- 通用关键帧（mo 前缀） ---------- */
 @keyframes moFadeUp{
