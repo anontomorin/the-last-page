@@ -1,0 +1,114 @@
+/* ============================================================
+   动效系统规范（2026-10 第二轮 · 第六/七章）
+   ------------------------------------------------------------
+   · 统一时长与缓动变量；关键帧以 mo 前缀集中管理，避免散落重复。
+   · 规范值（参考任务书 7.1）：
+       --t-fast  160ms  hover / focus / pressed
+       --t-base  320ms  组件进入/关闭、卡片切换
+       --t-slow  600ms  翻面 / 描画 / 物件检查
+       --t-reveal 1000ms 线索发现 / 场景转场 / 局部聚焦
+   · 所有关键帧只使用 transform / opacity / stroke 类可控属性。
+   ============================================================ */
+:root{
+  --t-fast:160ms;
+  --t-base:320ms;
+  --t-slow:600ms;
+  --t-reveal:1000ms;
+  --ease-out:cubic-bezier(.2,.9,.3,1);
+  --ease-soft:ease;
+}
+
+/* ---------- 通用关键帧（mo 前缀） ---------- */
+@keyframes moFadeUp{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:none}
+}
+@keyframes moCard{
+  from{opacity:0;transform:translateY(16px) scale(.97)}
+  to{opacity:1;transform:none}
+}
+@keyframes moPaper{
+  from{opacity:0;transform:rotate(-.8deg) translateY(12px)}
+  to{opacity:1;transform:none}
+}
+@keyframes moInk{
+  to{stroke-dashoffset:0}
+}
+@keyframes moStamp{
+  0%{opacity:0;transform:scale(1.3) rotate(-10deg)}
+  55%{opacity:1;transform:scale(.94) rotate(-5deg)}
+  75%{transform:scale(1.03) rotate(-7deg)}
+  100%{opacity:1;transform:scale(1) rotate(-6deg)}
+}
+@keyframes moGlowRing{
+  0%{box-shadow:0 0 0 0 rgba(185,138,47,.55)}
+  100%{box-shadow:0 0 0 12px rgba(185,138,47,0)}
+}
+@keyframes moWarnRing{
+  0%{box-shadow:0 0 0 0 rgba(184,94,82,.5)}
+  100%{box-shadow:0 0 0 10px rgba(184,94,82,0)}
+}
+
+/* ---------- 工具类 ---------- */
+.mo-fade-up{animation:moFadeUp var(--t-base) var(--ease-out)}
+.mo-card{animation:moCard var(--t-base) var(--ease-out)}
+.mo-paper{animation:moPaper var(--t-slow) var(--ease-out)}
+/* 一次性高亮（用于原件/卡片定位） */
+.mo-glow{animation:moGlowRing 900ms ease-out 3}
+.mo-warn{animation:moWarnRing 500ms ease-out 2}
+
+/* ============================================================
+   组件级规范实现
+   ============================================================ */
+
+/* ---- Toast：进入 + 退出（6.7） ---- */
+.toast.out{animation:moToastOut 240ms ease forwards}
+@keyframes moToastOut{
+  from{opacity:1;transform:translate(-50%,0)}
+  to{opacity:0;transform:translate(-50%,-10px)}
+}
+
+/* ---- 结局：印章落印回弹 + 纸页边缘光照 + 跳过按钮（6.8） ---- */
+#print-page{position:relative;overflow:hidden}
+#print-page::before{content:'';position:absolute;top:0;bottom:0;left:0;width:3px;
+  background:linear-gradient(180deg,rgba(233,205,145,.0),rgba(233,205,145,.65),rgba(233,205,145,0));
+  pointer-events:none}
+.fp-stamp .stamp{animation:moStamp var(--t-reveal) var(--ease-out)}
+.fp-skip{position:absolute;right:1rem;top:.9rem;z-index:5}
+@media print{ .fp-skip{display:none} #print-page::before{display:none} }
+
+/* ---- 时间线：验证成功的逐段落位 + 字段级错误突出（6.6） ---- */
+.tl-slot.done{animation:moSlotDone var(--t-reveal) var(--ease-out) backwards}
+.tl-slot.done:nth-child(2){animation-delay:180ms}
+.tl-slot.done:nth-child(3){animation-delay:360ms}
+@keyframes moSlotDone{
+  0%{opacity:.3;transform:translateY(10px);border-color:var(--gold)}
+  60%{opacity:1;transform:none;border-color:var(--gold)}
+  100%{border-color:var(--ok)}
+}
+.tl-meta-cell.field-warn .tl-sel,
+.tl-meta-cell.field-warn .tl-date-in{
+  border-color:var(--red)!important;
+  animation:moFieldWarn 600ms ease 2;
+}
+@keyframes moFieldWarn{
+  0%,100%{box-shadow:0 0 0 0 rgba(184,94,82,0)}
+  50%{box-shadow:0 0 0 4px rgba(184,94,82,.28)}
+}
+
+/* ---- 证据板：连线墨画 + 节点成败反馈（6.5） ---- */
+.ev-lines line.linked{transition:stroke-dashoffset var(--t-slow) var(--ease-out)}
+.ev-node.mo-glow{border-color:var(--gold)!important}
+.ev-node.mo-warn{border-color:var(--red)!important}
+
+/* ---- 文档：红标批注的聚焦显影（6.2） ---- */
+.paper-doc .red-mark{
+  background:linear-gradient(transparent 62%,rgba(233,205,145,.5) 62%);
+  padding:0 .1em;animation:moEmphasis 1.2s var(--ease-out) 1 both}
+@keyframes moEmphasis{from{opacity:0}to{opacity:1}}
+
+/* ---- 人物卡：错峰入场（6.4） ---- */
+.person-grid .person-card{animation:moFadeUp var(--t-base) var(--ease-out) backwards}
+.person-grid .person-card:nth-child(2){animation-delay:90ms}
+.person-grid .person-card:nth-child(3){animation-delay:180ms}
+.person-grid .person-card:nth-child(4){animation-delay:270ms}

@@ -133,6 +133,7 @@ LP.duo = (function () {
     if (LP.$('.duo-overlay')) return;
     LP.audio.open();
     const s = LP.state.get();
+    const trigger = document.activeElement;   // 关闭后归还焦点
 
     const overlay = LP.el('div', { class: 'duo-overlay' });
     const panel = LP.el('div', { class: 'duo-panel' });
@@ -177,7 +178,11 @@ LP.duo = (function () {
     overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
     document.body.appendChild(overlay);
 
-    function close() { LP.audio.click(); overlay.remove(); }
+    function close() {
+      LP.audio.click(); overlay.remove();
+      if (trigger && trigger.focus) trigger.focus();
+    }
+    LP.ui.bindEsc && LP.ui.bindEsc(overlay, close);
     function redraw() { renderSay(sayList, redraw); renderHear(hearList, redraw); renderFallback(fb); }
 
     redraw();

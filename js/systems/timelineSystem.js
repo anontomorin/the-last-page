@@ -306,6 +306,17 @@ LP.timeline = (function () {
     LP.audio.error();
     const days = container.querySelector('.tl-days');
     if (days) LP.anim.shake(days);
+    /* 字段级突出：指出该复查哪一类输入，但不清空玩家已填内容 */
+    container.querySelectorAll('.tl-meta-cell').forEach(c => c.classList.remove('field-warn'));
+    if (kind === 'weather') {
+      container.querySelectorAll('.tl-meta-cell').forEach((c, i) => {
+        if (i % 2 === 0) c.classList.add('field-warn');
+      });
+    } else if (kind === 'date') {
+      container.querySelectorAll('.tl-meta-cell').forEach((c, i) => {
+        if (i % 2 === 1) c.classList.add('field-warn');
+      });
+    }
     const old = container.querySelector('.tl-conflict');
     if (old) old.remove();
     container.querySelector('.tl-wrap').appendChild(LP.el('div', { class: 'tl-conflict' }, [

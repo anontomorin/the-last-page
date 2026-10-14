@@ -66,14 +66,30 @@ LP.ui = (function () {
   let toastTimer = null;
   function toast(msg, type) {
     const t = LP.$('#toast');
+    clearTimeout(toastTimer);
+    t.classList.remove('out');           // 打断旧退出动画
     t.textContent = msg;
     t.className = 'toast mono' + (type ? ' ' + type : '');
     t.hidden = false;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { t.hidden = true; }, 2800);
+    toastTimer = setTimeout(() => {
+      t.classList.add('out');            // 先淡出再隐藏
+      setTimeout(() => { t.hidden = true; }, 240);
+    }, 2800);
   }
 
-  return { narrate, toast };
+  /* 弹窗统一的 Escape 关闭（6.7）：overlay 打开期间按 Esc 触发 onClose，
+     关闭后把焦点还给触发按钮，保证键盘流程闭环 */
+  function bindEsc(overlay, onClose) {
+    const h = e => {
+      if (e.key !== 'Escape') return;
+      if (!overlay.isConnected) { document.removeEventListener('keydown', h); return; }
+      document.removeEventListener('keydown', h);
+      onClose();
+    };
+    document.addEventListener('keydown', h);
+  }
+
+  return { narrate, toast, bindEsc };
 })();
 
 /* ---------------- 档案工作台 ---------------- */
@@ -281,8 +297,9 @@ LP.archive = (function () {
 
     if (!items.length) {
       box.appendChild(LP.el('div', {
-        class: 'dim mono', text: curTab === 'timeline' ? '在中央区域操作' : '（暂无条目）',
-        style: 'padding:1rem;font-size:.7rem;text-align:center'
+        class: 'dim mono',
+        text: searchKw ? `未检索到与「${searchKw}」相关的档案` : (curTab === 'timeline' ? '在中央区域操作' : '（暂无条目）'),
+        style: 'padding:1rem;font-size:.7rem;text-align:center;line-height:1.9'
       }));
       return;
     }

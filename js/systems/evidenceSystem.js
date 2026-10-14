@@ -83,6 +83,20 @@ LP.evidence = (function () {
     return visible;
   }
 
+  /* ---------- 节点位置持久化（独立于存档结构，单独 localStorage 键） ---------- */
+  const POS_KEY = 'lp_evpos_v1';
+  function loadPositions() {
+    try { return JSON.parse(localStorage.getItem(POS_KEY) || '{}'); }
+    catch (e) { return {}; }
+  }
+  function savePositions() {
+    const data = {};
+    nodes.forEach((n, id) => {
+      if (n.el.style.left) data[id] = { left: n.el.style.left, top: n.el.style.top };
+    });
+    try { localStorage.setItem(POS_KEY, JSON.stringify(data)); } catch (e) { /* 忽略 */ }
+  }
+
   /* ---------- 渲染 ---------- */
   function render(container) {
     container.innerHTML = '';
@@ -135,16 +149,20 @@ LP.evidence = (function () {
     }
 
     const { pos: positions, rows } = layout(visible.size);
+    const savedPos = loadPositions();
     if (rows * 88 > 480) board.style.height = (rows * 88) + 'px';
     if (visible.size > 34) board.classList.add('dense');
     let i = 0;
     visible.forEach((meta, id) => {
-      const pos = positions[i++];
+      /* 位置：玩家拖动保存的优先，否则用自动网格（layout 返回 x/y 百分比） */
+      let left, top;
+      if (savedPos[id]) { left = savedPos[id].left; top = savedPos[id].top; }
+      else { const p = positions[i++]; left = p.x + '%'; top = p.y + '%'; }
       const el = LP.el('div', {
         class: 'ev-node kind-' + meta.kind + (selFirst === id ? ' picked' : ''),
         'data-id': id,
         title: meta.hint ? meta.hint : meta.label,
-        style: `left:${pos.x}%;top:${pos.y}%`
+        style: `left:${left};top:${top}`
       }, [
         LP.el('span', { class: 'ev-kind', text: meta.kind === 'clue' ? '线索' : meta.kind === 'person' ? '人物' : '资料' }),
         LP.el('span', { text: meta.label })
@@ -154,12 +172,15 @@ LP.evidence = (function () {
       nodes.set(id, { el, kind: meta.kind });
       makeDraggable(el, board, () => drawLines(svg));
     });
+    /* 重建后施加待播放的成败反馈 */
+    pendingFx.forEach(f => nodeFx(f.id, f.cls));
+    pendingFx = [];
 
     wrap.appendChild(board);
     /* 已建立的推理记录 */
     wrap.appendChild(reasonLog(container));
     container.appendChild(wrap);
-    requestAnimationFrame(() => drawLines(svg));
+    requestAnimationFrame(() => requestAnimationFrame(() => drawLines(svg, true)));
   }
 
   /* 玩家连线的记录清单（可点回原件追溯依据） */
@@ -252,12 +273,26 @@ LP.evidence = (function () {
         attemptLink(a, b, pickedType, why.value.trim(), container);
       }
     }));
-    acts.appendChild(LP.el('button', { class: 'btn-ghost', text: '取消', onclick: () => { LP.audio.click(); overlay.remove(); } }));
+    acts.appendChild(LP.el('button', { class: 'btn-ghost', text: '取消', onclick: close }));
     panel.appendChild(acts);
 
+    function close() { LP.audio.click(); overlay.remove(); }
     overlay.appendChild(panel);
-    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
     document.body.appendChild(overlay);
+    const firstBtn = panel.querySelector('.ev-type');
+    LP.ui.bindEsc && LP.ui.bindEsc(overlay, close);
+    if (firstBtn) firstBtn.focus();
+  }
+
+  /* 待播放的节点反馈（render 重建节点后施加，避免被重渲染清掉） */
+  let pendingFx = [];
+  function queueFx(id, cls) { pendingFx.push({ id, cls }); }
+  function nodeFx(id, cls) {
+    const n = nodes.get(id);
+    if (!n) return;
+    n.el.classList.remove(cls); void n.el.offsetWidth; n.el.classList.add(cls);
+    setTimeout(() => n.el.classList.remove(cls), 2200);
   }
 
   /* 判定：连对记入 evidenceLinks；连错给出分层反馈 */
@@ -277,6 +312,7 @@ LP.evidence = (function () {
       LP.audio.complete();
       LP.anim.flash();
       LP.ui.toast('推理成立：' + rule.why, 'gold');
+      queueFx(a, 'mo-glow'); queueFx(b, 'mo-glow');   // 两节点金环 + 连线墨画
       selFirst = null;
       render(container);
       LP.inv.checkDeductions();
@@ -286,6 +322,7 @@ LP.evidence = (function () {
     /* 两端之间存在正确关系，但类型选错了 */
     if (rule) {
       LP.audio.error();
+      queueFx(a, 'mo-warn'); queueFx(b, 'mo-warn');
       LP.ui.toast(
         `这两者之间确实有关系，但你想的不是「${typeLabel(type)}」——再从它们各自说了什么想一想。`,
         'red'
@@ -297,6 +334,7 @@ LP.evidence = (function () {
 
     /* 完全不成立 */
     LP.audio.error();
+    queueFx(a, 'mo-warn'); queueFx(b, 'mo-warn');
     LP.anim.shake(LP.$('.ev-board', container));
     LP.ui.toast('这两条记录之间，暂时找不到能彼此印证的关联。', 'red');
     recordTrial(a, b, type, null);
@@ -310,7 +348,9 @@ LP.evidence = (function () {
   }
 
   /* ---------- 连线绘制 ---------- */
-  function drawLines(svg) {
+  /* animate：仅在整板渲染后为「玩家建立的关系」播放墨画动画；
+     拖动/高亮时重绘不重复播放 */
+  function drawLines(svg, animate) {
     svg.innerHTML = '';
     const board = svg.parentElement;
     const W = board.clientWidth, H = board.clientHeight;
@@ -328,6 +368,17 @@ LP.evidence = (function () {
       line.setAttribute('x2', rb.left + rb.width / 2 - br.left);
       line.setAttribute('y2', rb.top + rb.height / 2 - br.top);
       if (cls) line.setAttribute('class', cls);
+      /* 关系线：以墨画方式显现（从一端“书写”到另一端） */
+      if (animate && cls && cls.indexOf('linked') === 0) {
+        const len = Math.hypot(
+          (ra.left - rb.left), (ra.top - rb.top)
+        ) || 100;
+        line.style.strokeDasharray = String(len);
+        line.style.strokeDashoffset = String(len);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          line.style.strokeDashoffset = '0';
+        }));
+      }
       svg.appendChild(line);
     }
 
@@ -362,7 +413,9 @@ LP.evidence = (function () {
       el.style.top = (ny / br.height * 100) + '%';
       onMove && onMove();
     });
-    el.addEventListener('pointerup', () => { dragging = false; if (moved) LP.audio.click(); });
+    el.addEventListener('pointerup', () => {
+      dragging = false; if (moved) { LP.audio.click(); savePositions(); }
+    });
   }
 
   function focusNode(id) {

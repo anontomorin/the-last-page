@@ -287,6 +287,7 @@ LP.photo = (function () {
     overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
     document.body.appendChild(overlay);
     function close() { LP.audio.click(); overlay.remove(); }
+    LP.ui.bindEsc && LP.ui.bindEsc(overlay, close);
   }
 
   return { open, openSort };

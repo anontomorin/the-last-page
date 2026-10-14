@@ -128,7 +128,7 @@ LP.ending = (function () {
     return lines;
   }
 
-  /* 打印动画：逐行「印」到最终页上 */
+  /* 打印动画：逐行「印」到最终页上（可跳过，跳过直接进入最终状态） */
   function printFinalPage(stage) {
     stage.innerHTML = '';
     const page = LP.el('div', { id: 'print-page' });
@@ -139,12 +139,29 @@ LP.ending = (function () {
     stage.appendChild(page);
 
     const lines = finalPageLines();
-    let i = 0;
+    let i = 0, cancelType = null;
+
+    const skipBtn = LP.el('button', {
+      class: 'btn-ghost small fp-skip', type: 'button', text: '跳过书写 ›'
+    });
+    skipBtn.addEventListener('click', () => {
+      LP.audio.click();
+      if (cancelType) { cancelType(); cancelType = null; }
+      while (i < lines.length) {
+        page.appendChild(LP.el('div', { class: 'fp-line ' + lines[i].cls, text: lines[i].text }));
+        i++;
+      }
+      skipBtn.remove();
+      afterPrint(stage, page);
+    });
+    stage.appendChild(skipBtn);
+
     (function next() {
-      if (i >= lines.length) return afterPrint(stage, page);
+      if (i >= lines.length) { skipBtn.remove(); return afterPrint(stage, page); }
       const row = LP.el('div', { class: 'fp-line ' + lines[i].cls });
       page.appendChild(row);
-      LP.anim.typewriter(row, lines[i].text, lines[i].cls === 'user' ? 34 : 22, () => {
+      cancelType = LP.anim.typewriter(row, lines[i].text, lines[i].cls === 'user' ? 34 : 22, () => {
+        cancelType = null;
         i++;
         setTimeout(next, 220);
       });
@@ -332,6 +349,7 @@ LP.ending = (function () {
     overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
     document.body.appendChild(overlay);
     function close() { LP.audio.click(); overlay.remove(); }
+    LP.ui.bindEsc && LP.ui.bindEsc(overlay, close);
   }
 
   function myRoleKey() { return LP.state.get().mode; }
@@ -439,6 +457,7 @@ LP.ending = (function () {
     overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
     document.body.appendChild(overlay);
     function close() { LP.audio.click(); overlay.remove(); }
+    LP.ui.bindEsc && LP.ui.bindEsc(overlay, close);
   }
 
   /* 念给对方听：把自己的三问逐条展示出来 */
