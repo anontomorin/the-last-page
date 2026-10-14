@@ -55,10 +55,10 @@ body[data-act="6"] #red-ribbon{opacity:.95;width:7px}
 /* ============ 启动画面（封面 + 卡片） ============ */
 #screen-boot{align-items:stretch;justify-content:flex-start;overflow:hidden;
   background:var(--bg-tint)}
-.boot-visual{position:absolute;inset:0;z-index:0}
+.boot-visual{position:absolute;top:0;left:0;right:0;bottom:0;z-index:0}
 .boot-visual img{width:100%;height:100%;object-fit:cover;object-position:center 38%}
 /* 左侧渐层保证标题在任何宽度下清晰 */
-.boot-visual::after{content:"";position:absolute;inset:0;
+.boot-visual::after{content:"";position:absolute;top:0;left:0;right:0;bottom:0;
   background:linear-gradient(90deg,rgba(247,245,238,.94) 0%,rgba(247,245,238,.82) 34%,rgba(247,245,238,.25) 62%,rgba(247,245,238,0) 78%)}
 .boot-inner{position:relative;z-index:1;width:min(560px,100%);height:100%;
   display:flex;align-items:center;padding:4vh 4vw}
