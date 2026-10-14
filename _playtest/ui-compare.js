@@ -89,7 +89,13 @@ const CASES = [
       discoveredDocuments: ['diary_01', 'photo_09', 'letter_02'],
       evidenceLinks: ['id_zhou', 'id_chen', 'id_li']
     }
-  }
+  },
+
+  /* ---- 时间线 ---- */
+  { name: 'timeline_locked', sel: '#wb-preview', setTab: 'timeline', cfg: { act: 3, mode: 'solo' } },
+  { name: 'timeline_act4', sel: '#wb-preview', setTab: 'timeline', cfg: { act: 4, mode: 'solo' } },
+  { name: 'timeline_placed', sel: '#wb-preview', setTab: 'timeline', fillTimeline: true, cfg: { act: 4, mode: 'solo' } },
+  { name: 'timeline_done', sel: '#wb-preview', setTab: 'timeline', fillTimeline: true, cfg: { act: 4, mode: 'solo', completedPuzzles: ['timeline'] } }
 ];
 
 async function clearNarrator(page) {
@@ -129,6 +135,14 @@ async function clearNarrator(page) {
       await page.evaluate(id => LP.photo.open(id), c.openPhoto);
       await page.waitForTimeout(700);              // 等照片就位
       await clearNarrator(page);
+    }
+    if (c.fillTimeline) {
+      await page.evaluate(() => {
+        const nodes = {}, w = [], d = [];
+        LP.data.timelineDays.forEach((day, i) => { nodes[i] = day.accept.slice(); w[i] = day.weather; d[i] = day.num; });
+        LP.state.set({ timelineNodes: nodes, tlWeather: w, tlDate: d });
+        LP.archive.refreshAll();
+      });
     }
     if (c.setTab) {
       await page.evaluate(t => LP.archive.setTab(t), c.setTab);

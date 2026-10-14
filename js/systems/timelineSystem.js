@@ -33,7 +33,45 @@ LP.timeline = (function () {
       : '先和执笔者核对纸面日期、天气与无日期的离开回忆，再填写日期。';
   }
 
+  /* ---------- 渲染 ----------
+     新壳（?ui=next）：由 ui2/view/timeline.js 的 viewModel + render 接管；
+     旧壳完整保留为 renderLegacy。 */
   function render(container) {
+    if (LP.ui2 && LP.ui2.enabled('timeline')) {
+      LP.ui2.mount('timeline', { root: container }, timelineCtx(container));
+      return;
+    }
+    renderLegacy(container);
+  }
+
+  /* 新壳所需上下文：状态变更与校验判定留在本模块 */
+  function timelineCtx(container) {
+    return {
+      state: LP.state.get(),
+      data: LP.data,
+      onMove(cid, slotIdx) { moveCard(cid, slotIdx, container); },
+      onValidate() { validate(container); },
+      onClear() { LP.state.set({ timelineNodes: {} }); LP.audio.click(); render(container); },
+      onWeather(i, v) {
+        const arr = (LP.state.get().tlWeather || ['', '', '']).slice();
+        arr[i] = v;
+        LP.state.set({ tlWeather: arr });
+        LP.audio.click();
+      },
+      onDate(i, v) {
+        const arr = (LP.state.get().tlDate || ['', '', '']).slice();
+        arr[i] = v;
+        LP.state.set({ tlDate: arr });
+      },
+      onRef(cardId) {
+        const c = LP.data.timelineCards.find(x => x.id === cardId);
+        if (c) openRef(c);
+      }
+    };
+  }
+
+  /* ---------- 旧壳渲染（保留，P6 验收后再删） ---------- */
+  function renderLegacy(container) {
     container.innerHTML = '';
     const s = LP.state.get();
 
