@@ -131,6 +131,8 @@ reset.css → tokens.css → variables.css → global.css
 
 **规则 C13**：只允许**相对路径**。`assets/images/x.webp` ✅；`/assets/images/x.webp` ❌（GitHub Pages 子路径部署会 404）。无 `<base>` 标签、无绝对域名。
 
+**规则 C14（P2 新增 · 视图层判定）**：`LP.questData.QUESTS[*].steps[*].done` 是**纯谓词** `done(state, data)` —— 只读传入的 `state`，不访问 `LP.state`。这是 `ui2` 的 `viewModel()` 能做到无副作用的前提。任何调用方漏传 `state`，都会让「已完成」静默变成「未完成」；因此判定在 `state` 缺失时**主动抛错**（fail fast），语义由断言 14 锁定。
+
 ---
 
 ## 9. 可执行断言清单
@@ -149,9 +151,10 @@ reset.css → tokens.css → variables.css → global.css
 | 8 | `reasonRequired.act3` 内容一致 | C6 |
 | 9 | `evidenceGraph.length === 31` | C6 |
 | 10 | `PAGE32.fragments.length === 5` | C6 |
-| 11 | 全部资源引用版本参数在引号内 | C10 |
-| 12 | CSS 加载顺序符合 C12 | C12 |
-| 13 | 源码中不存在绝对路径 `/assets/` | C13 |
+| 11 | 全部资源引用版本参数在引号内（覆盖 `css/` · `js/` · `ui2/`） | C10 |
+| 12 | CSS 加载顺序符合 C12（含 `ui2/` 三段） | C12 |
+| 13 | 源码中不存在绝对路径 `/assets/`（含 `ui2/`） | C13 |
+| 14 | 任务卡判定为纯谓词 `done(state, data)`，语义与元数据正确；漏传 state 必须抛错 | C14 |
 
 ---
 

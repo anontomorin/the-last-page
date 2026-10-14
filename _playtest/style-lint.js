@@ -22,8 +22,14 @@ const ROOT = path.resolve(__dirname, '..');
 const BASELINE = path.join(__dirname, 'style-baseline.json');
 const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 
-const CSS_FILES = fs.readdirSync(path.join(ROOT, 'css')).filter(f => f.endsWith('.css'));
-const cssAll = () => CSS_FILES.map(f => ['css/' + f, read('css/' + f)]);
+/* 扫描范围：旧壳 css/ 与新壳 ui2/（两者同受契约约束） */
+const CSS_DIRS = ['css', 'ui2'];
+const CSS_FILES = CSS_DIRS.flatMap(d => {
+  const abs = path.join(ROOT, d);
+  if (!fs.existsSync(abs)) return [];
+  return fs.readdirSync(abs).filter(f => f.endsWith('.css')).map(f => d + '/' + f);
+});
+const cssAll = () => CSS_FILES.map(f => [f, read(f)]);
 
 /* camelCase → kebab-case；并给「字母+数字」边界补连字符：red08 → red-08 */
 const kebab = s => s.replace(/[A-Z]/g, c => '-' + c.toLowerCase()).replace(/([a-z])(\d)/g, '$1-$2');
@@ -96,10 +102,13 @@ function run(opts) {
   try {
     const html = read('index.html');
     const outside = (html.match(/"?\?v=/g) || []).filter(x => x.startsWith('"')).length;
-    const refs = html.match(/(?:href|src)="(?:css|js)\/[^"]+"/g) || [];
-    const noVer = refs.filter(r => !r.includes('?v='));
-    if (outside === 0 && noVer.length === 0) ok(`资源引用合规（${refs.length} 处，版本参数均在引号内）`);
-    else bad('资源引用不合规', `引号外 ${outside} 处；缺版本 ${noVer.length} 处`);
+    /* 覆盖全部本地资源目录：css/ · js/ · ui2/ */
+    const refs = html.match(/(?:href|src)="(?:css|js|ui2)\/[^"]*"/g) || [];
+    const noVer = refs.filter(r => !/\?v=/.test(r));
+    if (outside === 0 && noVer.length === 0) ok(`资源引用合规（${refs.length} 处，均含引号内版本参数）`);
+    else bad('资源引用不合规',
+      `引号外 ${outside} 处；缺版本 ${noVer.length} 处` +
+      (noVer.length ? '：' + noVer.slice(0, 4).join('  ') : ''));
   } catch (e) { bad('资源引用校验失败', e.message); }
 
   /* ---------- A3. 透明度上限 ---------- */
@@ -151,6 +160,29 @@ function run(opts) {
     if (!errs.length) ok('无纯黑实心底、无高饱和霓虹色');
     else bad('存在禁止色', [...new Set(errs)].slice(0, 6).join('; '));
   } catch (e) { bad('禁止色校验失败', e.message); }
+
+  /* ---------- A5. CSS 变量引用完整性 ----------
+     引用一个从未定义的变量、且不带 fallback 时，整条声明会静默失效
+     —— 这类缺陷肉眼极难发现，必须由机器守。 */
+  try {
+    const defined = new Set();
+    for (const [, t] of cssAll()) {
+      (t.match(/--[a-z0-9-]+\s*:/gi) || [])
+        .forEach(m => defined.add(m.replace(/\s*:$/, '').toLowerCase().trim()));
+    }
+    const undef = [];
+    for (const [f, t] of cssAll().concat([['index.html', read('index.html')]])) {
+      /* 只检查无 fallback 的 var(--x)；var(--x, y) 允许缺席 */
+      const re = /var\(\s*(--[a-z0-9-]+)\s*\)/gi;
+      let m;
+      while ((m = re.exec(t))) {
+        const v = m[1].toLowerCase();
+        if (!defined.has(v)) undef.push(`${f}: ${v}`);
+      }
+    }
+    if (!undef.length) ok(`CSS 变量引用全部有定义（${defined.size} 个已定义）`);
+    else bad('引用了未定义的 CSS 变量（声明会静默失效）', [...new Set(undef)].slice(0, 6).join('; '));
+  } catch (e) { bad('变量引用校验失败', e.message); }
 
   /* ---------- B. 棘轮规则 ---------- */
   const current = (() => {

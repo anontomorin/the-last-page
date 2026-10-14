@@ -54,6 +54,7 @@
   --rgb-gold-light: 233,205,145;  /* 淡金：显影 / 纸边光 */
   --rgb-ink:        36,36,36;     /* = #242424 墨 */
   --rgb-paper-hi:   247,245,238;  /* 高光纸色：遮罩 / 白纱 */
+  --rgb-shadow:     40,52,58;     /* 卡片投影基色（冷灰蓝） */
 
   /* ============ 字体 ============ */
   --font-ui:   "PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;

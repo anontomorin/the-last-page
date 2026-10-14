@@ -2,7 +2,7 @@
   "name": "the-last-page",
   "version": "1.0.0",
   "private": true,
-  "description": "《最后一页没有写完》—— 叙事型 ARG / 数字档案解谜游戏（纯前端，无构建步骤）",
+  "description": "《第32页：写给未来的信》—— 叙事型 ARG / 数字档案解谜游戏（纯前端，无构建步骤）",
   "scripts": {
     "serve": "node _playtest/serve.js",
     "test": "node _playtest/harness.js",
@@ -13,6 +13,8 @@
     "shots": "node _playtest/shots4.js",
     "shots:baseline": "node _playtest/shots4.js --baseline",
     "test:visual": "node _playtest/visual-diff.js",
+    "ui:compare": "node _playtest/ui-compare.js",
+    "ui:compare:diff": "node _playtest/ui-compare.js --diff",
     "demo": "node _playtest/demo_solo.js",
     "demo:fast": "node _playtest/demo_solo.js fast"
   },

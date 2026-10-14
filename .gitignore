@@ -12,3 +12,4 @@ Thumbs.db
 # 视觉回归产物（基线可随时用 npm run shots:baseline 重建）
 _playtest/baseline/
 _playtest/visual-report/
+_playtest/ui-compare/

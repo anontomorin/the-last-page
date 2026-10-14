@@ -6,6 +6,8 @@
      打开通话面板 / 前往结局，并对目标条目做短暂高亮。
    · 双人模式下需要对方信息的步骤显示「等待搭档」，按钮指向
      现有通话面板；不泄露另一卷独有的内容。
+   · P2（绞杀者）：默认走本文件内的旧渲染；?ui=next 时改由
+     ui2 视图层（viewModel → render 纯函数）接管，业务导航不变。
    ============================================================ */
 window.LP = window.LP || {};
 LP.quest = (function () {
@@ -79,10 +81,31 @@ LP.quest = (function () {
     }
   }
 
-  /* ---------- 渲染 ---------- */
+  /* ---------- 新壳（ui2）挂载上下文 ----------
+     业务回调集中在此：视图层只负责画，动作一律回到这里执行。 */
+  function nextCtx() {
+    return {
+      state: LP.state.get(),
+      data: LP.data,
+      ui: { collapsed, doneOpen },
+      onFold() { LP.audio.click(); collapsed = !collapsed; render(); },
+      onDoneToggle(open) { doneOpen = !!open; },
+      onAction(action) { runAction(action); }
+    };
+  }
+
+  /* ---------- 渲染 ----------
+     默认走旧实现；?ui=next（或 localStorage.lp_ui=next）时由
+     ui2/view/questGuide.js 的 viewModel + render 两个纯函数接管。 */
   function render() {
     const box = LP.$('#quest-card');
     if (!box) return;
+    if (LP.ui2 && LP.ui2.mount('questGuide', box, nextCtx())) return;
+    renderLegacy(box);
+  }
+
+  /* ---------- 旧壳渲染（保留，P6 验收通过后再删） ---------- */
+  function renderLegacy(box) {
     const s = LP.state.get();
     box.innerHTML = '';
     if (!s.act || s.act < 1 || s.act > 6) { box.hidden = true; return; }
@@ -93,7 +116,7 @@ LP.quest = (function () {
     const steps = (stepsOf(q) || []).filter(st => !st.duoOnly || s.mode !== 'solo');
     const action = actionOf(q);
     const rc = reasonCounts();
-    const stepStates = steps.map(st => st.done());
+    const stepStates = steps.map(st => st.done(s, LP.data));
     const allDone = stepStates.length > 0 && stepStates.every(Boolean);
     /* 当前进行中的步骤 = 第一个未完成 */
     const curIdx = stepStates.indexOf(false);

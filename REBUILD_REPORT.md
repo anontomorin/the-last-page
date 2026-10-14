@@ -196,3 +196,92 @@ box-shadow: 0 0 0 12px rgba(var(--rgb-red), 0);
 5. 全绿后翻转默认、删除旧实现
 
 > 注意：P2/P3 是本项目**唯一涉及业务代码结构**的阶段，风险最高；必须坚持「每层迁移后立即跑视觉回归 + 双开通关」的节奏。
+
+---
+
+# P2 实施：绞杀者新壳（第一个垂直切片 —— 主线任务卡）
+
+## 一、架构落地
+
+| 新增 | 说明 |
+|---|---|
+| `ui2/index.js` | `LP.ui2`：开关（`?ui=next` / `localStorage.lp_ui=next`）、视图注册表、`mount()` |
+| `ui2/view/questGuide.js` | `viewModel(state, data, ui) → vm` 与 `render(vm, ctx) → DOM`，**两个纯函数** |
+| `ui2/primitives.css` | 新壳原子类（`.u2-card` / `.u2-badge` / `.u2-focusable`） |
+| `ui2/components.css` | 任务卡新壳样式（`.u2-qg-*`），与旧壳视觉等价 |
+| `ui2/screens.css` | P3 屏幕迁移用的占位 |
+
+- 目录按方案文档置于**项目根级** `ui2/`。`index.html` 加载顺序：`motion.css` 之后接三份 ui2 样式；`js/data/questGuide.js` 之后接 `ui2/index.js` 与视图层。资源版本统一 `20261015a`。
+- 类名命名空间 `u2-*`：新旧壳 DOM 并存、互不干扰，任何情况下都可回退。
+- **旧壳完整保留**：`questGuideSystem.js` 的原渲染改名 `renderLegacy(box)`，默认仍走它。
+
+## 二、`state → view-model → render` 解耦（P2 硬门禁）
+
+`viewModel` 与 `render` 都不读写 `LP.state`，也不产生副作用：
+
+```
+LP.state.get() ─┐
+LP.data        ─┼→ viewModel(s, d, ui) → vm（纯数据）→ render(vm, ctx) → DOM
+会话 UI 状态   ─┘                                        ↑
+                        事件 → ctx.onXxx() → systems 层业务 → 状态变更 → 回到起点
+```
+
+为达成这一点，数据层的步骤判定由闭包改为**纯谓词**：
+
+```js
+// 改前：闭包直接读 LP.state
+{ text: '…', done: () => has('discoveredEvidence', 'clue_317') }
+// 改后：只读传入的 state
+{ text: '…', done: s => has(s, 'discoveredEvidence', 'clue_317') }
+```
+
+并新增 `needState()` 守卫：`state` 缺失时**主动抛错**，而不是静默判为「未完成」。
+
+## 三、过程中发现并修复的两个真实缺陷
+
+二者都不是本次重构引入的，而是被新加的工具照出来的。
+
+**① `--sun` 从未定义 → 两条金色边框从未显示过**
+
+`css/global.css` 的 `.boot-tag` 与 `css/quest-guide.css` 的 `.qg-wait-flag` 都写了 `border: … var(--sun)`，但项目里**从未定义 `--sun`**。CSS 中引用未定义变量且无 fallback 时，**整条声明会静默失效**（不是回退成某个值，而是完全不生效）。
+
+→ 修复为已有的 `var(--c-gold)`（记入决策 D3）。带来一处**有意的视觉变化**：启动页宣传语出现 3px 金色左边框，「搭档」标签出现 1px 金色描边。
+→ 新增 lint 规则 **A5「CSS 变量引用完整性」**，这类缺陷以后由机器守。
+
+**② 判定签名错配导致旧壳静默降级**
+
+数据层签名从 `done()` 改为 `done(state, data)` 后，`renderLegacy` 仍按旧签名 `st.done()` 调用 → `state` 为 `undefined` → **旧壳所有步骤判定退化成「未完成」**。
+
+由 `ui-compare` 的像素对比抓出（新壳显示 `✓ 已完成`，旧壳显示序号 `1`）。
+
+> **最值得记的一点**：首版对比用例恰好全是「全部未完成」的场景（act1/act5/act6 的初始状态），4 张 100% 一致，**造成假绿**。补齐「部分完成」用例后差异才暴露。
+> → 视觉回归的用例**必须覆盖状态差异**，否则「一致」毫无意义。
+
+→ 修复调用点，并新增契约断言 14 锁定签名与语义（含「漏传 state 必须抛错」）。
+
+## 四、门禁增强
+
+| 工具 | 变化 |
+|---|---|
+| `style-lint.js` | 新增 A5 变量引用完整性；A2 资源引用正则与 CSS 扫描范围扩展到 `ui2/`（共 6 条规则） |
+| `contract.test.js` | 新增断言 14；断言 11/12/13 扩展覆盖 `ui2/`（共 16 条） |
+| `ui-compare.js`（新增） | 同状态分别以旧壳 / 新壳渲染并逐张像素对比：`npm run ui:compare:diff` |
+
+## 五、验证结果
+
+- **新壳一致性**：`ui-compare` **8/8 全部 0.000%** —— 覆盖 act1 部分完成 · act2 A 卷等待 · act3 证据关系 0/3 与 3/3 · act5 A · act6 已写 · 折叠态。
+- **六层回归**：`npm test` 全绿 —— 29 语法 / 数据一致性 / 87 听写 / lint 6 / 契约 16 / 双开通关。
+- **全量视觉回归**（20 张 vs P1 基线）：全部在阈值内，其中 10 张 0.000%。
+  - 有差异的集中在 `r3_boot_*`（0.045%–0.456%），即 `--sun` 修复让启动页金色左边框真正生效；其余为含动画场景的帧序抖动。
+  - 基线已按修复后的状态重建。
+
+## 六、P2/P3 进度与下一步
+
+| 组件 / 屏幕 | 状态 |
+|---|---|
+| 主线任务卡 | ✅ 已迁移（旧壳保留） |
+| 查看器 / 证据板 / 时间线 | ⬜ 待迁移 |
+| P3 五个屏幕（启动 / 工作台 / 地图 / 实地 / 结局） | ⬜ 待迁移 |
+
+迁移模式已跑通，后续按同一套路推进：
+**数据层纯谓词 → viewModel + render 纯函数 → 旧壳 `renderLegacy` 保留 → `ui-compare` 验证 0.000% → `npm test` 六层回归**。

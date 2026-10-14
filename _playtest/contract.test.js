@@ -36,9 +36,11 @@ const FROZEN = {
   evidenceGraph: 31,
   page32Fragments: 5,
   cssOrder: [
-    'reset.css', 'tokens.css', 'variables.css', 'global.css',
-    'archive.css', 'document.css', 'map.css', 'timeline.css',
-    'evidence.css', 'ending.css', 'quest-guide.css', 'motion.css'
+    'css/reset.css', 'css/tokens.css', 'css/variables.css', 'css/global.css',
+    'css/archive.css', 'css/document.css', 'css/map.css', 'css/timeline.css',
+    'css/evidence.css', 'css/ending.css', 'css/quest-guide.css', 'css/motion.css',
+    /* 新壳（ui2）必须加载在全部旧壳样式之后 */
+    'ui2/primitives.css', 'ui2/components.css', 'ui2/screens.css'
   ]
 };
 
@@ -175,16 +177,18 @@ function run(extra) {
   try {
     const html = read('index.html');
     const outside = (html.match(/"?\?v=/g) || []).filter(x => x.startsWith('"')).length;
-    const refs = html.match(/(?:href|src)="(?:css|js)\/[^"]+"/g) || [];
-    const noVer = refs.filter(r => !r.includes('?v='));
+    /* 覆盖 css/ · js/ · ui2/ 三个本地资源目录 */
+    const refs = html.match(/(?:href|src)="(?:css|js|ui2)\/[^"]*"/g) || [];
+    const noVer = refs.filter(r => !/\?v=/.test(r));
     if (outside === 0 && noVer.length === 0) ok(`资源引用版本参数均在引号内（${refs.length} 处）`);
-    else bad('资源引用不合规', `引号外 ${outside} 处；缺版本 ${noVer.length} 处`);
+    else bad('资源引用不合规',
+      `引号外 ${outside} 处；缺版本 ${noVer.length} 处` + (noVer.length ? '：' + noVer.slice(0, 4).join('  ') : ''));
   } catch (e) { bad('资源引用校验失败', e.message); }
 
   /* ---------- 12. CSS 加载顺序 ---------- */
   try {
     const html = read('index.html');
-    const got = (html.match(/href="css\/([a-z-]+\.css)/g) || []).map(s => s.replace('href="css/', ''));
+    const got = (html.match(/href="((?:css|ui2)\/[a-z-]+\.css)/g) || []).map(s => s.replace('href="', ''));
     const want = FROZEN.cssOrder;
     if (got.length === want.length && got.every((f, i) => f === want[i])) ok(`CSS 加载顺序正确（${got.length} 个）`);
     else bad('CSS 加载顺序不符', `实际: ${got.join(' → ')}`);
@@ -192,15 +196,64 @@ function run(extra) {
 
   /* ---------- 13. 不得出现绝对路径资源引用 ---------- */
   try {
-    const targets = [
-      ['index.html', read('index.html')],
-      ...fs.readdirSync(path.join(ROOT, 'css')).filter(f => f.endsWith('.css'))
-        .map(f => ['css/' + f, read('css/' + f)])
-    ];
+    const cssDirs = ['css', 'ui2'];
+    const cssFiles = cssDirs.flatMap(d => {
+      const abs = path.join(ROOT, d);
+      if (!fs.existsSync(abs)) return [];
+      return fs.readdirSync(abs).filter(f => f.endsWith('.css')).map(f => d + '/' + f);
+    });
+    const targets = [['index.html', read('index.html')], ...cssFiles.map(f => [f, read(f)])];
     const hit = targets.filter(([, t]) => /["'(]\/assets\//.test(t));
     if (!hit.length) ok('无绝对路径资源引用（GitHub Pages 子路径安全）');
     else bad('存在绝对路径引用', hit.map(h => h[0]).join(', '));
   } catch (e) { bad('绝对路径校验失败', e.message); }
+
+  /* ---------- 14. 任务卡判定：纯谓词 done(state, data) 的签名与语义 ----------
+     这一条为 P2 新增：数据层判定签名从 done() 改为 done(state, data)，
+     任何调用方漏传 state 都会让「已完成」静默变成「未完成」。 */
+  try {
+    const data = {
+      reasonRequired: { act3: ['id_zhou', 'id_chen', 'id_li'] },
+      people: {
+        person_linyuan: { known: true }, person_zhou: { known: false },
+        person_chen: { known: false }, person_li: { known: false }
+      }
+    };
+    const LP = evalLP(['js/data/questGuide.js'], { data });
+    const Q = LP.questData.QUESTS;
+    const at = act => Q.find(q => q.act === act);
+    const errs = [];
+    const T = (label, got, want) => { if (got !== want) errs.push(`${label}=${got}≠${want}`); };
+
+    /* 基本判定 */
+    const s1 = at(1).steps.solo[0];
+    T('act1.s1(有折痕线索)', s1.done({ discoveredEvidence: ['clue_317'] }, data), true);
+    T('act1.s1(无线索)', s1.done({}, data), false);
+    T('act1.s3(已完成)', at(1).steps.solo[2].done({ completedPuzzles: ['act1'] }, data), true);
+    T('act2A.s1(已敲钟)', at(2).steps.A[0].done({ completedPuzzles: ['bell7'] }, data), true);
+
+    /* 人物身份：林远 known=true，其余靠 discoveredPeople */
+    const p3 = at(3).steps.default[0];
+    T('act3.s1(仅林远)', p3.done({}, data), false);
+    T('act3.s1(四人齐)', p3.done({ discoveredPeople: ['person_zhou', 'person_chen', 'person_li'] }, data), true);
+
+    /* 第三幕证据关系计数 */
+    const p3r = at(3).steps.default[1];
+    T('act3.s2(未连)', p3r.done({ evidenceLinks: [] }, data), false);
+    T('act3.s2(连满三条)', p3r.done({ evidenceLinks: ['id_zhou', 'id_chen', 'id_li'] }, data), true);
+
+    /* 漏传 state 必须抛错（fail fast，而非静默判为未完成） */
+    let threw = false;
+    try { p3r.done(); } catch (e) { threw = true; }
+    if (!threw) errs.push('漏传 state 未抛错（会静默判为未完成）');
+
+    /* 双人/单人差异所需的元数据仍在 */
+    if (!at(2).steps.A.some(st => st.wait)) errs.push('act2 A 卷缺少 wait 标记');
+    if (!at(6).steps.default.some(st => st.duoOnly)) errs.push('act6 缺少 duoOnly 标记');
+
+    if (!errs.length) ok('任务卡判定为纯谓词 done(state,data)，语义与元数据正确');
+    else bad('任务卡判定语义不符', errs.join('; '));
+  } catch (e) { bad('questGuide 判定校验失败', e.message); }
 
   return { pass, fail, output: out.join('\n') };
 }
