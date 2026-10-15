@@ -6,8 +6,11 @@
 
 子命令：
   process <raw> --out assets/images/x.webp --role scene --width 1536 --height 1024
-      创意处理：sepia 统一 → 颗粒 → 暗角 → 裁切到目标比例 → 缩放 → WebP 导出
-      （可选 --strip-bottom N 裁除底部水印区；--max-bytes 按 role 预算自动降质量）
+      创意处理：sepia 统一 → 颗粒 → 暗角 → 去水印 → 裁切到目标比例 → 缩放 → WebP 导出
+      （可选 --strip-bottom N 裁除底部水印区；--no-dewm 跳过去水印；
+       --max-bytes 按 role 预算自动降质量）
+  dewm
+      给存量资产补去水印（按 manifest.dewm 幂等；--force 全部重做）
   reencode
       存量优化：对 manifest 里未标记本管线版本的文件做纯重编码
       （WebP 质量阶梯到单图预算；JPG q80 渐进式）。内容零变更，幂等。
@@ -31,7 +34,7 @@ import os
 import random
 import sys
 
-from PIL import Image, ImageDraw, ImageEnhance, ImageOps
+from PIL import Image, ImageDraw, ImageEnhance, ImageOps, ImageStat
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IMG_DIR = os.path.join(ROOT, 'assets', 'images')
@@ -148,6 +151,120 @@ def cover_crop(img, tw, th):
     return img.crop((left, top, left + tw, top + th))
 
 
+# ---------------- 去水印（生成服务的角标模板） ----------------
+# 生成服务会在图片右下角贴一枚固定模板角标：「AI生成」+「WORKBUDDY>_」，浅灰描边字。
+# 实测几何：@1536 宽画布约 110×51px，距右边/下边各约 10px，随画布等比缩放；
+# 存量图另有一种更淡的方框变体（约 80×30 @1280 宽），位置相近。
+# 它是纯瑕疵（docs/art-prompts.md §1.6 明确要求「无水印」），且底纹会整屏铺给
+# 玩家看，必须清掉 —— 用户第一次注意到的是 bg_ending（那上面还有一段被模型
+# 画进画面的提示词文字），但实测 47 张资产里几乎没有一张是干净的。
+# 取 13%×8.5% 的右下角矩形（含两种变体的余量），用其正上方等高的一条像素
+# **垂直镜像**填补 —— 木地板 / 砖墙 / 瓦顶这类纹理镜像后没有方向破绽；
+# 上边与左边各留一段线性羽化过渡，避免硬接缝。
+DEWM = {'w': 0.13, 'h': 0.095, 'feather': 0.28, 'downscale': 8}
+
+
+def _dewm_mask(bw, bh):
+    """矩形遮罩：上边与左边各留一段线性羽化，避免硬接缝。"""
+    mask = Image.new('L', (bw, bh), 255)
+    px = mask.load()
+    fw = max(1, int(round(bw * DEWM['feather'])))
+    fh = max(1, int(round(bh * DEWM['feather'])))
+    for y in range(fh):
+        a = int(255 * (y + 1) / (fh + 1))
+        for x in range(bw):
+            px[x, y] = a
+    for x in range(fw):
+        a = int(255 * (x + 1) / (fw + 1))
+        for y in range(bh):
+            if px[x, y] > a:
+                px[x, y] = a
+    return mask
+
+
+def _fill_source(img, bw, bh):
+    """填补源：在 1/8 降采样上做「边界调和扩散」，再放大回填。
+    为什么不用镜像：老地图的裂纹、衣褶、纸张边缘这类**有结构**的角落，
+    镜像会造出可见的万花筒重影。低频扩散只会给出一小块「失焦」——
+    同样的面积下观感自然得多，且不产生任何重复纹理。
+    先在 1/8 尺度上收敛（区域仅约 24×10 像素，成本可忽略），
+    再双三次放大 —— 得到的正是周边纹理的低频延续。"""
+    W, H = img.size
+    f = DEWM['downscale']
+    sw, sh = max(4, W // f), max(4, H // f)
+    small = img.resize((sw, sh), Image.BOX)
+    sx0, sy0 = (W - bw) // f, (H - bh) // f
+    sx1 = min(sw, max(sx0 + 2, W // f))
+    sy1 = min(sh, max(sy0 + 2, H // f))
+    reg = small.crop((sx0, sy0, sx1, sy1))
+    w, h = reg.size
+    get = reg.load()
+
+    def at(x, y, fx, fy):
+        return small.getpixel((min(sw - 1, max(0, x)), min(sh - 1, max(0, y))))
+
+    left = [at(sx0 - 1, sy0 + j, 0, 0) for j in range(h)]
+    right = [at(sx1, sy0 + j, 0, 0) for j in range(h)]
+    top = [at(sx0 + i, sy0 - 1, 0, 0) for i in range(w)]
+    bot = [at(sx0 + i, sy1, 0, 0) for i in range(w)]
+    # 初值：四向线性插值（比常数初值收敛快得多）
+    for j in range(h):
+        fy = (j + 1) / (h + 1)
+        for i in range(w):
+            fx = (i + 1) / (w + 1)
+            a = [(left[j][c] * (1 - fx) + right[j][c] * fx) for c in range(3)]
+            b = [(top[i][c] * (1 - fy) + bot[i][c] * fy) for c in range(3)]
+            get[i, j] = (round((a[0] + b[0]) / 2), round((a[1] + b[1]) / 2),
+                         round((a[2] + b[2]) / 2))
+    # 松弛：区域内做拉普拉斯平均，边界钉死在真实像素上
+    for _ in range(24):
+        prev = reg.copy().load()
+        for j in range(h):
+            for i in range(w):
+                n = prev[i, j - 1] if j > 0 else top[i]
+                s = prev[i, j + 1] if j < h - 1 else bot[i]
+                ww = prev[i - 1, j] if i > 0 else left[j]
+                e = prev[i + 1, j] if i < w - 1 else right[j]
+                get[i, j] = ((n[0] + s[0] + ww[0] + e[0] + 2) >> 2,
+                             (n[1] + s[1] + ww[1] + e[1] + 2) >> 2,
+                             (n[2] + s[2] + ww[2] + e[2] + 2) >> 2)
+    fill = reg.resize((bw, bh), Image.BICUBIC)
+    # 色调对齐：把填块均值拉齐到「正上方等大一条」的均值。
+    # 不做这一步，边界处会出现一块比周围深/浅的矩形（纸面上尤其显眼）。
+    band = img.crop((W - bw, H - bh * 2, W, H - bh))
+    bm = ImageStat.Stat(band).mean
+    fm = ImageStat.Stat(fill).mean
+    off = [max(-30.0, min(30.0, bm[c] - fm[c])) for c in range(3)]
+    if max(abs(o) for o in off) > 1.0:
+        chans = fill.split()
+        fill = Image.merge('RGB', [
+            ch.point(lambda v, o=o: max(0, min(255, int(v + o))))
+            for ch, o in zip(chans, off)])
+    return fill
+
+
+def dewatermark(img):
+    """抹掉右下角水印。确定性：无随机源，同尺寸同输入必得同输出。"""
+    W, H = img.size
+    bw = min(max(10, int(round(W * DEWM['w']))), W // 3)
+    bh = min(max(8, int(round(H * DEWM['h']))), H // 3)
+    out = img.convert('RGB').copy()
+    out.paste(_fill_source(out, bw, bh), (W - bw, H - bh), _dewm_mask(bw, bh))
+    return out
+
+
+def dewatermark_mirror(img):
+    """镜像填补版（保留：纯纹理角落观感更连贯，供对比 / 回退）。"""
+    W, H = img.size
+    bw = min(max(10, int(round(W * DEWM['w']))), W // 3)
+    bh = min(max(8, int(round(H * DEWM['h']))), H // 3)
+    top = H - bh
+    patch = img.crop((W - bw, top - bh, W, top)).transpose(Image.FLIP_TOP_BOTTOM)
+    out = img.convert('RGB').copy()
+    out.paste(patch, (W - bw, top), _dewm_mask(bw, bh))
+    return out
+
+
 def encode_webp_budget(img, path, max_bytes, q_ladder=None):
     """质量阶梯导出，取第一个达标档；全超则用最末档（audit 会报超限）。"""
     for q in (q_ladder or QUALITY_LADDER):
@@ -175,6 +292,10 @@ def cmd_process(args):
     if args.strip_bottom:
         w, h = img.size
         img = img.crop((0, 0, w, h - int(h * args.strip_bottom / 100)))
+    # 去水印必须在 cover 裁切**之前**：此时水印还在右下角原位；
+    # 先抹掉再裁，任何裁切结果都不会带角标。
+    if not args.no_dewm:
+        img = dewatermark(img)
     img = cover_crop(img, args.width, args.height)
     # 背景层再补一道轻锐化：源图经 cover 缩放到 1440 宽后边缘会软，
     # 1.22 的锐化在不引入明显光晕的前提下把书架/木纹拉回来。
@@ -239,6 +360,42 @@ def cmd_reencode(args):
         changed.append(f)
     save_manifest(m)
     print(f'-- {len(changed)} 个文件已重编码并登记 manifest.pipe={PIPE_VERSION}')
+
+
+# ---------------- 存量去水印（幂等） ----------------
+
+def cmd_dewm(args):
+    """对 IMG_DIR 里所有已上线的图补一次去水印，再按 role 预算重编码。
+    幂等：manifest 里 dewm=True 的跳过；--force 可整体重做。"""
+    m = load_manifest()
+    done, skipped = [], []
+    for f in sorted(os.listdir(IMG_DIR)):
+        if not f.lower().endswith(('.webp', '.jpg', '.jpeg')):
+            continue
+        entry = m.setdefault(f, {})
+        if entry.get('dewm') and not args.force:
+            skipped.append(f)
+            continue
+        path = os.path.join(IMG_DIR, f)
+        img = Image.open(path)
+        img.load()
+        w, h = img.size
+        out = dewatermark(img)
+        if f.lower().endswith('.webp'):
+            q, size = encode_webp_budget(out, path, budget_for(f))
+            note = f'q{q}  {size/1024:.1f} KB'
+        else:
+            q, size = 82, None
+            out.save(path, 'JPEG', quality=q, progressive=True)
+            note = f'q{q}  {os.path.getsize(path)/1024:.1f} KB'
+        entry['dewm'] = True
+        entry['dewmBox'] = [round(DEWM['w'], 4), round(DEWM['h'], 4)]
+        done.append(f)
+        print(f'dewm  {f:<34} {w}x{h}  {note}')
+    save_manifest(m)
+    # bytes 变了，回写 manifest
+    cmd_manifest(args)
+    print(f'-- 去水印 {len(done)} 张，跳过 {len(skipped)} 张（已处理）')
 
 
 # ---------------- manifest 维护 ----------------
@@ -308,6 +465,10 @@ def cmd_audit(args):
     total = 0
     over = []
     for f in sorted(os.listdir(IMG_DIR)):
+        # 只算图片：manifest.json 是索引不是资产，混进来会让「总量」随条目数
+        # 漂移（与 style-lint 的口径也会不一致）
+        if not f.lower().endswith(('.webp', '.jpg', '.jpeg')):
+            continue
         p = os.path.join(IMG_DIR, f)
         b = os.path.getsize(p)
         total += b
@@ -344,9 +505,14 @@ def main():
     p.add_argument('--width', type=int, required=True)
     p.add_argument('--height', type=int, required=True)
     p.add_argument('--strip-bottom', type=float, default=0, help='裁除底部百分比（水印区）')
+    p.add_argument('--no-dewm', action='store_true', help='跳过去水印（默认对每张都做）')
     p.add_argument('--flat', action='store_true', help='平铺纹理：跳过 sepia/颗粒/暗角')
     p.add_argument('--max-bytes', type=int, default=0, help='覆盖单图字节预算')
     p.set_defaults(func=cmd_process)
+
+    p = sub.add_parser('dewm', help='给存量资产补去水印（幂等，按 manifest.dewm 标记跳过）')
+    p.add_argument('--force', action='store_true', help='忽略 manifest 标记，全部重做')
+    p.set_defaults(func=cmd_dewm)
 
     sub.add_parser('reencode', help='存量重编码（内容零变更，幂等）').set_defaults(func=cmd_reencode)
     sub.add_parser('manifest', help='重算 manifest 的 size/bytes').set_defaults(func=cmd_manifest)

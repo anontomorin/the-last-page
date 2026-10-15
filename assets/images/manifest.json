@@ -16,7 +16,7 @@
   },
   "bg_boot.webp": {
     "alt": "",
-    "bytes": 96106,
+    "bytes": 95124,
     "containsAnswer": false,
     "decorative": true,
     "eager": true,
@@ -31,7 +31,7 @@
   },
   "bg_ending.webp": {
     "alt": "",
-    "bytes": 87528,
+    "bytes": 115754,
     "containsAnswer": false,
     "decorative": true,
     "fallback": "css-gradient",
@@ -45,7 +45,7 @@
   },
   "bg_evidence.webp": {
     "alt": "",
-    "bytes": 88626,
+    "bytes": 115964,
     "containsAnswer": false,
     "decorative": true,
     "fallback": "css-gradient",
@@ -59,7 +59,7 @@
   },
   "bg_map.webp": {
     "alt": "",
-    "bytes": 99174,
+    "bytes": 115688,
     "containsAnswer": false,
     "decorative": true,
     "fallback": "css-gradient",
@@ -73,7 +73,7 @@
   },
   "bg_scene.webp": {
     "alt": "",
-    "bytes": 122084,
+    "bytes": 118354,
     "containsAnswer": false,
     "decorative": true,
     "fallback": "css-gradient",
@@ -87,7 +87,7 @@
   },
   "bg_timeline.webp": {
     "alt": "",
-    "bytes": 93466,
+    "bytes": 115934,
     "containsAnswer": false,
     "decorative": true,
     "fallback": "css-gradient",
@@ -101,7 +101,7 @@
   },
   "bg_viewer.webp": {
     "alt": "",
-    "bytes": 97004,
+    "bytes": 109696,
     "containsAnswer": false,
     "decorative": true,
     "fallback": "solid-color",
@@ -115,7 +115,7 @@
   },
   "bg_workbench.webp": {
     "alt": "",
-    "bytes": 100076,
+    "bytes": 119862,
     "containsAnswer": false,
     "decorative": true,
     "fallback": "css-gradient",

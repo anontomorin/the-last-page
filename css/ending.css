@@ -86,8 +86,14 @@
   .ending-stage{padding:4vh 1rem 8vh}
 }
 
-/* 结局主视觉（生成：春日窗台与远处的旧镇） */
-.end-hero{width:100%;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--line);
+/* 结局主视觉（生成：春日窗台与远处的旧镇）
+   height:auto 不可省：img 带 width/height 属性（P5 为防 CLS 补的），CSS 若只锁
+   width:100%，就会被属性里的 922 把高度钉死 —— 1536×922 的横版照片被渲染成
+   635×922 的竖版条（用户反馈「第六幕开始时照片应显示横板」）。
+   与 .map-room img 是同一处陷阱，P5 只补了后者，漏了这里。
+   也不再写 aspect-ratio/object-fit：交给属性里的 1536/922 固有比例，
+   横版照片完整显示、零裁切，比例只有一个真相来源。 */
+.end-hero{width:100%;height:auto;border:1px solid var(--line);
   box-shadow:var(--shadow);margin-bottom:2rem;animation:cardIn 1s ease}
 
 /* ============ 第三轮：最终页入场与稳定态（2026-10-14） ============ */

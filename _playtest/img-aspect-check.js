@@ -54,8 +54,35 @@ const CASES = [
           if (!im.naturalWidth) return;
           const nat = im.naturalWidth / im.naturalHeight;
           const ren = r.width / r.height;
-          // object-fit:cover 的图不做比例校验（设计即裁切）
-          const fit = getComputedStyle(im).objectFit;
+          const cs = getComputedStyle(im);
+
+          /* 规则 B：CSS 里声明了 aspect-ratio 就必须兑现。
+             P5 给 img 补 width/height 属性防 CLS 之后，CSS 若只锁 width:100%，
+             属性里的 height 会把高度钉死、aspect-ratio 被整个忽略 —— 1536×922
+             的横版照片被渲染成 635×922 的竖版条（.end-hero，用户反馈「第六幕
+             开始时照片应显示横板」）。而 cover/contain 的豁免恰好放过了它。
+             getComputedStyle 在只有属性（无 CSS 声明）时返回 "auto 1536 / 922"
+             —— 那是浏览器的固有比例提示，与 natural 必然一致，不必校验；
+             只有不以 auto 开头的才是作者显式声明，必须兑现。 */
+          const ar = cs.aspectRatio || 'auto';
+          if (ar !== 'auto' && !/^auto\b/.test(ar)) {
+            const m = /^([\d.]+)\s*\/\s*([\d.]+)$/.exec(ar.trim());
+            if (m) {
+              const want = parseFloat(m[1]) / parseFloat(m[2]);
+              const dev2 = Math.abs(want - ren) / want;
+              if (dev2 > 0.03) {
+                out.push({
+                  src: (im.getAttribute('src') || '').split('/').pop(),
+                  nat: nat.toFixed(3), ren: ren.toFixed(3), dev: dev2, tol: 0.03,
+                  box: Math.round(r.width) + 'x' + Math.round(r.height),
+                  note: `声明 aspect-ratio:${ar.trim()} 未兑现（被 height 属性钉死？）`
+                });
+              }
+            }
+          }
+
+          // object-fit:cover 的图不做「比例 == 自然比例」校验（设计即裁切）
+          const fit = cs.objectFit;
           if (fit === 'cover' || fit === 'contain') return;
           out.push({
             src: (im.getAttribute('src') || '').split('/').pop(),
@@ -66,9 +93,10 @@ const CASES = [
         });
         return out;
       });
-      rows.filter(r => r.dev > 0.05).forEach(r => {
+      rows.filter(r => r.dev > (r.tol || 0.05)).forEach(r => {
         bad++;
-        console.log(`  [失真 ${(r.dev * 100).toFixed(0)}%] ${vp.tag} ${c.name}  ${r.src}  nat比例=${r.nat} 渲染比例=${r.ren}  box=${r.box}`);
+        const why = r.note ? r.note : `拉伸 ${(r.dev * 100).toFixed(0)}%`;
+        console.log(`  [失真] ${vp.tag} ${c.name}  ${r.src}  nat比例=${r.nat} 渲染比例=${r.ren}  box=${r.box}  ← ${why}`);
       });
       if (errs.length) console.log(`  [JS错误] ${vp.tag} ${c.name}: ${errs[0]}`);
       await page.close();
