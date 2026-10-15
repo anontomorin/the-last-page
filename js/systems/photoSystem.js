@@ -302,7 +302,7 @@ LP.photo = (function () {
         const d = LP.data.documents[id];
         const card = LP.el('div', { class: 'ps-card' + (picked === id ? ' picked' : ''), 'data-id': id }, [
           LP.el('div', { class: 'mono ps-file', text: d.meta.file }),
-          LP.el('div', { class: 'ps-title', text: d.title.replace('旧照片 · ', '') })
+          LP.el('div', { class: 'ps-title', text: d.title })
         ]);
         card.addEventListener('click', () => {
           LP.audio.click();
@@ -335,7 +335,7 @@ LP.photo = (function () {
             '编号即日期。',
             '她用最笨的办法，替所有人守住了时间的顺序。',
             '档案深处，有一张新的照片浮出了水面。'
-          ], () => LP.ui.toast('获得资料：旧照片 · 开着的门', 'gold'));
+          ], () => LP.ui.toast('获得资料：开着的门', 'gold'));
           LP.bus.emit('refresh');
         } else {
           LP.audio.error();

@@ -458,7 +458,7 @@ LP.data.documents = {
 
   /* ---------------- 照片（按拍摄日期编号 01-12） ---------------- */
   photo_01: {
-    id: 'photo_01', type: 'photo', no: '01', title: '旧照片 · 青年单人像',
+    id: 'photo_01', type: 'photo', no: '01', title: '青年单人像',
     date: '未知', cred: { level: '高', kind: '视觉记录' },
     unlock: 'start',
     src: 'assets/images/photo_linyuan.webp',
@@ -470,7 +470,7 @@ LP.data.documents = {
   },
 
   photo_02: {
-    id: 'photo_02', type: 'photo', no: '02', title: '旧照片 · 油印机',
+    id: 'photo_02', type: 'photo', no: '02', title: '油印机',
     date: '未知', cred: { level: '高', kind: '视觉记录' },
     unlock: 'act2',
     src: 'assets/images/photo_press.webp',
@@ -482,7 +482,7 @@ LP.data.documents = {
   },
 
   photo_03: {
-    id: 'photo_03', type: 'photo', no: '03', title: '旧照片 · 《新芽》',
+    id: 'photo_03', type: 'photo', no: '03', title: '《新芽》',
     date: '未知', cred: { level: '高', kind: '视觉记录' },
     unlock: 'act4',
     src: 'assets/images/photo_xinya.webp',
@@ -494,7 +494,7 @@ LP.data.documents = {
   },
 
   photo_04: {
-    id: 'photo_04', type: 'photo', no: '04', title: '旧照片 · 面摊',
+    id: 'photo_04', type: 'photo', no: '04', title: '面摊',
     date: '未知', cred: { level: '高', kind: '视觉记录' },
     unlock: 'act3',
     src: 'assets/images/photo_stall.webp',
@@ -506,7 +506,7 @@ LP.data.documents = {
   },
 
   photo_05: {
-    id: 'photo_05', type: 'photo', no: '05', title: '旧照片 · 夜校合影',
+    id: 'photo_05', type: 'photo', no: '05', title: '夜校合影',
     date: '未知', cred: { level: '高', kind: '视觉记录' },
     unlock: 'act2',
     src: 'assets/images/photo_school.webp',
@@ -518,7 +518,7 @@ LP.data.documents = {
   },
 
   photo_06: {
-    id: 'photo_06', type: 'photo', no: '06', title: '旧照片 · 小先生们',
+    id: 'photo_06', type: 'photo', no: '06', title: '小先生们',
     date: '未知', cred: { level: '高', kind: '视觉记录' },
     unlock: 'act2',
     src: 'assets/images/photo_kids.webp',
@@ -530,7 +530,7 @@ LP.data.documents = {
   },
 
   photo_07: {
-    id: 'photo_07', type: 'photo', no: '07', title: '旧照片 · 饺子',
+    id: 'photo_07', type: 'photo', no: '07', title: '饺子',
     date: '未知', cred: { level: '高', kind: '视觉记录' },
     unlock: 'act3',
     src: 'assets/images/photo_dumpling.webp',
@@ -542,7 +542,7 @@ LP.data.documents = {
   },
 
   photo_08: {
-    id: 'photo_08', type: 'photo', no: '08', title: '旧照片 · 渡船',
+    id: 'photo_08', type: 'photo', no: '08', title: '渡船',
     date: '未知', cred: { level: '高', kind: '视觉记录' },
     unlock: 'act3',
     src: 'assets/images/photo_ferry.webp',
@@ -554,7 +554,7 @@ LP.data.documents = {
   },
 
   photo_09: {
-    id: 'photo_09', type: 'photo', no: '09', title: '旧照片 · 四人合影',
+    id: 'photo_09', type: 'photo', no: '09', title: '四人合影',
     date: '未知', cred: { level: '高', kind: '视觉记录' },
     unlock: 'start',
     src: 'assets/images/IMG_0317.webp',
@@ -570,7 +570,7 @@ LP.data.documents = {
   },
 
   photo_10: {
-    id: 'photo_10', type: 'photo', no: '10', title: '旧照片 · 钟楼',
+    id: 'photo_10', type: 'photo', no: '10', title: '钟楼',
     date: '未知', cred: { level: '高', kind: '视觉记录' },
     unlock: 'act1_done',
     src: 'assets/images/photo_clocktower.webp',
@@ -582,7 +582,7 @@ LP.data.documents = {
   },
 
   photo_11: {
-    id: 'photo_11', type: 'photo', no: '11', title: '旧照片 · 雨中的街',
+    id: 'photo_11', type: 'photo', no: '11', title: '雨中的街',
     date: '未知', cred: { level: '高', kind: '视觉记录' },
     // 记录者卷要靠这张照片的背面落款确认「李禾」，故提前到第三幕解锁
     unlock: 'act3',
@@ -595,7 +595,7 @@ LP.data.documents = {
   },
 
   photo_12: {
-    id: 'photo_12', type: 'photo', no: '12', title: '旧照片 · 开着的门',
+    id: 'photo_12', type: 'photo', no: '12', title: '开着的门',
     date: '未知', cred: { level: '高', kind: '视觉记录' },
     unlock: 'photosort',
     src: 'assets/images/photo_door.webp',

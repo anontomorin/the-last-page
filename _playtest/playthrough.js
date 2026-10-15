@@ -368,7 +368,7 @@ async function ensureServer() {
   await snap(A, 'act1-diary21', 'A');
 
   await goTab(B, 'photo');
-  await step('B', '观察《旧照片 · 四人合影》背面折痕');
+  await step('B', '观察《四人合影》背面折痕');
   await flipPhoto(B, 'B', 'photo_09');
   // 折痕热区是 clip-path 右下三角（斜边恰过元素中心），点元素中心不可靠，
   // 改点三角形内部（右下象限 75%,75%）—— 这本身是本次测试发现的一个可用性缺陷
