@@ -165,8 +165,14 @@ LP.archive = (function () {
     LP.$('#btn-back-ending').hidden = !(s.ending || (s.act >= 6 && s.finalMessage));
     document.body.dataset.act = s.act;
     if (s.act >= 1) LP.$('#wb-act-title').textContent = LP.story.ACT_TITLES[Math.min(s.act, 6)];
+    const act = Math.max(1, Math.min(s.act || 1, 6));
     const ap = LP.$('#wb-act-progress');
-    if (ap) ap.textContent = Math.max(1, Math.min(s.act || 1, 6));
+    if (ap) ap.textContent = act;
+    /* 抬头刻度与完整度进度条：与上面两个数字同源（S9 —— 状态不只靠图形表达，
+       刻度/条只是把数字换个形状再讲一遍，数字本身始终在）。 */
+    LP.$$('#wb-ticks i').forEach((t, i) => t.classList.toggle('on', i < act));
+    const bar = LP.$('#wb-bar');
+    if (bar) bar.style.transform = 'scaleX(' + Math.max(0, Math.min(1, pct / 100)).toFixed(4) + ')';
   }
 
   /* ---------------- 启动画面 ---------------- */

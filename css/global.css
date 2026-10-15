@@ -42,9 +42,15 @@ body.theme-bright{ --paper:#FDFCF8; --paper-deep:#F2EEE2; }
 .btn-ghost.small{padding:.35rem .8rem;font-size:.72rem}
 .btn-ghost:disabled{opacity:.35;pointer-events:none}
 
-/* 红色旗带：左侧缘，随幕数推进逐渐点亮（红色主题） */
+/* 红色旗带：左侧缘，随幕数推进逐渐点亮（红色主题）。
+   P9：向下渐隐 —— 顶部 56px（抬头高度）保持实色作为「书脊起点」，
+   往下渐隐到全透明。原来是一根等亮度的竖条贯穿整页，压在纸面上抢视线。
+   渐隐用 mask 的 alpha 通道，故用 rgba(var(--rgb-ink),a) 而不是色值字面量
+   （颜色/时长字面量受 style-lint 棘轮约束，只允许减少）。 */
 #red-ribbon{position:fixed;left:0;top:0;bottom:0;width:5px;z-index:55;pointer-events:none;
   background:linear-gradient(180deg,var(--red),var(--red-bright) 55%,var(--gold));
+  -webkit-mask-image:linear-gradient(180deg,rgba(var(--rgb-ink),1) 0 56px,rgba(var(--rgb-ink),0) 84%);
+  mask-image:linear-gradient(180deg,rgba(var(--rgb-ink),1) 0 56px,rgba(var(--rgb-ink),0) 84%);
   opacity:.12;transition:opacity 1.2s ease,width 1.2s ease}
 body[data-act="2"] #red-ribbon{opacity:.26}
 body[data-act="3"] #red-ribbon{opacity:.4}

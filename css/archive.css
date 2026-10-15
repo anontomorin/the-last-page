@@ -1,12 +1,56 @@
 /* ============ 档案工作台 ============ */
 #screen-archive{background:var(--bg-tint);transition:background 2s}
 
-.wb-top{display:flex;align-items:center;gap:1rem;padding:.7rem 1.2rem;
-  border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
-.wb-brand{font-size:.78rem;letter-spacing:.25em}
-.wb-act{font-size:1rem;font-weight:600;color:var(--red);letter-spacing:.15em;flex:1;text-align:center}
-.wb-status{display:flex;gap:1.2rem;font-size:.72rem;color:var(--ink-soft)}
-.wb-percent b{color:var(--red);font-size:.95rem}
+/* ============ 抬头（HUD，P9 改版）============
+   三栏网格：左 品牌 / 中 幕标题 / 右 状态。
+   为什么不用 flex：原来写的是「flex:1 + text-align:center」，
+   它只在**剩余空间**里居中 —— 左右内容一宽，标题就跟着偏
+   （实测：显示双人按钮时偏 32.9px，隐藏时偏 46.6px，偏移量随内容浮动）。
+   grid-template-columns:1fr auto 1fr 让中栏永久落在页面中线上，
+   与两侧内容宽度彻底解耦。
+
+   左右内边距必须对称：网格只保证中栏落在**内容盒**的中线上，若左内边距
+   比右内边距大 4.8px，中栏（含标题）就整体偏右 2.4px。这一点由
+   npm run test:hud 以 1px 容差守着 —— 别再把 padding 改成一长一短。 */
+.wb-top{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  gap:1rem;padding:.78rem 1.4rem;
+  border-bottom:1px solid var(--line);background:var(--panel);
+  flex:0 0 auto;position:relative;z-index:12}
+/* 台账双线：主线下再压一条淡红发丝线，像档案台账的抬头分隔 */
+.wb-top::after{content:'';position:absolute;left:0;right:0;bottom:2px;height:1px;
+  background:rgba(var(--rgb-red),.14);pointer-events:none}
+
+/* ---- 左：方印 + 字号 + 编号牌 ---- */
+.wb-brand{display:flex;align-items:center;gap:.5rem;justify-self:start;
+  font-size:.72rem;letter-spacing:.22em;color:var(--ink-soft);white-space:nowrap}
+.wb-seal{width:14px;height:14px;flex:0 0 auto;color:var(--red)}
+.wb-code{font-size:.7rem;letter-spacing:.14em;color:var(--red);
+  border:1px solid rgba(var(--rgb-red),.45);background:rgba(var(--rgb-red),.05);padding:.06rem .4rem}
+
+/* ---- 中：幕标题 + 两侧飞线（印刷章节式） ---- */
+.wb-act{justify-self:center;display:flex;align-items:center;gap:.85rem;
+  font-size:1rem;font-weight:600;color:var(--red);letter-spacing:.18em;white-space:nowrap}
+.wb-act::before,.wb-act::after{content:'';width:clamp(1.4rem,4vw,3.4rem);height:1px;
+  background:rgba(var(--rgb-red),.3);flex:0 0 auto}
+
+/* ---- 右：两个数据块 ---- */
+.wb-status{display:flex;align-items:center;justify-content:flex-end;gap:1rem;
+  font-size:.72rem;color:var(--ink-soft)}
+.wb-meters{display:flex;align-items:center;gap:.75rem}
+.wb-meter{display:flex;align-items:center;gap:.42rem;white-space:nowrap}
+.wb-meter-label{font-size:.7rem;letter-spacing:.18em;color:var(--ink-soft)}
+.wb-meter-value{font-size:.74rem;color:var(--ink)}
+.wb-meter-value b{color:var(--red);font-size:.84rem}
+.wb-meter-div{width:1px;height:1.05rem;background:rgba(var(--rgb-ink),.14)}
+/* 主线刻度：把 1/6 变成能看的推进（圆点/色块，非纯颜色表达，数字仍在） */
+.wb-ticks{display:flex;gap:2px}
+.wb-ticks i{display:block;width:7px;height:3px;background:rgba(var(--rgb-ink),.16)}
+.wb-ticks i.on{background:var(--red)}
+/* 完整度细进度条：金色只在此出现，红让给章节名 */
+.wb-bar{display:block;width:3.6rem;height:4px;background:rgba(var(--rgb-ink),.12);overflow:hidden}
+.wb-bar i{display:block;height:100%;background:var(--gold);
+  transform:scaleX(0);transform-origin:left;transition:transform var(--t-base) var(--ease-out)}
 
 .wb-tabs{display:flex;border-bottom:1px solid var(--line);background:var(--paper-deep);
   overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -19,9 +63,12 @@
    字距收到 .12em（衬线 + 2.72px 宽字距会显得松散）。 */
 .wb-tab{display:flex;align-items:center;justify-content:center;
   padding:.72rem 1.3rem;font-family:var(--font-doc);font-size:.9rem;letter-spacing:.12em;color:var(--ink-soft);
-  border-bottom:2px solid transparent;white-space:nowrap;transition:.2s;position:relative}
+  border-bottom:2px solid transparent;white-space:nowrap;position:relative}
 .wb-tab:hover{color:var(--ink)}
-.wb-tab.active{color:var(--red);border-bottom-color:var(--red);background:var(--panel)}
+/* 激活页签：底色与抬头同为 --panel，再加一条红色上发丝线，
+   与抬头底部的淡红发丝线对齐 —— 视觉上把「当前页签」挂到抬头上。 */
+.wb-tab.active{color:var(--red);border-bottom-color:var(--red);background:var(--panel);
+  box-shadow:inset 0 1px 0 rgba(var(--rgb-red),.14)}
 .wb-tab .dot{position:absolute;top:.45rem;right:.45rem;width:7px;height:7px;border-radius:50%;
   background:var(--red);animation:blink 1.4s infinite}
 
@@ -174,6 +221,13 @@
 /* ============ 响应式 ============ */
 @media (max-width:1100px){
   .wb-body{grid-template-columns:220px 1fr 210px}
+  /* 抬头收窄：先收字距与飞线，再收数据块间距 —— 保证仍是一行 */
+  .wb-brand{letter-spacing:.14em}
+  .wb-act{font-size:.92rem;letter-spacing:.12em}
+  .wb-act::before,.wb-act::after{width:1.1rem}
+  .wb-meters{gap:.55rem}
+  .wb-meter-label{letter-spacing:.12em}
+  .wb-bar{width:2.8rem}
 }
 @media (max-width:860px){
   .wb-body{grid-template-columns:1fr;grid-template-rows:auto 1fr auto;overflow-y:auto}
@@ -181,7 +235,21 @@
   .wb-list{max-height:22vh}
   .wb-clues{border-left:none;border-top:1px solid var(--line);max-height:30vh}
   .wb-clues-list{max-height:16vh}
-  .wb-act{font-size:.85rem}
+  /* 窄屏一行放不下三段（方印+编号 / 章节名 / 两个数据块），
+     改为两行定式排布：上行章节名居中，下行 编号牌 + 状态。
+     用定式而不是让它自己换行（原来 flex-wrap 换在哪一行不确定）。
+     抬头本身不需要 sticky：.screen 是固定满屏的 flex 列，
+     唯一滚动容器是 .wb-body，抬头与页签本来就不会跟着滚走。 */
+  .wb-top{grid-template-columns:1fr auto;grid-template-areas:"act act" "brand status";
+    row-gap:.42rem;padding:.55rem 1rem .6rem;gap:.5rem}
+  .wb-act{grid-area:act;justify-self:center;font-size:.88rem;gap:.6rem}
+  .wb-act::before,.wb-act::after{width:1rem}
+  .wb-brand{grid-area:brand}
+  .wb-status{grid-area:status}
+  /* 窄屏省掉冗余的英文全称（编号牌 A-017 已是唯一识别），
+     并省掉完整度进度条（数字仍在，状态不只靠图形表达） */
+  .wb-brand-text{display:none}
+  .wb-bar{display:none}
   .wb-tab{padding:.55rem .9rem;font-size:.78rem}
 }
 
@@ -195,7 +263,7 @@
 
 /* ============ 交互反馈升级（2026-10） ============ */
 /* 标签页：墨线描画式下划线 */
-.wb-tab{position:relative;transition:color .2s}
+.wb-tab{position:relative;transition:color var(--t-micro),box-shadow var(--t-micro)}
 .wb-tab::after{content:'';position:absolute;left:12%;right:12%;bottom:-1px;height:2px;
   background:var(--red);transform:scaleX(0);transform-origin:left;transition:transform .3s ease}
 .wb-tab:hover::after{transform:scaleX(.45)}
