@@ -9,6 +9,7 @@
     "test:dictation": "node _playtest/dictation.test.js",
     "test:style": "node _playtest/style-lint.js",
     "test:contract": "node _playtest/contract.test.js",
+    "test:img": "node _playtest/img-aspect-check.js",
     "test:playthrough": "node _playtest/playthrough.js",
     "shots": "node _playtest/shots4.js",
     "shots:baseline": "node _playtest/shots4.js --baseline",

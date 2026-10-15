@@ -114,7 +114,8 @@
 /* ---- 阅览室场景图 ---- */
 .map-room{margin:1.2rem auto 0;max-width:520px;border:1px solid var(--line);
   background:var(--panel);padding:.6rem;box-shadow:var(--shadow)}
-.map-room img{width:100%;display:block;filter:sepia(.18)}
+/* height:auto 不可省：img 带 width/height 属性防 CLS，若只锁 width 会被纵向拉伸失真 */
+.map-room img{width:100%;height:auto;display:block;filter:sepia(.18)}
 .map-room figcaption{text-align:center;font-size:.6rem;letter-spacing:.3em;
   color:var(--ink-soft);padding:.5rem 0 .2rem}
 
