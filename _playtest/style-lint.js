@@ -89,6 +89,16 @@ function run(opts) {
       if (got === null) problems.push(`${name} 缺失`);
       else if (got.replace(/\s/g, '') !== String(v).replace(/\s/g, '')) problems.push(`${name}: ${got} ≠ ${v}`);
     }
+    /* 根字号：font.root → --font-root
+       全站 rem 的唯一基准。它若与 tokens.json 漂移，「改一个值全局生效」
+       的承诺就是假的 —— 所以和其它令牌一样纳入 A1 一致性校验。 */
+    if (tokens.font && tokens.font.root !== undefined) {
+      const got = getVar('font-root');
+      if (got === null) problems.push('--font-root 缺失');
+      else if (got.replace(/\s/g, '') !== String(tokens.font.root).replace(/\s/g, '')) {
+        problems.push(`--font-root: ${got} ≠ ${tokens.font.root}`);
+      }
+    }
     /* 阴影 */
     const sh = getVar('shadow');
     if (sh === null) problems.push('--shadow 缺失');

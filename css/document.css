@@ -35,7 +35,9 @@
     url('../assets/images/detail_letter.webp') center/cover no-repeat}
 @keyframes paperIn{from{opacity:0;transform:rotate(-.6deg) translateY(10px)}to{opacity:1;transform:none}}
 .paper-doc::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.5;
-  background:repeating-linear-gradient(0deg,transparent 0 27px,rgba(150,130,90,.08) 27px 28px)}
+  /* 横线周期改用 rem：根字号放大后仍与正文保持同一视觉密度
+     （写死 px 时，字变大而线不变密，稿纸会显得「线太细」）。 */
+  background:repeating-linear-gradient(0deg,transparent 0 1.6875rem,rgba(150,130,90,.08) 1.6875rem 1.75rem)}
 .paper-doc h3{font-size:1.15rem;margin-bottom:.4rem;letter-spacing:.1em}
 .paper-doc .pdate{font-family:var(--font-mono);font-size:.68rem;color:#8a7a58;margin-bottom:1.1rem}
 .paper-doc p{line-height:2.15;margin-bottom:.5rem;font-size:.98rem;color:#33302a}

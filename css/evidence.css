@@ -81,8 +81,10 @@
 .ev-node.kind-person{border-left:3px solid var(--gold);color:var(--gold)}
 /* 节点较多时自动收窄，避免窄栏里互相压边 */
 .ev-board.dense .ev-node{max-width:118px;font-size:.66rem;padding:.38rem .6rem}
-.ev-board.dense .ev-node .ev-kind{font-size:.48rem}
-.ev-node .ev-kind{display:block;font-family:var(--font-mono);font-size:.52rem;
+/* 契约 S5：可见文字 ≥11px。根字号 19px 时 .58rem = 11.02px 是下限，
+   再小即便放大了根字号也仍然不合规（.48rem 只有 9.1px）。 */
+.ev-board.dense .ev-node .ev-kind{font-size:.58rem}
+.ev-node .ev-kind{display:block;font-family:var(--font-mono);font-size:.58rem;
   letter-spacing:.2em;color:var(--ink-soft);font-weight:400}
 .ev-empty{height:100%;display:flex;align-items:center;justify-content:center;
   color:var(--ink-soft);font-size:.75rem;font-family:var(--font-mono);letter-spacing:.15em;text-align:center}

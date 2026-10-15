@@ -113,7 +113,7 @@
 .doc-item .cred{font-size:.58rem;font-family:var(--font-mono);padding:.05rem .3rem;border:1px solid var(--line);color:var(--ink-soft)}
 .doc-item .cred.高{border-color:var(--ok);color:var(--ok)}
 .doc-item .cred.低{border-color:var(--red);color:var(--red)}
-.doc-item .gist-flag{font-size:.56rem;font-family:var(--font-mono);padding:.05rem .3rem;
+.doc-item .gist-flag{font-size:.58rem;font-family:var(--font-mono);padding:.05rem .3rem;
   border:1px dashed var(--line);color:var(--ink-soft);letter-spacing:.08em}
 .doc-item .new-flag{position:absolute;right:.4rem;top:50%;transform:translateY(-50%);
   width:6px;height:6px;border-radius:50%;background:var(--gold)}

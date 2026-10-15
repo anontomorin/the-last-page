@@ -8,7 +8,7 @@ body{
   overflow-x:hidden;
   transition:background 2s ease;
 }
-body.theme-bright{ --paper:#FDFCF8; --paper-deep:#F2EEE2; }
+body.theme-bright{ --paper:#FDFAF2; --paper-deep:#F4ECD8; }
 
 /* 场景切换 */
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .6s ease,visibility .6s}
@@ -43,14 +43,17 @@ body.theme-bright{ --paper:#FDFCF8; --paper-deep:#F2EEE2; }
 .btn-ghost:disabled{opacity:.35;pointer-events:none}
 
 /* 红色旗带：左侧缘，随幕数推进逐渐点亮（红色主题）。
-   P9：向下渐隐 —— 顶部 56px（抬头高度）保持实色作为「书脊起点」，
-   往下渐隐到全透明。原来是一根等亮度的竖条贯穿整页，压在纸面上抢视线。
+   P9：向下渐隐 —— 顶部保持实色作为「书脊起点」，往下渐隐到全透明。
+   原来是一根等亮度的竖条贯穿整页，压在纸面上抢视线。
+   D5：实色段原写死 56px（当时的桌面抬头高），根字号放大后抬头变高，
+   两者就脱节了 —— 改为 rem 跟随。当前值对应 test:hud 报出的
+   「抬头高度 59.1px」，改根字号或抬头内边距后需按该数字复核。
    渐隐用 mask 的 alpha 通道，故用 rgba(var(--rgb-ink),a) 而不是色值字面量
    （颜色/时长字面量受 style-lint 棘轮约束，只允许减少）。 */
 #red-ribbon{position:fixed;left:0;top:0;bottom:0;width:5px;z-index:55;pointer-events:none;
   background:linear-gradient(180deg,var(--red),var(--red-bright) 55%,var(--gold));
-  -webkit-mask-image:linear-gradient(180deg,rgba(var(--rgb-ink),1) 0 56px,rgba(var(--rgb-ink),0) 84%);
-  mask-image:linear-gradient(180deg,rgba(var(--rgb-ink),1) 0 56px,rgba(var(--rgb-ink),0) 84%);
+  -webkit-mask-image:linear-gradient(180deg,rgba(var(--rgb-ink),1) 0 3.1rem,rgba(var(--rgb-ink),0) 84%);
+  mask-image:linear-gradient(180deg,rgba(var(--rgb-ink),1) 0 3.1rem,rgba(var(--rgb-ink),0) 84%);
   opacity:.12;transition:opacity 1.2s ease,width 1.2s ease}
 body[data-act="2"] #red-ribbon{opacity:.26}
 body[data-act="3"] #red-ribbon{opacity:.4}
@@ -112,9 +115,9 @@ body[data-act="6"] #red-ribbon{opacity:.95;width:7px}
 
 /* ============ 旁白层 ============ */
 .narrator{position:fixed;inset:0;z-index:150;display:flex;align-items:flex-end;justify-content:center;
-  background:rgba(20,18,14,.55);backdrop-filter:blur(3px);cursor:pointer;padding:2rem 1rem 8vh}
+  background:rgba(28,20,12,.55);backdrop-filter:blur(3px);cursor:pointer;padding:2rem 1rem 8vh}
 /* soft：不虚化背景 —— 玩家需要一边读旁白、一边看清身后的页面（如刚修复的 PAGE_032） */
-.narrator.soft{background:rgba(20,18,14,.26);backdrop-filter:none}
+.narrator.soft{background:rgba(28,20,12,.28);backdrop-filter:none}
 .narrator-box{max-width:640px;width:100%;background:var(--panel);border:1px solid var(--line);
   border-left:4px solid var(--red);padding:1.6rem 1.8rem;box-shadow:var(--shadow);animation:cardIn .5s ease}
 .narrator-text{font-size:1.05rem;line-height:2;white-space:pre-wrap}
@@ -125,7 +128,9 @@ body[data-act="6"] #red-ribbon{opacity:.95;width:7px}
   background:var(--ink);color:var(--c-paper);padding:.6rem 1.4rem;font-size:.75rem;letter-spacing:.12em;
   box-shadow:var(--shadow);animation:toastIn .35s ease;max-width:88vw;text-align:center}
 .toast.red{background:var(--red)}
-.toast.gold{background:var(--gold);color:#1d1a12}
+/* D4：金色（深暖金）比原来的旧金更深，原配深色字对金底只剩 3.31:1；
+   改浅奶油字后 4.75:1。金底上的字色必须跟着金走，不能沿用旧值。 */
+.toast.gold{background:var(--gold);color:#FBF3E2}
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,-12px)}to{opacity:1;transform:translate(-50%,0)}}
 
 /* ============ 印章 ============ */

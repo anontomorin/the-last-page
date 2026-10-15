@@ -46,7 +46,7 @@
 .tl-meta{display:flex;gap:.5rem;align-items:flex-end;border:1px dashed var(--line);
   background:var(--paper-deep);padding:.5rem .55rem}
 .tl-meta-cell{flex:1;display:flex;flex-direction:column;gap:.25rem;min-width:0}
-.tl-meta-k{font-size:.55rem;letter-spacing:.2em;color:var(--ink-soft)}
+.tl-meta-k{font-size:.58rem;letter-spacing:.2em;color:var(--ink-soft)}
 .tl-sel,.tl-date-in{width:100%;border:1px solid var(--line);background:#FFFDF6;
   font-family:var(--font-mono);font-size:.72rem;color:var(--ink);padding:.28rem .35rem;
   border-radius:0;outline:none}
@@ -56,7 +56,7 @@
 .tl-date-in:disabled{background:repeating-linear-gradient(45deg,#F1EBD9,#F1EBD9 5px,#E8E0C9 5px,#E8E0C9 10px);
   color:var(--ink-soft)}
 .tl-date-unit{font-size:.68rem;color:var(--ink-soft)}
-.tl-meta-lock{flex-basis:100%;font-size:.55rem;letter-spacing:.12em;color:var(--gold);
+.tl-meta-lock{flex-basis:100%;font-size:.58rem;letter-spacing:.12em;color:var(--gold);
   text-align:center;padding-top:.15rem}
 
 .tl-slot .tl-card{width:100%;cursor:pointer}
@@ -70,7 +70,7 @@
   border-top:1px dashed var(--line);padding-top:.5rem;animation:cardIn .6s}
 /* 结论来源：可点回原件 */
 .tl-slot-src{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center;margin-top:.4rem}
-.tl-slot-src-k{font-size:.52rem;letter-spacing:.2em;color:var(--ink-soft)}
+.tl-slot-src-k{font-size:.58rem;letter-spacing:.2em;color:var(--ink-soft)}
 .tl-src-chip{font-size:.58rem;font-family:var(--font-doc);border:1px solid var(--gold);
   background:transparent;color:var(--gold);padding:.1rem .4rem;cursor:pointer;transition:.2s}
 .tl-src-chip:hover{background:var(--gold);color:#fff}
