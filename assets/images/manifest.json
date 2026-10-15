@@ -1,0 +1,579 @@
+{
+  "IMG_0317.webp": {
+    "alt": "",
+    "bytes": 94682,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "IMG_0317.webp",
+    "pipe": 3,
+    "role": "IMG",
+    "size": [
+      1280,
+      960
+    ],
+    "usage": ""
+  },
+  "cover_archive.webp": {
+    "alt": "旧木桌上摊开的日记本、信封与合影，窗外是钟楼老街",
+    "bytes": 105944,
+    "containsAnswer": false,
+    "decorative": false,
+    "eager": true,
+    "fallback": "css-gradient",
+    "file": "cover_archive.webp",
+    "pipe": 3,
+    "role": "cover",
+    "size": [
+      1536,
+      878
+    ],
+    "usage": "启动页封面（桌面默认）"
+  },
+  "cover_tall.webp": {
+    "alt": "旧木桌上摊开的日记本、信封与合影，窗外是钟楼老街",
+    "bytes": 103526,
+    "containsAnswer": false,
+    "decorative": false,
+    "eager": true,
+    "fallback": "css-gradient",
+    "file": "cover_tall.webp",
+    "role": "cover",
+    "size": [
+      900,
+      1350
+    ],
+    "usage": "启动页封面竖版（≤640px 宽屏用 srcset 切换）"
+  },
+  "detail_clock_0717.webp": {
+    "alt": "",
+    "bytes": 132786,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "detail_clock_0717.webp",
+    "pipe": 3,
+    "role": "detail",
+    "size": [
+      1024,
+      645
+    ],
+    "usage": ""
+  },
+  "detail_fold_mark.webp": {
+    "alt": "",
+    "bytes": 56654,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "detail_fold_mark.webp",
+    "pipe": 3,
+    "role": "detail",
+    "size": [
+      1024,
+      648
+    ],
+    "usage": ""
+  },
+  "detail_letter.webp": {
+    "alt": "",
+    "bytes": 89990,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "detail_letter.webp",
+    "pipe": 3,
+    "role": "detail",
+    "size": [
+      1024,
+      678
+    ],
+    "usage": ""
+  },
+  "detail_notice_row7.webp": {
+    "alt": "",
+    "bytes": 115964,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "detail_notice_row7.webp",
+    "pipe": 3,
+    "role": "detail",
+    "size": [
+      1024,
+      678
+    ],
+    "usage": ""
+  },
+  "ending_spring_morning.webp": {
+    "alt": "",
+    "bytes": 148866,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "ending_spring_morning.webp",
+    "pipe": 3,
+    "role": "ending",
+    "size": [
+      1536,
+      922
+    ],
+    "usage": ""
+  },
+  "map_old.webp": {
+    "alt": "",
+    "bytes": 171226,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "map_old.webp",
+    "pipe": 3,
+    "role": "map",
+    "size": [
+      1280,
+      960
+    ],
+    "usage": ""
+  },
+  "page32_damaged.webp": {
+    "alt": "",
+    "bytes": 109298,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "page32_damaged.webp",
+    "pipe": 3,
+    "role": "page32",
+    "size": [
+      768,
+      922
+    ],
+    "usage": ""
+  },
+  "page32_restored.webp": {
+    "alt": "",
+    "bytes": 56548,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "page32_restored.webp",
+    "pipe": 3,
+    "role": "page32",
+    "size": [
+      768,
+      922
+    ],
+    "usage": ""
+  },
+  "photo_clocktower.webp": {
+    "alt": "",
+    "bytes": 190978,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "photo_clocktower.webp",
+    "pipe": 3,
+    "role": "photo",
+    "size": [
+      1280,
+      960
+    ],
+    "usage": ""
+  },
+  "photo_door.webp": {
+    "alt": "",
+    "bytes": 145572,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "photo_door.webp",
+    "pipe": 3,
+    "role": "photo",
+    "size": [
+      1280,
+      960
+    ],
+    "usage": ""
+  },
+  "photo_dumpling.webp": {
+    "alt": "",
+    "bytes": 117200,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "photo_dumpling.webp",
+    "pipe": 3,
+    "role": "photo",
+    "size": [
+      1280,
+      960
+    ],
+    "usage": ""
+  },
+  "photo_ferry.webp": {
+    "alt": "",
+    "bytes": 57424,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "photo_ferry.webp",
+    "pipe": 3,
+    "role": "photo",
+    "size": [
+      1280,
+      960
+    ],
+    "usage": ""
+  },
+  "photo_kids.webp": {
+    "alt": "",
+    "bytes": 145904,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "photo_kids.webp",
+    "pipe": 3,
+    "role": "photo",
+    "size": [
+      1280,
+      960
+    ],
+    "usage": ""
+  },
+  "photo_linyuan.webp": {
+    "alt": "",
+    "bytes": 77368,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "photo_linyuan.webp",
+    "pipe": 3,
+    "role": "photo",
+    "size": [
+      960,
+      1280
+    ],
+    "usage": ""
+  },
+  "photo_press.webp": {
+    "alt": "",
+    "bytes": 102422,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "photo_press.webp",
+    "pipe": 3,
+    "role": "photo",
+    "size": [
+      1280,
+      960
+    ],
+    "usage": ""
+  },
+  "photo_rain_street.webp": {
+    "alt": "",
+    "bytes": 163752,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "photo_rain_street.webp",
+    "pipe": 3,
+    "role": "photo",
+    "size": [
+      1280,
+      960
+    ],
+    "usage": ""
+  },
+  "photo_school.webp": {
+    "alt": "",
+    "bytes": 141976,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "photo_school.webp",
+    "pipe": 3,
+    "role": "photo",
+    "size": [
+      1280,
+      960
+    ],
+    "usage": ""
+  },
+  "photo_stall.webp": {
+    "alt": "",
+    "bytes": 153158,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "photo_stall.webp",
+    "pipe": 3,
+    "role": "photo",
+    "size": [
+      1280,
+      960
+    ],
+    "usage": ""
+  },
+  "photo_xinya.webp": {
+    "alt": "",
+    "bytes": 162134,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "photo_xinya.webp",
+    "pipe": 3,
+    "role": "photo",
+    "size": [
+      1280,
+      960
+    ],
+    "usage": ""
+  },
+  "portrait_chen_chuan.webp": {
+    "alt": "",
+    "bytes": 52566,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "portrait_chen_chuan.webp",
+    "pipe": 3,
+    "role": "portrait",
+    "size": [
+      768,
+      922
+    ],
+    "usage": ""
+  },
+  "portrait_chen_chuan_1x1.webp": {
+    "alt": "陈川胸像，侧望",
+    "bytes": 52600,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "initial-letter",
+    "file": "portrait_chen_chuan_1x1.webp",
+    "role": "portrait",
+    "size": [
+      768,
+      768
+    ],
+    "usage": "陈川人物卡 1:1 头像"
+  },
+  "portrait_li_he.webp": {
+    "alt": "",
+    "bytes": 54720,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "portrait_li_he.webp",
+    "pipe": 3,
+    "role": "portrait",
+    "size": [
+      768,
+      922
+    ],
+    "usage": ""
+  },
+  "portrait_li_he_1x1.webp": {
+    "alt": "李禾胸像，侧望",
+    "bytes": 52890,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "initial-letter",
+    "file": "portrait_li_he_1x1.webp",
+    "role": "portrait",
+    "size": [
+      768,
+      768
+    ],
+    "usage": "李禾人物卡 1:1 头像"
+  },
+  "portrait_linyuan.webp": {
+    "alt": "",
+    "bytes": 47200,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "portrait_linyuan.webp",
+    "pipe": 3,
+    "role": "portrait",
+    "size": [
+      768,
+      922
+    ],
+    "usage": ""
+  },
+  "portrait_linyuan_1x1.webp": {
+    "alt": "林远胸像，侧望，手持钢笔",
+    "bytes": 38698,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "initial-letter",
+    "file": "portrait_linyuan_1x1.webp",
+    "role": "portrait",
+    "size": [
+      768,
+      768
+    ],
+    "usage": "林远人物卡 1:1 头像"
+  },
+  "portrait_zhou_ning.webp": {
+    "alt": "",
+    "bytes": 46018,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "portrait_zhou_ning.webp",
+    "pipe": 3,
+    "role": "portrait",
+    "size": [
+      768,
+      922
+    ],
+    "usage": ""
+  },
+  "portrait_zhou_ning_1x1.webp": {
+    "alt": "周宁胸像，侧望",
+    "bytes": 46556,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "initial-letter",
+    "file": "portrait_zhou_ning_1x1.webp",
+    "role": "portrait",
+    "size": [
+      768,
+      768
+    ],
+    "usage": "周宁人物卡 1:1 头像"
+  },
+  "scene_clocktower.webp": {
+    "alt": "",
+    "bytes": 160084,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "scene_clocktower.webp",
+    "pipe": 3,
+    "role": "scene",
+    "size": [
+      1280,
+      768
+    ],
+    "usage": ""
+  },
+  "scene_clocktower_tall.webp": {
+    "alt": "旧钟楼砖塔与拱形木门，门前长椅",
+    "bytes": 148534,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "scene_clocktower_tall.webp",
+    "role": "scene",
+    "size": [
+      960,
+      1280
+    ],
+    "usage": "钟楼实地场景竖档（移动端）"
+  },
+  "scene_ferry.webp": {
+    "alt": "",
+    "bytes": 82086,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "scene_ferry.webp",
+    "pipe": 3,
+    "role": "scene",
+    "size": [
+      1536,
+      922
+    ],
+    "usage": ""
+  },
+  "scene_ferry_tall.webp": {
+    "alt": "雾中江面、停泊木船与近处系船木桩",
+    "bytes": 75682,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "scene_ferry_tall.webp",
+    "role": "scene",
+    "size": [
+      960,
+      1280
+    ],
+    "usage": "渡口实地场景竖档（移动端）"
+  },
+  "scene_oldstreet.webp": {
+    "alt": "",
+    "bytes": 156214,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "scene_oldstreet.webp",
+    "pipe": 3,
+    "role": "scene",
+    "size": [
+      1536,
+      922
+    ],
+    "usage": ""
+  },
+  "scene_oldstreet_tall.webp": {
+    "alt": "石板老街纵深，两侧木构店铺与幌子杆",
+    "bytes": 148910,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "scene_oldstreet_tall.webp",
+    "role": "scene",
+    "size": [
+      960,
+      1280
+    ],
+    "usage": "老街实地场景竖档（移动端）"
+  },
+  "scene_reading_room.webp": {
+    "alt": "",
+    "bytes": 110366,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "scene_reading_room.webp",
+    "pipe": 3,
+    "role": "scene",
+    "size": [
+      1536,
+      922
+    ],
+    "usage": ""
+  },
+  "scene_reading_room_tall.webp": {
+    "alt": "旧阅览室：木桌卷宗、书架与窗光",
+    "bytes": 114298,
+    "containsAnswer": false,
+    "decorative": false,
+    "fallback": "css-gradient",
+    "file": "scene_reading_room_tall.webp",
+    "role": "scene",
+    "size": [
+      960,
+      1280
+    ],
+    "usage": "阅览室场景竖档（移动端）"
+  },
+  "ui_paper_1024.webp": {
+    "alt": "",
+    "bytes": 34974,
+    "containsAnswer": false,
+    "decorative": true,
+    "fallback": "solid-color",
+    "file": "ui_paper_1024.webp",
+    "role": "ui",
+    "size": [
+      1024,
+      1024
+    ],
+    "usage": "纸张平铺纹理（1024，大面积纸面用）"
+  }
+}

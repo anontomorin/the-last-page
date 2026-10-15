@@ -233,7 +233,7 @@ window.LP = window.LP || {};
     ]);
 
     if (vm.type === 'photo') {
-      body.appendChild(el('img', { class: 'doc-thumb', src: vm.img, alt: vm.imgAlt }));
+      body.appendChild(el('img', { class: 'doc-thumb', src: vm.img, alt: vm.imgAlt, loading: 'lazy', decoding: 'async' }));
       body.appendChild(el('p', { text: vm.text }));
     } else if (vm.type === 'map') {
       body.appendChild(el('p', { text: vm.text }));

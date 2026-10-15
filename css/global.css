@@ -56,6 +56,7 @@ body[data-act="6"] #red-ribbon{opacity:.95;width:7px}
 #screen-boot{align-items:stretch;justify-content:flex-start;overflow:hidden;
   background:var(--bg-tint)}
 .boot-visual{position:absolute;top:0;left:0;right:0;bottom:0;z-index:0}
+.boot-visual picture{display:contents}   /* picture 不参与布局，img 直接铺满 */
 .boot-visual img{width:100%;height:100%;object-fit:cover;object-position:center 38%}
 /* 左侧渐层保证标题在任何宽度下清晰 */
 .boot-visual::after{content:"";position:absolute;top:0;left:0;right:0;bottom:0;

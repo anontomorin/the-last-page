@@ -27,6 +27,12 @@ window.LP = window.LP || {};
     oldstreet: 'scene_oldstreet',
     ferry: 'scene_ferry'
   };
+  /* 竖档（移动端 ≤640px 切换；P5 派生，避免 cover 裁掉纵向构图） */
+  const SCENE_TALL = {
+    clocktower: 'scene_clocktower_tall',
+    oldstreet: 'scene_oldstreet_tall',
+    ferry: 'scene_ferry_tall'
+  };
 
   /* 物件线性图标（与旧壳同一套 path，保持像素一致） */
   const OBJ_ICONS = {
@@ -69,6 +75,7 @@ window.LP = window.LP || {};
       desc: loc.desc,
       scene: loc.scene,
       photo: SCENE_IMG[loc.scene] ? 'assets/images/' + SCENE_IMG[loc.scene] + '.webp' : null,
+      photoTall: SCENE_TALL[loc.scene] ? 'assets/images/' + SCENE_TALL[loc.scene] + '.webp' : null,
       photoAlt: loc.name + '的旧照片',
       objects: (loc.objects || []).map(o => {
         const pz = OBJ_DONE_PUZZLE[o.id] || null;
@@ -90,7 +97,12 @@ window.LP = window.LP || {};
     const msgBox = el('div', { class: 'scene-msg', text: vm.desc });
 
     if (vm.photo) {
-      stage.appendChild(el('img', { class: 'scene-photo', src: vm.photo, alt: vm.photoAlt }));
+      /* <picture>：移动端切竖档（无竖档的场景自动退回宽幅） */
+      const pic = el('picture', {}, [
+        vm.photoTall ? el('source', { media: '(max-width:640px)', srcset: vm.photoTall }) : null,
+        el('img', { class: 'scene-photo', src: vm.photo, alt: vm.photoAlt, decoding: 'async' })
+      ]);
+      stage.appendChild(pic);
     }
     /* 环境动态层：低密度的漂移光斑与尘粒 */
     stage.appendChild(el('div', { class: 'scene-dust', 'aria-hidden': 'true' }));

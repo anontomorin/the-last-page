@@ -184,6 +184,52 @@ function run(opts) {
     else bad('引用了未定义的 CSS 变量（声明会静默失效）', [...new Set(undef)].slice(0, 6).join('; '));
   } catch (e) { bad('变量引用校验失败', e.message); }
 
+  /* ---------- A6. 美术 manifest 与体积预算（方案 §6.4 / §6.9） ----------
+     containsAnswer 恒为 false 是自动化检查点；单图与总量预算超限即失败。 */
+  try {
+    const IMG_DIR = path.join(ROOT, 'assets', 'images');
+    const files = fs.readdirSync(IMG_DIR).filter(f => /\.(webp|jpe?g)$/i.test(f));
+    const m = JSON.parse(read('assets/images/manifest.json'));
+    const errs = [];
+    /* ① 双向完整：盘上每张图都有条目；条目都有对应文件 */
+    for (const f of files) if (!m[f]) errs.push(`缺条目: ${f}`);
+    for (const k of Object.keys(m)) if (!files.includes(k)) errs.push(`条目指向不存在的文件: ${k}`);
+    /* ② 答案隔离硬检查 */
+    for (const [k, v] of Object.entries(m)) if (v.containsAnswer !== false) errs.push(`containsAnswer 必须为 false: ${k}`);
+    /* ③ 单图预算（scene 160 / cover 110 / portrait 60，其余 200 KB） */
+    const BUD = { scene: 160, cover: 110, portrait: 60 };
+    for (const f of files) {
+      const lim = (BUD[m[f] && m[f].role] || 200) * 1024;
+      const b = fs.statSync(path.join(IMG_DIR, f)).size;
+      if (b > lim) errs.push(`${f} ${(b / 1024).toFixed(0)}KB > ${lim / 1024}KB`);
+    }
+    /* ④ 总量预算 */
+    const total = files.reduce((s, f) => s + fs.statSync(path.join(IMG_DIR, f)).size, 0);
+    if (total > 4 * 1024 * 1024) errs.push(`总量 ${(total / 1048576).toFixed(2)}MB > 4MB`);
+    /* ⑤ 代码引用的图都存在且在册 */
+    const referenced = new Set();
+    for (const [f, t] of cssAll().concat([['index.html', read('index.html')]])) {
+      (t.match(/assets\/images\/[A-Za-z0-9_.]+\.(?:webp|jpe?g)/g) || [])
+        .forEach(x => referenced.add(x.split('/').pop()));
+    }
+    for (const dir of ['js', 'ui2']) {
+      const walk = d => fs.readdirSync(path.join(ROOT, d), { withFileTypes: true }).forEach(e => {
+        const p = path.join(ROOT, d, e.name);
+        if (e.isDirectory()) return walk(d + '/' + e.name);
+        if (!e.name.endsWith('.js')) return;
+        (read(d + '/' + e.name).match(/assets\/images\/[A-Za-z0-9_.]+\.(?:webp|jpe?g)/g) || [])
+          .forEach(x => referenced.add(x.split('/').pop()));
+      });
+      walk(dir);
+    }
+    for (const r of referenced) {
+      if (!files.includes(r)) errs.push(`代码引用了不存在的图: ${r}`);
+      else if (!m[r]) errs.push(`代码引用的图不在 manifest: ${r}`);
+    }
+    if (!errs.length) ok(`manifest 完整 / containsAnswer 全 false / 体积达标（${files.length} 张，${(total / 1048576).toFixed(2)}MB）`);
+    else bad('美术资产门禁未过', errs.slice(0, 6).join('; ') + (errs.length > 6 ? ` 等 ${errs.length} 项` : ''));
+  } catch (e) { bad('manifest 校验失败', e.message); }
+
   /* ---------- B. 棘轮规则 ---------- */
   const current = (() => {
     let colorHex = 0, colorRgba = 0, durLiterals = 0, varDur = 0;

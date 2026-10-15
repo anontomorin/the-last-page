@@ -137,6 +137,8 @@ python3 -m http.server 8000
 ├── CONTRACT.md           # 逻辑契约（命名空间/状态/存档/隐藏 ARG/谜题数据/部署）
 ├── FRONTEND_REBUILD_PLAN.md  # 重构方案
 ├── REBUILD_REPORT.md     # 重构实施报告（含已知问题）
+├── docs/art-prompts.md   # 美术风格圣经 + 逐张生成记录
+├── tools/art-pipeline.py # 美术后处理流水线（重编码/manifest/拼版/体积审计）
 ├── css/                  # 样式：tokens → variables(垫片) → 档案/文档/地图/时间线/证据板/结局/motion
 ├── ui2/                  # 新壳视图层：index.js（开关+注册表） / view/*.js（viewModel + render）
 ├── js/
@@ -144,7 +146,7 @@ python3 -m http.server 8000
 │   ├── core/             # 事件总线 / 状态机 / 存档 / 路由
 │   ├── data/             # 剧情与数据分离：资料/人物/地点/线索/时间线/脚本/任务卡
 │   └── systems/          # 档案/文档/照片/调查/证据板/地图/时间线/结局
-├── assets/images/        # AI 生成的复古档案照片与手绘地图
+├── assets/images/        # AI 生成的复古档案照片与手绘地图（manifest.json 登记全部元数据）
 └── _playtest/            # 可复现测试环境（见下节）
 ```
 
@@ -169,9 +171,23 @@ npm run serve            # 起本地静态服务（默认 127.0.0.1:8123）
 | 1 | 语法自检：编译 `js/**` 与 `ui2/**` 全部脚本，等价 `node --check` | 无 |
 | 2 | 数据一致性：校验线索 / 证据关系 / 时间线卡片引用的 id 全部存在 | 无 |
 | 3 | 听写校验：正确答案、同义答案、常见误答三组向量（87 条） | 无 |
-| 4 | 风格 lint：令牌一致性、资源版本参数、透明度上限、禁色、变量引用完整性、字面量棘轮 | 无 |
+| 4 | 风格 lint：令牌一致性、资源版本参数、透明度上限、禁色、变量引用完整性、字面量棘轮、美术 manifest 与体积预算 | 无 |
 | 5 | 逻辑契约：16 条断言（状态键 / 存档键 / 隐藏路由 / 关系条数 / 加载顺序 / 相对路径…） | 无 |
 | 6 | 六幕通关：双开浏览器上下文，A/B 两卷各自独立存档，全流程真实点击 | Chrome + playwright-core |
+
+## 美术资产
+
+全部图片由 `assets/images/manifest.json` 登记（用途 / 尺寸 / 字节 / alt / 回退），`containsAnswer` 恒为 `false` ——
+谜题答案（钟面时间、公告栏第七行等）一律是 DOM 文本，绝不烘进图里。
+
+```bash
+python tools/art-pipeline.py reencode      # 存量重编码到单图预算（幂等）
+python tools/art-pipeline.py contact-sheet # 拼版质检 → _playtest/contact_sheet.jpg
+python tools/art-pipeline.py audit         # 体积核对（超限非零退出）
+```
+
+新图生成规范（风格圣经、提示词模板、黄金参考图、逐张记录）见 `docs/art-prompts.md`；
+单图与总量预算由 `npm run test:style` 的 manifest 规则自动把守。
 
 **依赖路径可覆盖**（换机 / CI 时）：
 

@@ -476,7 +476,7 @@ LP.archive = (function () {
       LP.el('h3', { text: LP.inv.sub(doc.title) })
     ]);
     if (doc.type === 'photo') {
-      body.appendChild(LP.el('img', { class: 'doc-thumb', src: doc.src, alt: doc.title }));
+      body.appendChild(LP.el('img', { class: 'doc-thumb', src: doc.src, alt: doc.title, loading: 'lazy', decoding: 'async' }));
       body.appendChild(LP.el('p', { text: LP.inv.sub(doc.desc) }));
     } else if (doc.type === 'map') {
       body.appendChild(LP.el('p', { text: LP.inv.sub(doc.desc) }));

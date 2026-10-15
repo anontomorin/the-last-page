@@ -437,7 +437,7 @@ LP.map = (function () {
 
     /* 阅览室场景图：档案馆所在的旧阅览室 */
     wrap.appendChild(LP.el('figure', { class: 'map-room' }, [
-      LP.el('img', { src: 'assets/images/scene_reading_room.webp', alt: '旧阅览室的木桌、卷宗与窗光', loading: 'lazy' }),
+      LP.el('img', { src: 'assets/images/scene_reading_room.webp', alt: '旧阅览室的木桌、卷宗与窗光', loading: 'lazy', decoding: 'async', width: '1536', height: '922' }),
       LP.el('figcaption', { class: 'mono', text: '数字档案馆 · 旧阅览室' })
     ]));
     container.appendChild(wrap);
@@ -526,13 +526,19 @@ LP.map = (function () {
     const stage = LP.el('div', { class: 'scene-stage' });
     const msgBox = LP.el('div', { class: 'scene-msg', text: loc.desc });
 
-    /* 场景宽幅老照片（本地生成， sepia 与档案原件一致） */
+    /* 场景宽幅老照片（本地生成， sepia 与档案原件一致）；移动端切竖档 */
     const SCENE_IMG = { clocktower: 'scene_clocktower', oldstreet: 'scene_oldstreet', ferry: 'scene_ferry' };
+    const SCENE_TALL = { clocktower: 'scene_clocktower_tall', oldstreet: 'scene_oldstreet_tall', ferry: 'scene_ferry_tall' };
     if (SCENE_IMG[loc.scene]) {
-      stage.appendChild(LP.el('img', {
-        class: 'scene-photo', src: 'assets/images/' + SCENE_IMG[loc.scene] + '.webp',
-        alt: loc.name + '的旧照片'
-      }));
+      stage.appendChild(LP.el('picture', {}, [
+        SCENE_TALL[loc.scene] ? LP.el('source', {
+          media: '(max-width:640px)', srcset: 'assets/images/' + SCENE_TALL[loc.scene] + '.webp'
+        }) : null,
+        LP.el('img', {
+          class: 'scene-photo', src: 'assets/images/' + SCENE_IMG[loc.scene] + '.webp',
+          alt: loc.name + '的旧照片', decoding: 'async'
+        })
+      ]));
     }
     /* 环境动态层：低密度的漂移光斑与尘粒 */
     stage.appendChild(LP.el('div', { class: 'scene-dust', 'aria-hidden': 'true' }));

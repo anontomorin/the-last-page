@@ -3,6 +3,13 @@ window.LP = window.LP || {};
 LP.$  = (sel, root) => (root || document).querySelector(sel);
 LP.$$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
+/* 图缺失兜底（方案 §6.10「绝不留白」）：图片加载失败时隐藏 <img>，
+   让其下的 CSS 渐层 / 纸色衬底显出来。捕获阶段监听，覆盖动态创建的图片。 */
+window.addEventListener('error', e => {
+  const t = e.target;
+  if (t && t.tagName === 'IMG') t.style.visibility = 'hidden';
+}, true);
+
 LP.el = function (tag, attrs, children) {
   const node = document.createElement(tag);
   if (attrs) {

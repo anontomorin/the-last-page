@@ -42,7 +42,8 @@ window.LP = window.LP || {};
     /* 结局氛围主视觉（生成：春日清晨的窗台与远处的老镇） */
     stage.appendChild(el('img', {
       class: 'end-hero', src: 'assets/images/ending_spring_morning.webp',
-      alt: '春日清晨的窗台，窗外是旧镇与远处的钟楼'
+      alt: '春日清晨的窗台，窗外是旧镇与远处的钟楼',
+      width: '1536', height: '922', decoding: 'async'
     }));
 
     stage.appendChild(el('div', { class: 'end-q-head' }, [

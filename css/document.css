@@ -24,8 +24,8 @@
 /* ---- 文档纸张（低对比纸纹理衬底） ---- */
 .paper-doc{background:
     linear-gradient(175deg,rgba(251,247,236,.9),rgba(243,237,220,.92)),
-    url('../assets/images/texture_paper_light.webp') repeat;
-  background-size:auto,480px;
+    url('../assets/images/ui_paper_1024.webp') repeat;
+  background-size:auto,1024px;
   border:1px solid #DCD3BC;
   padding:2rem 2.2rem;max-width:600px;width:100%;box-shadow:0 6px 30px rgba(60,50,30,.18);
   position:relative;font-family:var(--font-doc);animation:paperIn .6s ease}

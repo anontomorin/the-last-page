@@ -36,7 +36,10 @@
 <!-- ============ 启动画面（封面入口） ============ -->
 <section id="screen-boot" class="screen active">
   <div class="boot-visual" aria-hidden="true">
-    <img src="assets/images/cover_archive.webp" alt="" loading="eager">
+    <picture>
+      <source media="(max-width:640px)" srcset="assets/images/cover_tall.webp">
+      <img src="assets/images/cover_archive.webp" alt="" loading="eager" decoding="async" width="1536" height="878">
+    </picture>
   </div>
   <div class="boot-inner">
     <!-- 档案载入过场（短暂、可跳过） -->

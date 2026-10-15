@@ -412,7 +412,7 @@ window.LP = window.LP || {};
 
     /* 阅览室场景图：档案馆所在的旧阅览室 */
     wrap.appendChild(el('figure', { class: 'map-room' }, [
-      el('img', { src: 'assets/images/scene_reading_room.webp', alt: '旧阅览室的木桌、卷宗与窗光', loading: 'lazy' }),
+      el('img', { src: 'assets/images/scene_reading_room.webp', alt: '旧阅览室的木桌、卷宗与窗光', loading: 'lazy', decoding: 'async', width: '1536', height: '922' }),
       el('figcaption', { class: 'mono', text: '数字档案馆 · 旧阅览室' })
     ]));
 
