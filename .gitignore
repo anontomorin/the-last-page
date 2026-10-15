@@ -1,4 +1,5 @@
 # 测试产物
+_backup/
 _playtest/shots/
 _playtest/dictation.result.json
 _playtest/*.log

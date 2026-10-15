@@ -11,6 +11,11 @@
        --max-bytes 按 role 预算自动降质量）
   dewm
       给存量资产补去水印（按 manifest.dewm 幂等；--force 全部重做）
+      ⚠ 固定右下角框（13%×9.5%）——P14 实测角标位置随画布漂移，
+      一部分图盖不住（见 WM_BOXES 注释），存量清理请用 dewm2。
+  dewm2
+      按 WM_BOXES 逐图坐标表精确去水印（幂等，按 manifest.dewm2 标记跳过）。
+      坐标是 2026-10-15 对备份原图逐张放大人工定位的结果（_diag/wm_zoom2_*.png）。
   reencode
       存量优化：对 manifest 里未标记本管线版本的文件做纯重编码
       （WebP 质量阶梯到单图预算；JPG q80 渐进式）。内容零变更，幂等。
@@ -364,6 +369,172 @@ def cmd_reencode(args):
 
 # ---------------- 存量去水印（幂等） ----------------
 
+# P14：角标不是总在「右下角贴边」。对备份原图逐张放大定位（_diag/wm_zoom2_*.png）
+# 后发现两种模板、位置随画布漂移：
+#   A. 双行「AI生成 / WORKBUDDY>_」（约 100×70px）：1x1 人像、cover_tall、ui_paper —— 贴右下角；
+#   B. 单行圆角框「AI生成」（约 100×30px）：photo 系 / scene_reading_room ——
+#      可偏离角落（photo_school 在 x 75–85%，photo_press 还整体上浮到 y≈0.85）。
+# 另经全量复查：四张 768×922 人像、scene_ferry / scene_clocktower / scene_oldstreet 系、
+# 8 张 bg、detail / page32 / map / IMG_0317 等原图本来就没有角标 —— 不在本表内就不动。
+# 值 = (x0, y0, x1, y1) 相对画布的填补矩形，已含 ~2% 余量。
+WM_BOXES = {
+    'cover_tall.webp':            (0.855, 0.895, 1.000, 1.000),
+    'portrait_chen_chuan_1x1.webp': (0.845, 0.895, 1.000, 1.000),
+    'portrait_li_he_1x1.webp':    (0.845, 0.895, 1.000, 1.000),
+    'portrait_linyuan_1x1.webp':  (0.825, 0.895, 1.000, 1.000),
+    'portrait_zhou_ning_1x1.webp': (0.845, 0.895, 1.000, 1.000),
+    'ui_paper_1024.webp':         (0.855, 0.895, 1.000, 1.000),
+    'photo_door.webp':            (0.845, 0.878, 0.995, 0.982),
+    'photo_dumpling.webp':        (0.845, 0.878, 0.995, 0.982),
+    'photo_ferry.webp':           (0.855, 0.870, 0.990, 0.975),
+    'photo_kids.webp':            (0.845, 0.888, 0.995, 0.982),
+    'photo_linyuan.webp':         (0.815, 0.875, 0.960, 0.975),
+    'photo_press.webp':           (0.850, 0.840, 1.000, 0.990),
+    'photo_rain_street.webp':     (0.730, 0.870, 0.965, 0.992),
+    'photo_school.webp':          (0.715, 0.880, 0.960, 0.998),
+    'photo_xinya.webp':           (0.830, 0.858, 0.985, 0.978),
+    'scene_reading_room.webp':    (0.885, 0.898, 1.000, 0.985),
+}
+
+
+def _feather_mask_rect(bw, bh, feather=0.28, edges=('top', 'left', 'right', 'bottom')):
+    """任意矩形的羽化遮罩：指定边上留线性过渡，其余实心。"""
+    mask = Image.new('L', (bw, bh), 255)
+    px = mask.load()
+    ramps = {}
+    for e in edges:
+        n = {'top': bh, 'left': bw, 'right': bw, 'bottom': bh}[e]
+        ramps[e] = max(1, int(round(n * feather)))
+    for y in range(bh):
+        a = 255
+        if 'top' in ramps and y < ramps['top']:
+            a = min(a, int(255 * (y + 1) / (ramps['top'] + 1)))
+        if 'bottom' in ramps and (bh - 1 - y) < ramps['bottom']:
+            a = min(a, int(255 * (bh - y) / (ramps['bottom'] + 1)))
+        for x in range(bw):
+            v = a
+            if 'left' in ramps and x < ramps['left']:
+                v = min(v, int(255 * (x + 1) / (ramps['left'] + 1)))
+            if 'right' in ramps and (bw - 1 - x) < ramps['right']:
+                v = min(v, int(255 * (bw - x) / (ramps['right'] + 1)))
+            px[x, y] = v
+    return mask
+
+
+def _fill_rect(img, x0, y0, x1, y1):
+    """任意矩形填补：1/8 降采样上做边界调和扩散，双三次放大回填 + 色调对齐。
+    同 _fill_source 的思路，但矩形不再假定贴右下角（P14：角标位置会漂）。"""
+    W, H = img.size
+    bx0, by0, bx1, by1 = max(0, x0), max(0, y0), min(W, x1), min(H, y1)
+    bw, bh = bx1 - bx0, by1 - by0
+    assert bw > 4 and bh > 4, f'填补矩形过小: {(bx0, by0, bx1, by1)}'
+    f = DEWM['downscale']
+    sw, sh = max(4, W // f), max(4, H // f)
+    small = img.resize((sw, sh), Image.BOX)
+    sx0, sy0 = bx0 // f, by0 // f
+    sx1, sy1 = min(sw, max(sx0 + 2, bx1 // f)), min(sh, max(sy0 + 2, by1 // f))
+    reg = small.crop((sx0, sy0, sx1, sy1))
+    w, h = reg.size
+    get = reg.load()
+
+    top = [small.getpixel((min(sw - 1, max(0, sx0 + i)), max(0, sy0 - 1)))
+           for i in range(w)]
+    bot = [small.getpixel((min(sw - 1, max(0, sx0 + i)), min(sh - 1, sy1)))
+           for i in range(w)]
+    left = [small.getpixel((max(0, sx0 - 1), min(sh - 1, max(0, sy0 + j))))
+            for j in range(h)]
+    right = [small.getpixel((min(sw - 1, sx1), min(sh - 1, max(0, sy0 + j))))
+             for j in range(h)]
+    for j in range(h):
+        fy = (j + 1) / (h + 1)
+        for i in range(w):
+            fx = (i + 1) / (w + 1)
+            a = [(left[j][c] * (1 - fx) + right[j][c] * fx) for c in range(3)]
+            b = [(top[i][c] * (1 - fy) + bot[i][c] * fy) for c in range(3)]
+            get[i, j] = (round((a[0] + b[0]) / 2), round((a[1] + b[1]) / 2),
+                         round((a[2] + b[2]) / 2))
+    for _ in range(24):
+        prev = reg.copy().load()
+        for j in range(h):
+            for i in range(w):
+                n = prev[i, j - 1] if j > 0 else top[i]
+                s = prev[i, j + 1] if j < h - 1 else bot[i]
+                ww = prev[i - 1, j] if i > 0 else left[j]
+                e = prev[i + 1, j] if i < w - 1 else right[j]
+                get[i, j] = ((n[0] + s[0] + ww[0] + e[0] + 2) >> 2,
+                             (n[1] + s[1] + ww[1] + e[1] + 2) >> 2,
+                             (n[2] + s[2] + ww[2] + e[2] + 2) >> 2)
+    fill = reg.resize((bw, bh), Image.BICUBIC)
+    # 色调对齐：把填块均值拉齐到「框外一圈」的均值，避免出现深浅方块
+    ring = []
+    if by0 > 0:
+        ring.append(img.crop((bx0, max(0, by0 - bh), bx1, by0)))
+    if by1 < H:
+        ring.append(img.crop((bx0, by1, bx1, min(H, by1 + bh))))
+    if bx0 > 0:
+        ring.append(img.crop((max(0, bx0 - bw), by0, bx0, by1)))
+    if bx1 < W:
+        ring.append(img.crop((bx1, by0, min(W, bx1 + bw), by1)))
+    if ring:
+        band = Image.new('RGB', (sum(r.width for r in ring), bh))
+        off_x = 0
+        for r in ring:
+            band.paste(r, (off_x, 0))
+            off_x += r.width
+        bm = ImageStat.Stat(band).mean
+        fm = ImageStat.Stat(fill).mean
+        offs = [max(-30.0, min(30.0, bm[c] - fm[c])) for c in range(3)]
+        if max(abs(o) for o in offs) > 1.0:
+            chans = fill.split()
+            fill = Image.merge('RGB', [
+                ch.point(lambda v, o=o: max(0, min(255, int(v + o))))
+                for ch, o in zip(chans, offs)])
+    return (bx0, by0, bx1, by1), fill
+
+
+def cmd_dewm2(args):
+    """按 WM_BOXES 逐图精确去水印（P14）。幂等：manifest.dewm2 跳过；--force 重做。"""
+    m = load_manifest()
+    done, skipped = [], []
+    for f, (fx0, fy0, fx1, fy1) in sorted(WM_BOXES.items()):
+        path = os.path.join(IMG_DIR, f)
+        if not os.path.exists(path):
+            print(f'dewm2  {f:<34} 缺文件，跳过')
+            continue
+        entry = m.setdefault(f, {})
+        if entry.get('dewm2') and not args.force:
+            skipped.append(f)
+            continue
+        img = Image.open(path)
+        img.load()
+        w, h = img.size
+        rect = (round(w * fx0), round(h * fy0), round(w * fx1), round(h * fy1))
+        out = img.convert('RGB').copy()
+        (bx0, by0, bx1, by1), fill = _fill_rect(out, *rect)
+        # 扩散填补是低频的，落在胶片颗粒纹理上会显出一块「失焦」；
+        # 给填块补一层与全图同源的确定性颗粒（种子含文件名）把它揉回去。
+        fill = add_grain(fill, 'dewm2:' + f, strength=12)
+        # 羽化只留在框内真正的「内边」上：贴画布边的框边必须实心填满，
+        # 否则角标贴边的那几个笔画会从半透明羽化带里透出来（第一版的教训）。
+        # 羽化宽取框短边的 8%（≈10–16px）：足以藏住接缝，又不会弱到盖不住笔画。
+        edges = ['top', 'left']
+        if fx1 < 1.0:
+            edges.append('right')
+        if fy1 < 1.0:
+            edges.append('bottom')
+        mask = _feather_mask_rect(bx1 - bx0, by1 - by0, 0.08,
+                                  edges=tuple(edges))
+        out.paste(fill, (bx0, by0), mask)
+        q, size = encode_webp_budget(out, path, budget_for(f))
+        entry['dewm2'] = True
+        entry['dewm2Box'] = [fx0, fy0, fx1, fy1]
+        done.append(f)
+        print(f'dewm2 {f:<34} {w}x{h}  box={rect}  q{q}  {size/1024:.1f} KB')
+    save_manifest(m)
+    cmd_manifest(args)
+    print(f'-- dewm2 精确去水印 {len(done)} 张，跳过 {len(skipped)} 张')
+
+
 def cmd_dewm(args):
     """对 IMG_DIR 里所有已上线的图补一次去水印，再按 role 预算重编码。
     幂等：manifest 里 dewm=True 的跳过；--force 可整体重做。"""
@@ -513,6 +684,10 @@ def main():
     p = sub.add_parser('dewm', help='给存量资产补去水印（幂等，按 manifest.dewm 标记跳过）')
     p.add_argument('--force', action='store_true', help='忽略 manifest 标记，全部重做')
     p.set_defaults(func=cmd_dewm)
+
+    p = sub.add_parser('dewm2', help='按 WM_BOXES 逐图坐标精确去水印（幂等）')
+    p.add_argument('--force', action='store_true', help='忽略 manifest 标记，全部重做')
+    p.set_defaults(func=cmd_dewm2)
 
     sub.add_parser('reencode', help='存量重编码（内容零变更，幂等）').set_defaults(func=cmd_reencode)
     sub.add_parser('manifest', help='重算 manifest 的 size/bytes').set_defaults(func=cmd_manifest)

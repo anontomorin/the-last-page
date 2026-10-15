@@ -145,9 +145,16 @@
   },
   "cover_tall.webp": {
     "alt": "旧木桌上摊开的日记本、信封与合影，窗外是钟楼老街",
-    "bytes": 103526,
+    "bytes": 96538,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.855,
+      0.895,
+      1.0,
+      1.0
+    ],
     "eager": true,
     "fallback": "css-gradient",
     "file": "cover_tall.webp",
@@ -295,9 +302,16 @@
   },
   "photo_door.webp": {
     "alt": "",
-    "bytes": 145572,
+    "bytes": 142622,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.845,
+      0.878,
+      0.995,
+      0.982
+    ],
     "fallback": "css-gradient",
     "file": "photo_door.webp",
     "pipe": 3,
@@ -310,9 +324,16 @@
   },
   "photo_dumpling.webp": {
     "alt": "",
-    "bytes": 117200,
+    "bytes": 115022,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.845,
+      0.878,
+      0.995,
+      0.982
+    ],
     "fallback": "css-gradient",
     "file": "photo_dumpling.webp",
     "pipe": 3,
@@ -325,9 +346,16 @@
   },
   "photo_ferry.webp": {
     "alt": "",
-    "bytes": 57424,
+    "bytes": 55040,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.855,
+      0.87,
+      0.99,
+      0.975
+    ],
     "fallback": "css-gradient",
     "file": "photo_ferry.webp",
     "pipe": 3,
@@ -340,9 +368,16 @@
   },
   "photo_kids.webp": {
     "alt": "",
-    "bytes": 145904,
+    "bytes": 142694,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.845,
+      0.888,
+      0.995,
+      0.982
+    ],
     "fallback": "css-gradient",
     "file": "photo_kids.webp",
     "pipe": 3,
@@ -355,9 +390,16 @@
   },
   "photo_linyuan.webp": {
     "alt": "",
-    "bytes": 77368,
+    "bytes": 75568,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.815,
+      0.875,
+      0.96,
+      0.975
+    ],
     "fallback": "css-gradient",
     "file": "photo_linyuan.webp",
     "pipe": 3,
@@ -370,9 +412,16 @@
   },
   "photo_press.webp": {
     "alt": "",
-    "bytes": 102422,
+    "bytes": 99560,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.85,
+      0.84,
+      1.0,
+      0.99
+    ],
     "fallback": "css-gradient",
     "file": "photo_press.webp",
     "pipe": 3,
@@ -385,9 +434,16 @@
   },
   "photo_rain_street.webp": {
     "alt": "",
-    "bytes": 163752,
+    "bytes": 158970,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.73,
+      0.87,
+      0.965,
+      0.992
+    ],
     "fallback": "css-gradient",
     "file": "photo_rain_street.webp",
     "pipe": 3,
@@ -400,9 +456,16 @@
   },
   "photo_school.webp": {
     "alt": "",
-    "bytes": 141976,
+    "bytes": 137066,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.715,
+      0.88,
+      0.96,
+      0.998
+    ],
     "fallback": "css-gradient",
     "file": "photo_school.webp",
     "pipe": 3,
@@ -430,9 +493,16 @@
   },
   "photo_xinya.webp": {
     "alt": "",
-    "bytes": 162134,
+    "bytes": 156572,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.83,
+      0.858,
+      0.985,
+      0.978
+    ],
     "fallback": "css-gradient",
     "file": "photo_xinya.webp",
     "pipe": 3,
@@ -460,9 +530,16 @@
   },
   "portrait_chen_chuan_1x1.webp": {
     "alt": "陈川胸像，侧望",
-    "bytes": 52600,
+    "bytes": 48566,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.845,
+      0.895,
+      1.0,
+      1.0
+    ],
     "fallback": "initial-letter",
     "file": "portrait_chen_chuan_1x1.webp",
     "role": "portrait",
@@ -489,9 +566,16 @@
   },
   "portrait_li_he_1x1.webp": {
     "alt": "李禾胸像，侧望",
-    "bytes": 52890,
+    "bytes": 47752,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.845,
+      0.895,
+      1.0,
+      1.0
+    ],
     "fallback": "initial-letter",
     "file": "portrait_li_he_1x1.webp",
     "role": "portrait",
@@ -518,9 +602,16 @@
   },
   "portrait_linyuan_1x1.webp": {
     "alt": "林远胸像，侧望，手持钢笔",
-    "bytes": 38698,
+    "bytes": 33854,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.825,
+      0.895,
+      1.0,
+      1.0
+    ],
     "fallback": "initial-letter",
     "file": "portrait_linyuan_1x1.webp",
     "role": "portrait",
@@ -547,9 +638,16 @@
   },
   "portrait_zhou_ning_1x1.webp": {
     "alt": "周宁胸像，侧望",
-    "bytes": 46556,
+    "bytes": 38604,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.845,
+      0.895,
+      1.0,
+      1.0
+    ],
     "fallback": "initial-letter",
     "file": "portrait_zhou_ning_1x1.webp",
     "role": "portrait",
@@ -648,9 +746,16 @@
   },
   "scene_reading_room.webp": {
     "alt": "",
-    "bytes": 162704,
+    "bytes": 153238,
     "containsAnswer": false,
     "decorative": false,
+    "dewm2": true,
+    "dewm2Box": [
+      0.885,
+      0.898,
+      1.0,
+      0.985
+    ],
     "fallback": "css-gradient",
     "file": "scene_reading_room.webp",
     "pipe": 3,
@@ -677,9 +782,16 @@
   },
   "ui_paper_1024.webp": {
     "alt": "",
-    "bytes": 34974,
+    "bytes": 25434,
     "containsAnswer": false,
     "decorative": true,
+    "dewm2": true,
+    "dewm2Box": [
+      0.855,
+      0.895,
+      1.0,
+      1.0
+    ],
     "fallback": "solid-color",
     "file": "ui_paper_1024.webp",
     "role": "ui",
