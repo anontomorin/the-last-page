@@ -48,10 +48,24 @@ LP.quest = (function () {
   }
 
   /* ---------- 真实导航 ---------- */
+
+  /* 左侧清单支持的资料类型。「切标签 + 高亮列表项」这套导航只对它们成立；
+     不在清单里的原件（PAGE_032.dat 这类 type:'file' 的损坏文件）在列表
+     里根本没有条目，切标签也切不到它 —— 必须直接开查看器，否则按钮
+     看起来就是「点了没反应」（第五幕主行动按钮曾因此成为死键）。 */
+  const LISTED_TYPES = ['diary', 'photo', 'letter', 'map'];
+
   function gotoDoc(id) {
     const doc = LP.data.documents[id];
     if (!doc) return;
     if (!LP.inv.docVisible(doc)) { LP.duo.openPanel(); return; }
+    /* 非清单原件（PAGE_032.dat）：本身就是「一页」，查看器就是它的页面。
+       不能走下面的「切标签 + 高亮」——标签切不到它，列表里也没有它的条目。 */
+    if (LISTED_TYPES.indexOf(doc.type) < 0) {
+      if (!LP.archive.isUnlocked(doc)) { LP.ui.toast('这份资料还没有解锁。', 'gold'); return; }
+      LP.doc.open(doc.id);
+      return;
+    }
     const tab = doc.type === 'photo' ? 'photo'
       : doc.type === 'letter' ? 'letter'
       : doc.type === 'map' ? 'map' : 'diary';

@@ -13,6 +13,7 @@
     "test:bg": "node _playtest/bg-check.js",
     "test:icon": "node _playtest/icon-line-check.js",
     "test:hud": "node _playtest/hud-check.js",
+    "test:qg": "node _playtest/quest-nav-check.js",
     "test:contrast": "node _playtest/bg-contrast.js",
     "test:playthrough": "node _playtest/playthrough.js",
     "shots": "node _playtest/shots4.js",
