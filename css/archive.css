@@ -10,7 +10,15 @@
 
 .wb-tabs{display:flex;border-bottom:1px solid var(--line);background:var(--paper-deep);
   overflow-x:auto;-webkit-overflow-scrolling:touch}
-.wb-tab{padding:.65rem 1.3rem;font-size:.85rem;letter-spacing:.2em;color:var(--ink-soft);
+/* 页签：图标 + 文字排在同一行。
+   注意 reset.css 有 img,canvas,svg,video{display:block} —— 若不把页签设为
+   flex，inline SVG 会被块级化，把文字挤到第二行（图标在上、文字在下）。
+
+   字体用 --font-doc（衬线宋体族）：与文档正文同族，印刷档案气质，
+   和满屏老照片底纹协调。宋体在 13.6px 下笔画偏细，故字号提到 .9rem、
+   字距收到 .12em（衬线 + 2.72px 宽字距会显得松散）。 */
+.wb-tab{display:flex;align-items:center;justify-content:center;
+  padding:.72rem 1.3rem;font-family:var(--font-doc);font-size:.9rem;letter-spacing:.12em;color:var(--ink-soft);
   border-bottom:2px solid transparent;white-space:nowrap;transition:.2s;position:relative}
 .wb-tab:hover{color:var(--ink)}
 .wb-tab.active{color:var(--red);border-bottom-color:var(--red);background:var(--panel)}
@@ -59,6 +67,9 @@
 .wb-main{overflow-y:auto;padding:1.4rem;min-height:0}
 .wb-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:.6rem;color:var(--ink-soft);font-size:.8rem;text-align:center}
+/* 空态提示直接压在底纹上（没有卡片衬底），而 .dim 默认 opacity .55 ——
+   底纹调清晰后这行会糊掉。这里单独提回 .8，保住可读性。 */
+.wb-empty .dim{opacity:.8}
 .wb-preview{animation:cardIn .45s ease}
 
 .doc-card{border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow);

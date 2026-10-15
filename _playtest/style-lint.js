@@ -197,15 +197,17 @@ function run(opts) {
     /* ② 答案隔离硬检查 */
     for (const [k, v] of Object.entries(m)) if (v.containsAnswer !== false) errs.push(`containsAnswer 必须为 false: ${k}`);
     /* ③ 单图预算（scene 160 / cover 110 / portrait 60，其余 200 KB） */
-    const BUD = { scene: 160, cover: 110, portrait: 60 };
+    const BUD = { scene: 160, cover: 110, portrait: 60, bg: 120 };
     for (const f of files) {
       const lim = (BUD[m[f] && m[f].role] || 200) * 1024;
       const b = fs.statSync(path.join(IMG_DIR, f)).size;
       if (b > lim) errs.push(`${f} ${(b / 1024).toFixed(0)}KB > ${lim / 1024}KB`);
     }
-    /* ④ 总量预算 */
+    /* ④ 总量预算（4MB → 4.3MB：P7 加 8 张界面背景；4.3MB → 4.8MB：
+       P8 底纹升到 1440x900 换清晰度，见 REBUILD_REPORT P8） */
     const total = files.reduce((s, f) => s + fs.statSync(path.join(IMG_DIR, f)).size, 0);
-    if (total > 4 * 1024 * 1024) errs.push(`总量 ${(total / 1048576).toFixed(2)}MB > 4MB`);
+    const TOTAL_CAP = 4.8 * 1024 * 1024;
+    if (total > TOTAL_CAP) errs.push(`总量 ${(total / 1048576).toFixed(2)}MB > 4.8MB`);
     /* ⑤ 代码引用的图都存在且在册 */
     const referenced = new Set();
     for (const [f, t] of cssAll().concat([['index.html', read('index.html')]])) {

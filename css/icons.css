@@ -1,0 +1,32 @@
+/* ============================================================
+   UI 图标（inline SVG）
+   ------------------------------------------------------------
+   图标一律是 stroke="currentColor" 的 inline SVG：
+     · 颜色自动跟随文字 —— 页签激活变红、按钮 hover 变深都不需要额外规则；
+     · 不写任何颜色字面量，因此不触犯 style-lint 的棘轮统计；
+     · 矢量缩放，零图片请求、不占图片体积预算；
+     · 纯装饰，故 svg 上带 aria-hidden="true"，读屏不会重复念。
+   ============================================================ */
+.ico {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  vertical-align: -2px;
+  margin-right: .38rem;
+  opacity: .7;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* 页签：默认淡，激活/悬停时与文字同重 */
+.wb-tab .ico { margin-right: .42rem; }
+.wb-tab.active .ico,
+.wb-tab:hover .ico { opacity: 1; }
+
+/* 幽灵按钮 */
+.btn-ghost .ico { margin-right: .35rem; }
+
+/* 窄屏：文字已足够，图标让位以免页签换行 */
+@media (max-width: 640px) {
+  .wb-tab .ico { margin-right: .28rem; }
+}

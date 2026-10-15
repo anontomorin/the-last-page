@@ -14,6 +14,119 @@
     ],
     "usage": ""
   },
+  "bg_boot.webp": {
+    "alt": "",
+    "bytes": 96106,
+    "containsAnswer": false,
+    "decorative": true,
+    "eager": true,
+    "fallback": "css-gradient",
+    "file": "bg_boot.webp",
+    "role": "bg",
+    "size": [
+      1440,
+      900
+    ],
+    "usage": "启动页背景：旧木桌与虚化窗光"
+  },
+  "bg_ending.webp": {
+    "alt": "",
+    "bytes": 87528,
+    "containsAnswer": false,
+    "decorative": true,
+    "fallback": "css-gradient",
+    "file": "bg_ending.webp",
+    "role": "bg",
+    "size": [
+      1440,
+      900
+    ],
+    "usage": "结局界面背景：春日清晨的窗台与远山"
+  },
+  "bg_evidence.webp": {
+    "alt": "",
+    "bytes": 88626,
+    "containsAnswer": false,
+    "decorative": true,
+    "fallback": "css-gradient",
+    "file": "bg_evidence.webp",
+    "role": "bg",
+    "size": [
+      1440,
+      900
+    ],
+    "usage": "证据板背景：档案室木墙与档案柜"
+  },
+  "bg_map.webp": {
+    "alt": "",
+    "bytes": 99174,
+    "containsAnswer": false,
+    "decorative": true,
+    "fallback": "css-gradient",
+    "file": "bg_map.webp",
+    "role": "bg",
+    "size": [
+      1440,
+      900
+    ],
+    "usage": "地图界面背景：测绘桌与空白绘图纸"
+  },
+  "bg_scene.webp": {
+    "alt": "",
+    "bytes": 122084,
+    "containsAnswer": false,
+    "decorative": true,
+    "fallback": "css-gradient",
+    "file": "bg_scene.webp",
+    "role": "bg",
+    "size": [
+      1440,
+      900
+    ],
+    "usage": "实地现场背景：晨雾中的老镇远景"
+  },
+  "bg_timeline.webp": {
+    "alt": "",
+    "bytes": 93466,
+    "containsAnswer": false,
+    "decorative": true,
+    "fallback": "css-gradient",
+    "file": "bg_timeline.webp",
+    "role": "bg",
+    "size": [
+      1440,
+      900
+    ],
+    "usage": "时间线背景：长木桌与纸卷"
+  },
+  "bg_viewer.webp": {
+    "alt": "",
+    "bytes": 97004,
+    "containsAnswer": false,
+    "decorative": true,
+    "fallback": "solid-color",
+    "file": "bg_viewer.webp",
+    "role": "bg",
+    "size": [
+      1440,
+      900
+    ],
+    "usage": "文档查看器背景：摊开的旧纸"
+  },
+  "bg_workbench.webp": {
+    "alt": "",
+    "bytes": 100076,
+    "containsAnswer": false,
+    "decorative": true,
+    "fallback": "css-gradient",
+    "file": "bg_workbench.webp",
+    "role": "bg",
+    "size": [
+      1440,
+      900
+    ],
+    "usage": "工作台/档案界面背景：阅览室书架虚化景"
+  },
   "cover_archive.webp": {
     "alt": "旧木桌上摊开的日记本、信封与合影，窗外是钟楼老街",
     "bytes": 105944,

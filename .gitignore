@@ -13,7 +13,15 @@ Thumbs.db
 _playtest/baseline/
 _playtest/visual-report/
 _playtest/ui-compare/
+# 底纹对比度门禁的中间截图（npm run test:contrast 每次重建）
+_playtest/_bgshot/
+# 人工看图用的预览截图（_playtest/_preview.js 输出）
+_playtest/_preview/
 
 # 生成图原始输出（中间产物，不入库；成品由 tools/art-pipeline.py 处理后入库）
 assets/raw/
 _playtest/contact_sheet.jpg
+
+# Python 字节码缓存
+tools/__pycache__/
+*.pyc

@@ -1,0 +1,131 @@
+/* ============================================================
+   界面背景（P7）—— 八个界面各一张专属老照片底纹
+   ------------------------------------------------------------
+   实现约定（改动前请先读，避免踩坏既有门禁）：
+
+   1. 「图 + 遮罩」用同一条 background-image 的两层实现：
+        第一层 = 纸色半透明遮罩，第二层 = 底纹图。
+      不新增伪元素，避免 z-index 层叠把正文盖住；正文对比度由
+      遮罩 alpha 保证（style-lint A3 扫描线/噪点透明度上限同理）。
+
+   2. 遮罩颜色一律写 rgba(var(--rgb-paper-hi), a)。
+      把三元组直接写进括号（首参为数字）会被 style-lint 棘轮记为新增
+      颜色字面量而失败；用 var() 视为已令牌化，不计入。
+
+   3. 本文件不写任何动画时长字面量（棘轮同样统计）。背景是静态层。
+
+   4. 背景图为纯装饰：不承载剧情信息（manifest containsAnswer=false），
+      无 alt、不可聚焦；任何一图 404 都只露出下层纸色，不影响可玩性。
+   ============================================================ */
+
+/* ---------- 通用：底纹铺法 ---------- */
+#screen-archive, #screen-scene, #screen-ending, .viewer, #screen-boot {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+/* ---------- 启动页 ----------
+   封面本身即主视觉，这里让封面微微透出下层底纹（双底叠印的档案感），
+   同时底纹也是封面尚未解码时的兜底画面。 */
+#screen-boot { background-image: url('../assets/images/bg_boot.webp'); }
+.boot-visual img { opacity: .86; }
+
+/* ---------- 工作台 / 档案列表（日记·照片·信件·人物） ---------- */
+#screen-archive {
+  background-image:
+    linear-gradient(rgba(var(--rgb-paper-hi), .78), rgba(var(--rgb-paper-hi), .84)),
+    url('../assets/images/bg_workbench.webp');
+}
+
+/* ---------- 地图页签：测绘桌与空白绘图纸 ---------- */
+#screen-archive[data-tab="map"] {
+  background-image:
+    linear-gradient(rgba(var(--rgb-paper-hi), .72), rgba(var(--rgb-paper-hi), .78)),
+    url('../assets/images/bg_map.webp');
+}
+
+/* ---------- 证据板页签：档案室木墙与档案柜 ---------- */
+#screen-archive[data-tab="evidence"] {
+  background-image:
+    linear-gradient(rgba(var(--rgb-paper-hi), .78), rgba(var(--rgb-paper-hi), .84)),
+    url('../assets/images/bg_evidence.webp');
+}
+
+/* ---------- 时间线页签：长木桌与纸卷 ---------- */
+#screen-archive[data-tab="timeline"] {
+  background-image:
+    linear-gradient(rgba(var(--rgb-paper-hi), .76), rgba(var(--rgb-paper-hi), .82)),
+    url('../assets/images/bg_timeline.webp');
+}
+
+/* ---------- 文档查看器：摊开的旧纸（正文最密，遮罩最重） ---------- */
+.viewer {
+  background-image:
+    linear-gradient(rgba(var(--rgb-paper-hi), .84), rgba(var(--rgb-paper-hi), .88)),
+    url('../assets/images/bg_viewer.webp');
+}
+
+/* ---------- 实地现场：晨雾中的老镇远景 ---------- */
+#screen-scene {
+  background-image:
+    linear-gradient(rgba(var(--rgb-paper-hi), .74), rgba(var(--rgb-paper-hi), .80)),
+    url('../assets/images/bg_scene.webp');
+}
+
+/* ---------- 结局：春日清晨的窗台（最亮） ---------- */
+#screen-ending {
+  background-image:
+    linear-gradient(rgba(var(--rgb-paper-hi), .70), rgba(var(--rgb-paper-hi), .76)),
+    url('../assets/images/bg_ending.webp');
+}
+
+/* ---------- 移动端：小屏文字更密，遮罩比桌面略重 ---------- */
+@media (max-width: 640px) {
+  #screen-archive, #screen-scene, #screen-ending, .viewer {
+    background-size: cover;
+    background-position: center top;
+  }
+  #screen-archive {
+    background-image:
+      linear-gradient(rgba(var(--rgb-paper-hi), .86), rgba(var(--rgb-paper-hi), .90)),
+      url('../assets/images/bg_workbench.webp');
+  }
+  #screen-archive[data-tab="map"] {
+    background-image:
+      linear-gradient(rgba(var(--rgb-paper-hi), .82), rgba(var(--rgb-paper-hi), .88)),
+      url('../assets/images/bg_map.webp');
+  }
+  #screen-archive[data-tab="evidence"] {
+    background-image:
+      linear-gradient(rgba(var(--rgb-paper-hi), .86), rgba(var(--rgb-paper-hi), .90)),
+      url('../assets/images/bg_evidence.webp');
+  }
+  #screen-archive[data-tab="timeline"] {
+    background-image:
+      linear-gradient(rgba(var(--rgb-paper-hi), .85), rgba(var(--rgb-paper-hi), .89)),
+      url('../assets/images/bg_timeline.webp');
+  }
+  .viewer {
+    background-image:
+      linear-gradient(rgba(var(--rgb-paper-hi), .90), rgba(var(--rgb-paper-hi), .93)),
+      url('../assets/images/bg_viewer.webp');
+  }
+  #screen-scene {
+    background-image:
+      linear-gradient(rgba(var(--rgb-paper-hi), .83), rgba(var(--rgb-paper-hi), .88)),
+      url('../assets/images/bg_scene.webp');
+  }
+  #screen-ending {
+    background-image:
+      linear-gradient(rgba(var(--rgb-paper-hi), .80), rgba(var(--rgb-paper-hi), .85)),
+      url('../assets/images/bg_ending.webp');
+  }
+}
+
+/* ---------- 省流量偏好：彻底不加载底纹，回落纯纸色 ---------- */
+@media (prefers-reduced-data: reduce) {
+  #screen-boot, #screen-archive, #screen-scene, #screen-ending, .viewer {
+    background-image: none;
+  }
+}

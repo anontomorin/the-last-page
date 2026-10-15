@@ -39,6 +39,9 @@ const FROZEN = {
     'css/reset.css', 'css/tokens.css', 'css/variables.css', 'css/global.css',
     'css/archive.css', 'css/document.css', 'css/map.css', 'css/timeline.css',
     'css/evidence.css', 'css/ending.css', 'css/quest-guide.css', 'css/motion.css',
+    /* 装饰层（P7 引入）：界面底纹、页签图标。必须晚于各界面基础样式，
+       且早于新壳（ui2），才能在旧壳与 ui2 两套 DOM 上都生效 */
+    'css/backgrounds.css', 'css/icons.css',
     /* 新壳（ui2）必须加载在全部旧壳样式之后 */
     'ui2/primitives.css', 'ui2/components.css', 'ui2/screens.css'
   ]

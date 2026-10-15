@@ -8,21 +8,23 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23F7F5EE'/%3E%3Ctext x='16' y='22' font-size='14' text-anchor='middle' fill='%23B85E52' font-family='serif'%3E32%3C/text%3E%3C/svg%3E">
 <!-- ARCHIVE FRAGMENT 01 : 有些东西不在页面上，在页面背后。 -->
 <!-- ARCHIVE FRAGMENT 02 : 试试这条路 /archive/A-017/page/032 -->
-<link rel="stylesheet" href="css/reset.css?v=20261015a">
-<link rel="stylesheet" href="css/tokens.css?v=20261015a">
-<link rel="stylesheet" href="css/variables.css?v=20261015a">
-<link rel="stylesheet" href="css/global.css?v=20261015a">
-<link rel="stylesheet" href="css/archive.css?v=20261015a">
-<link rel="stylesheet" href="css/document.css?v=20261015a">
-<link rel="stylesheet" href="css/map.css?v=20261015a">
-<link rel="stylesheet" href="css/timeline.css?v=20261015a">
-<link rel="stylesheet" href="css/evidence.css?v=20261015a">
-<link rel="stylesheet" href="css/ending.css?v=20261015a">
-<link rel="stylesheet" href="css/quest-guide.css?v=20261015a">
-<link rel="stylesheet" href="css/motion.css?v=20261015a">
-<link rel="stylesheet" href="ui2/primitives.css?v=20261015a">
-<link rel="stylesheet" href="ui2/components.css?v=20261015a">
-<link rel="stylesheet" href="ui2/screens.css?v=20261015a">
+<link rel="stylesheet" href="css/reset.css?v=20261015b">
+<link rel="stylesheet" href="css/tokens.css?v=20261015b">
+<link rel="stylesheet" href="css/variables.css?v=20261015b">
+<link rel="stylesheet" href="css/global.css?v=20261015b">
+<link rel="stylesheet" href="css/archive.css?v=20261015b">
+<link rel="stylesheet" href="css/document.css?v=20261015b">
+<link rel="stylesheet" href="css/map.css?v=20261015b">
+<link rel="stylesheet" href="css/timeline.css?v=20261015b">
+<link rel="stylesheet" href="css/evidence.css?v=20261015b">
+<link rel="stylesheet" href="css/ending.css?v=20261015b">
+<link rel="stylesheet" href="css/quest-guide.css?v=20261015b">
+<link rel="stylesheet" href="css/motion.css?v=20261015b">
+<link rel="stylesheet" href="css/backgrounds.css?v=20261015b">
+<link rel="stylesheet" href="css/icons.css?v=20261015b">
+<link rel="stylesheet" href="ui2/primitives.css?v=20261015b">
+<link rel="stylesheet" href="ui2/components.css?v=20261015b">
+<link rel="stylesheet" href="ui2/screens.css?v=20261015b">
 </head>
 <body data-act="0">
 
@@ -87,7 +89,7 @@
     <div class="wb-act serif" id="wb-act-title">第一幕 · 档案</div>
     <div class="wb-status mono">
       <span id="wb-mode-badge" class="wb-mode-badge" hidden></span>
-      <button id="btn-duo" class="btn-ghost small" hidden>通话 · 口述／听写</button>
+      <button id="btn-duo" class="btn-ghost small" hidden><svg class="ico" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 4.6h7v4.2h-3.4l-2.2 1.8V8.8H2.6z"/><path d="M13.4 7.4v4h-.9v1.7l-2.1-1.7H7.6v-4z"/></svg>通话 · 口述／听写</button>
       <button id="btn-back-ending" class="btn-ghost small" hidden>返回结束页</button>
       <span class="wb-act-progress mono">主线 <b id="wb-act-progress">1</b>/6</span>
       <span class="wb-percent">完整度 <b id="wb-percent">0%</b></span>
@@ -95,13 +97,20 @@
   </header>
 
   <nav class="wb-tabs" id="wb-tabs">
-    <button class="wb-tab active" data-tab="diary">日记</button>
-    <button class="wb-tab" data-tab="photo">照片</button>
-    <button class="wb-tab" data-tab="letter">信件</button>
-    <button class="wb-tab" data-tab="map">地图</button>
-    <button class="wb-tab" data-tab="person">人物</button>
-    <button class="wb-tab" data-tab="evidence">证据板</button>
-    <button class="wb-tab" data-tab="timeline">时间线</button>
+    <button class="wb-tab active" data-tab="diary">
+      <svg class="ico" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 3.6h9.4v9H2.8z"/><path d="M5.6 3.6v9"/><path d="M7.6 6.2h3.2M7.6 8.6h3.2"/></svg>日记</button>
+    <button class="wb-tab" data-tab="photo">
+      <svg class="ico" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="2.4" y="3.8" width="11.2" height="8.6" rx="1"/><circle cx="5.7" cy="6.4" r=".9"/><path d="M2.9 11.4l2.9-2.9 2.1 2.1 1.7-1.7 2.6 2.5"/></svg>照片</button>
+    <button class="wb-tab" data-tab="letter">
+      <svg class="ico" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="2.4" y="4.4" width="11.2" height="7.2" rx="1"/><path d="M2.9 4.9l5.1 3.6 5.1-3.6"/></svg>信件</button>
+    <button class="wb-tab" data-tab="map">
+      <svg class="ico" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 4.2l3.6-1.5 3.6 1.5 3.6-1.5v9.3l-3.6 1.5-3.6-1.5-3.6 1.5z"/><path d="M6.2 2.7v9.3M9.8 4.2v9.3"/></svg>地图</button>
+    <button class="wb-tab" data-tab="person">
+      <svg class="ico" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="5.7" r="2.2"/><path d="M3.7 13.4c0-2.5 1.9-4.1 4.3-4.1s4.3 1.6 4.3 4.1"/></svg>人物</button>
+    <button class="wb-tab" data-tab="evidence">
+      <svg class="ico" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="4.2" cy="4.6" r="1.5"/><circle cx="11.8" cy="4.6" r="1.5"/><circle cx="8" cy="11.9" r="1.5"/><path d="M5.3 5.7 7.2 10.6M10.7 5.7 8.8 10.6M5.7 4.6h4.6"/></svg>证据板</button>
+    <button class="wb-tab" data-tab="timeline">
+      <svg class="ico" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 8h10.8"/><circle cx="5" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="11" cy="8" r="1.3"/><path d="M5 5.4V4M8 5.4V3.4M11 5.4V4"/></svg>时间线</button>
   </nav>
 
   <div class="wb-body">
@@ -176,44 +185,44 @@
 </section>
 
 <!-- ARCHIVE FRAGMENT 03 : 如果你在看源代码，说明你已经是我们中的一员。 -->
-<script src="js/utils/dom.js?v=20261015a"></script>
-<script src="js/utils/storage.js?v=20261015a"></script>
-<script src="js/utils/audio.js?v=20261015a"></script>
-<script src="js/utils/animation.js?v=20261015a"></script>
-<script src="js/core/eventBus.js?v=20261015a"></script>
-<script src="js/core/gameState.js?v=20261015a"></script>
-<script src="js/core/saveManager.js?v=20261015a"></script>
-<script src="js/core/fragment.js?v=20261015a"></script>
-<script src="js/core/router.js?v=20261015a"></script>
-<script src="js/data/documents.js?v=20261015a"></script>
-<script src="js/data/diaryGist.js?v=20261015a"></script>
-<script src="js/data/people.js?v=20261015a"></script>
-<script src="js/data/locations.js?v=20261015a"></script>
-<script src="js/data/evidence.js?v=20261015a"></script>
-<script src="js/data/timeline.js?v=20261015a"></script>
-<script src="js/data/story.js?v=20261015a"></script>
-<script src="js/data/duoScript.js?v=20261015a"></script>
-<script src="js/data/questGuide.js?v=20261015a"></script>
-<script src="ui2/index.js?v=20261015a"></script>
-<script src="ui2/view/questGuide.js?v=20261015a"></script>
-<script src="ui2/view/viewer.js?v=20261015a"></script>
-<script src="ui2/view/photo.js?v=20261015a"></script>
-<script src="ui2/view/evidence.js?v=20261015a"></script>
-<script src="ui2/view/timeline.js?v=20261015a"></script>
-<script src="ui2/view/workbench.js?v=20261015a"></script>
-<script src="ui2/view/map.js?v=20261015a"></script>
-<script src="ui2/view/scene.js?v=20261015a"></script>
-<script src="ui2/view/ending.js?v=20261015a"></script>
-<script src="js/systems/archiveSystem.js?v=20261015a"></script>
-<script src="js/systems/documentSystem.js?v=20261015a"></script>
-<script src="js/systems/photoSystem.js?v=20261015a"></script>
-<script src="js/systems/investigationSystem.js?v=20261015a"></script>
-<script src="js/systems/evidenceSystem.js?v=20261015a"></script>
-<script src="js/systems/duoSystem.js?v=20261015a"></script>
-<script src="js/systems/mapSystem.js?v=20261015a"></script>
-<script src="js/systems/timelineSystem.js?v=20261015a"></script>
-<script src="js/systems/endingSystem.js?v=20261015a"></script>
-<script src="js/systems/questGuideSystem.js?v=20261015a"></script>
-<script src="js/main.js?v=20261015a"></script>
+<script src="js/utils/dom.js?v=20261015b"></script>
+<script src="js/utils/storage.js?v=20261015b"></script>
+<script src="js/utils/audio.js?v=20261015b"></script>
+<script src="js/utils/animation.js?v=20261015b"></script>
+<script src="js/core/eventBus.js?v=20261015b"></script>
+<script src="js/core/gameState.js?v=20261015b"></script>
+<script src="js/core/saveManager.js?v=20261015b"></script>
+<script src="js/core/fragment.js?v=20261015b"></script>
+<script src="js/core/router.js?v=20261015b"></script>
+<script src="js/data/documents.js?v=20261015b"></script>
+<script src="js/data/diaryGist.js?v=20261015b"></script>
+<script src="js/data/people.js?v=20261015b"></script>
+<script src="js/data/locations.js?v=20261015b"></script>
+<script src="js/data/evidence.js?v=20261015b"></script>
+<script src="js/data/timeline.js?v=20261015b"></script>
+<script src="js/data/story.js?v=20261015b"></script>
+<script src="js/data/duoScript.js?v=20261015b"></script>
+<script src="js/data/questGuide.js?v=20261015b"></script>
+<script src="ui2/index.js?v=20261015b"></script>
+<script src="ui2/view/questGuide.js?v=20261015b"></script>
+<script src="ui2/view/viewer.js?v=20261015b"></script>
+<script src="ui2/view/photo.js?v=20261015b"></script>
+<script src="ui2/view/evidence.js?v=20261015b"></script>
+<script src="ui2/view/timeline.js?v=20261015b"></script>
+<script src="ui2/view/workbench.js?v=20261015b"></script>
+<script src="ui2/view/map.js?v=20261015b"></script>
+<script src="ui2/view/scene.js?v=20261015b"></script>
+<script src="ui2/view/ending.js?v=20261015b"></script>
+<script src="js/systems/archiveSystem.js?v=20261015b"></script>
+<script src="js/systems/documentSystem.js?v=20261015b"></script>
+<script src="js/systems/photoSystem.js?v=20261015b"></script>
+<script src="js/systems/investigationSystem.js?v=20261015b"></script>
+<script src="js/systems/evidenceSystem.js?v=20261015b"></script>
+<script src="js/systems/duoSystem.js?v=20261015b"></script>
+<script src="js/systems/mapSystem.js?v=20261015b"></script>
+<script src="js/systems/timelineSystem.js?v=20261015b"></script>
+<script src="js/systems/endingSystem.js?v=20261015b"></script>
+<script src="js/systems/questGuideSystem.js?v=20261015b"></script>
+<script src="js/main.js?v=20261015b"></script>
 </body>
 </html>

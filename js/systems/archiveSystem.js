@@ -276,9 +276,7 @@ LP.archive = (function () {
       if (!btn) return;
       LP.audio.click();
       curTab = btn.dataset.tab;
-      LP.$$('.wb-tab').forEach(t => t.classList.toggle('active', t === btn));
-      renderList();
-      renderMain();
+      syncTabs();          // 统一入口：页签态 + 界面背景 + 列表/主区
     });
     LP.$('#wb-search-input').addEventListener('input', e => {
       searchKw = e.target.value.trim();
@@ -615,6 +613,9 @@ LP.archive = (function () {
 
   function syncTabs() {
     LP.$$('.wb-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === curTab));
+    /* 界面背景跟随页签：css/backgrounds.css 按 #screen-archive[data-tab] 切换底纹 */
+    const sc = LP.$('#screen-archive');
+    if (sc) sc.dataset.tab = curTab;
     renderList(); renderMain();
   }
 
@@ -644,6 +645,7 @@ LP.archive = (function () {
   function init() {
     initBoot();
     initTabs();
+    syncTabs();           // 初始页签也需同步背景（默认 diary）
     if (LP.quest) LP.quest.init();
     LP.$('#btn-back-ending').addEventListener('click', () => {
       LP.audio.click();

@@ -53,9 +53,16 @@ BUDGETS = {
     'ending': 200 * 1024,
     'ui': 120 * 1024,
     'fx': 80 * 1024,
+    # 界面背景（8 张）：P7 初版按 960x600 / 45KB 压，实测在 1280+ 视口下
+    # 被 cover 放大后发虚（用户反馈「太模糊」）。P8 重生成到 1536x1024、
+    # 输出 1440x900，单图预算同步提到 120KB（雾景 bg_scene 细节最多，
+    # 100KB 时质量阶梯到底仍超限）。
+    'bg': 120 * 1024,
 }
 DEFAULT_BUDGET = 200 * 1024
-TOTAL_BUDGET = 4 * 1024 * 1024
+# 总量：原 4MB → 4.3MB（P7 加 8 张背景图）→ 4.8MB
+# （P8 底纹升到 1440x900 换取清晰度，见 REBUILD_REPORT P8）
+TOTAL_BUDGET = int(4.8 * 1024 * 1024)
 QUALITY_LADDER = [84, 82, 80, 78, 75, 72, 68]
 
 
@@ -159,13 +166,20 @@ def cmd_process(args):
     out_path = os.path.join(ROOT, args.out) if not os.path.isabs(args.out) else args.out
     img = Image.open(raw_path)
     if not args.flat:
+        is_bg = role_of(out_path) == 'bg'
         img = sepia_unify(img)
-        img = add_grain(img, os.path.basename(out_path))
-        img = add_vignette(img)
+        # 背景层：颗粒减半。背景是满屏大面，14/255 的颗粒在 1280+ 视口下
+        # 与 WebP 量化叠加会糊成噪雾（用户反馈「太模糊」的直接来源之一）。
+        img = add_grain(img, os.path.basename(out_path), 7 if is_bg else 14)
+        img = add_vignette(img, 0.10 if is_bg else 0.12)
     if args.strip_bottom:
         w, h = img.size
         img = img.crop((0, 0, w, h - int(h * args.strip_bottom / 100)))
     img = cover_crop(img, args.width, args.height)
+    # 背景层再补一道轻锐化：源图经 cover 缩放到 1440 宽后边缘会软，
+    # 1.22 的锐化在不引入明显光晕的前提下把书架/木纹拉回来。
+    if not args.flat and role_of(out_path) == 'bg':
+        img = ImageEnhance.Sharpness(img).enhance(1.22)
     q, size = encode_webp_budget(img, out_path, args.max_bytes or budget_for(out_path))
     print(f'OK {os.path.relpath(out_path, ROOT)}  {args.width}x{args.height}  q{q}  {size/1024:.1f} KB')
 
@@ -301,7 +315,7 @@ def cmd_audit(args):
         # 剧情原件 JPG 冻结内容，但本轮已做编码优化 → 同样按预算核对
         if b > lim:
             over.append((f, b, lim))
-    print(f'全站图片总量 {total/1048576:.2f} MB / 预算 {TOTAL_BUDGET/1048576:.0f} MB')
+    print(f'全站图片总量 {total/1048576:.2f} MB / 预算 {TOTAL_BUDGET/1048576:.1f} MB')
     for f, b, lim in over:
         print(f'  超单图预算: {f}  {b/1024:.0f} KB > {lim/1024:.0f} KB')
     # 首屏 = index.html 里 loading=eager 的图（当前仅封面）
