@@ -76,6 +76,13 @@ const OUT = path.join(__dirname, '_preview');
   await p2.waitForTimeout(1300);
   const h2 = await p2.$('.wb-top');
   if (h2) await h2.screenshot({ path: path.join(OUT, '8-hud-2x.png') });
+
+  /* 双人模式抬头特写：编号牌与「通话」按钮同时在场 —— P10 修的就是这个场景 */
+  await p2.evaluate(() => { LP.state.set({ mode: 'A' }); LP.archive.refreshAll(); });
+  await p2.waitForTimeout(700);
+  const h4 = await p2.$('.wb-top');
+  if (h4) await h4.screenshot({ path: path.join(OUT, '10-hud-duo-2x.png') });
+  await p2.screenshot({ path: path.join(OUT, '11-workbench-duo.png') });
   await p2.close();
 
   /* 窄屏抬头 */

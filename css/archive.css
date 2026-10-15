@@ -31,13 +31,23 @@
 /* ---- 中：幕标题 + 两侧飞线（印刷章节式） ---- */
 .wb-act{justify-self:center;display:flex;align-items:center;gap:.85rem;
   font-size:1rem;font-weight:600;color:var(--red);letter-spacing:.18em;white-space:nowrap}
-.wb-act::before,.wb-act::after{content:'';width:clamp(1.4rem,4vw,3.4rem);height:1px;
+/* 飞线长度直接吃掉左右两栏的宽度（grid 三栏里中栏是 auto，越宽两侧越窄），
+   P10 由 3.4rem 收到 2.6rem，把宽度让给右侧「编号牌 + 通话 + 两个数据块」。 */
+.wb-act::before,.wb-act::after{content:'';width:clamp(1.2rem,3.2vw,2.6rem);height:1px;
   background:rgba(var(--rgb-red),.3);flex:0 0 auto}
 
 /* ---- 右：两个数据块 ---- */
-.wb-status{display:flex;align-items:center;justify-content:flex-end;gap:1rem;
+.wb-status{display:flex;align-items:center;justify-content:flex-end;
+  column-gap:.7rem;row-gap:.35rem;flex-wrap:wrap;
   font-size:.72rem;color:var(--ink-soft)}
-.wb-meters{display:flex;align-items:center;gap:.75rem}
+/* 抬头里的按钮绝不允许折行或被压扁。
+   右栏是 grid 的 1fr 列：双人模式下要同时装「编号牌 + 通话按钮 + 两个数据块」，
+   在 1440 及以下本来装不下，而 flex item 默认可收缩 —— 按钮被压到 144px 后
+   「通话 · 口述／听写」就折成两行（1024px 下更被压成 55px、五行）。
+   这里固定不收缩 + 不折行；真装不下时由上面的 flex-wrap 让 .wb-meters
+   整体换到第二行，而不是把按钮压扁。 */
+.wb-status .btn-ghost{flex:0 0 auto;white-space:nowrap}
+.wb-meters{display:flex;align-items:center;gap:.6rem}
 .wb-meter{display:flex;align-items:center;gap:.42rem;white-space:nowrap}
 .wb-meter-label{font-size:.7rem;letter-spacing:.18em;color:var(--ink-soft)}
 .wb-meter-value{font-size:.74rem;color:var(--ink)}
@@ -48,7 +58,7 @@
 .wb-ticks i{display:block;width:7px;height:3px;background:rgba(var(--rgb-ink),.16)}
 .wb-ticks i.on{background:var(--red)}
 /* 完整度细进度条：金色只在此出现，红让给章节名 */
-.wb-bar{display:block;width:3.6rem;height:4px;background:rgba(var(--rgb-ink),.12);overflow:hidden}
+.wb-bar{display:block;width:3.2rem;height:4px;background:rgba(var(--rgb-ink),.12);overflow:hidden}
 .wb-bar i{display:block;height:100%;background:var(--gold);
   transform:scaleX(0);transform-origin:left;transition:transform var(--t-base) var(--ease-out)}
 

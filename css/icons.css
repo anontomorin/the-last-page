@@ -11,6 +11,12 @@
   width: 13px;
   height: 13px;
   flex: none;
+  /* 必须显式声明 inline-block。
+     reset.css 有一条 img,canvas,svg,video{display:block} —— 它会把内联 SVG
+     块级化，于是图标独占一行、文字被挤到第二行（页签与「通话」按钮都中过这个招）。
+     .ico 的 vertical-align/-2px 与 margin-right 本就是为行内排布写的，
+     这里把 display 补回来即可；父容器是 flex 时会被块级化，行为不变。 */
+  display: inline-block;
   vertical-align: -2px;
   margin-right: .38rem;
   opacity: .7;
