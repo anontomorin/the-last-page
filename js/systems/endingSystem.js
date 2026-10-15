@@ -12,6 +12,24 @@ LP.ending = (function () {
     return LP.story.ENDING.questions;
   }
 
+  /* 提交三问（旧壳按钮与新壳视图共用） */
+  function submitEnding(answers, name) {
+    const mode = LP.state.get().mode;
+    if (answers.some(a => !a) || (mode !== 'solo' && !name)) {
+      LP.audio.error();
+      LP.ui.toast(mode === 'solo' ? '三句话都要写下——这一页需要完整。' : '三问与署名都要写下。', 'red');
+      return;
+    }
+    LP.audio.complete();
+    LP.state.set({
+      finalMessage: {
+        name: mode !== 'solo' ? name : '',
+        q1: answers[0], q2: answers[1], q3: answers[2]
+      }
+    });
+    printFinalPage(LP.$('#ending-stage'));
+  }
+
   function start() {
     document.body.dataset.act = 6;
     document.body.classList.add('theme-bright');
@@ -20,6 +38,13 @@ LP.ending = (function () {
     stage.innerHTML = '';
 
     const mode = LP.state.get().mode;
+
+    /* 新壳：三问表单由 ui2/view/ending.js 的 endingForm 视图渲染 */
+    if (LP.ui2 && LP.ui2.mount('endingForm', { root: stage }, {
+      state: LP.state.get(), data: LP.data, ui: { questions: myQuestions() },
+      onSubmit: submitEnding
+    })) return;
+
     const questions = myQuestions();
     const roleLine = mode === 'A' ? '执笔者卷 · 你的三问'
       : mode === 'B' ? '记录者卷 · 你的三问' : null;
@@ -64,22 +89,10 @@ LP.ending = (function () {
 
     const submit = LP.el('div', { class: 'end-submit' });
     const btn = LP.el('button', { class: 'btn-primary', text: mode === 'solo' ? '写下最后一页' : '写下我这半页' });
-    btn.addEventListener('click', () => {
-      const answers = inputs.map(t => t.value.trim());
-      if (answers.some(a => !a) || (mode !== 'solo' && !nameInput.value.trim())) {
-        LP.audio.error();
-        LP.ui.toast(mode === 'solo' ? '三句话都要写下——这一页需要完整。' : '三问与署名都要写下。', 'red');
-        return;
-      }
-      LP.audio.complete();
-      LP.state.set({
-        finalMessage: {
-          name: mode !== 'solo' ? nameInput.value.trim() : '',
-          q1: answers[0], q2: answers[1], q3: answers[2]
-        }
-      });
-      printFinalPage(stage);
-    });
+    btn.addEventListener('click', () => submitEnding(
+      inputs.map(t => t.value.trim()),
+      nameInput ? nameInput.value.trim() : ''
+    ));
     submit.appendChild(btn);
     stage.appendChild(submit);
   }
@@ -248,6 +261,27 @@ LP.ending = (function () {
 
   function showEndingLines(stage) {
     const s = LP.state.get();
+
+    /* 结局判定先于渲染：状态变化不由动画结果决定 */
+    const hidden = s.hiddenClues.length >= 1;
+    LP.state.set({ ending: hidden ? 'hidden' : 'normal' });
+    if (hidden) LP.audio.unlock();
+
+    /* 新壳：结语 / 隐藏结局 / 操作按钮由 endingLines 视图渲染 */
+    if (LP.ui2 && LP.ui2.mount('endingLines', { root: stage }, {
+      state: LP.state.get(), data: LP.data, ui: { ending: LP.story.ENDING },
+      onMergeCode: openMergeCode,
+      onMerge: openMerge,
+      onPrint: () => window.print(),
+      onBack: () => { LP.router.go('archive'); LP.archive.refreshAll(); },
+      onRestart: () => {
+        if (!confirm('清除本机存档并重新整理这份档案？')) return;
+        LP.save.wipe();
+        location.hash = '';
+        location.reload();
+      }
+    })) return;
+
     const box = LP.el('div', { class: 'end-lines' });
     const lines = LP.story.ENDING.lines.slice();
     if (LP.state.has('discoveredEvidence', 'clue_ferry_time')) {
@@ -258,15 +292,11 @@ LP.ending = (function () {
     });
     stage.appendChild(box);
 
-    if (s.hiddenClues.length >= 1) {
-      LP.state.set({ ending: 'hidden' });
+    if (hidden) {
       const h = LP.el('div', { class: 'end-hidden' });
       h.appendChild(LP.el('div', { class: 'mono', text: 'ARCHIVE A-017 · HIDDEN RECORD' }));
       LP.story.ENDING.hidden.slice(1).forEach(t => h.appendChild(LP.el('p', { text: t })));
       stage.appendChild(h);
-      LP.audio.unlock();
-    } else {
-      LP.state.set({ ending: 'normal' });
     }
 
     const actions = LP.el('div', { class: 'end-actions' });

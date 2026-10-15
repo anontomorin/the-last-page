@@ -89,6 +89,10 @@ LP.map = (function () {
   function showPreview(loc) {
     const box = mapPreviewEl();
     if (!box || !loc) return;
+    /* 新壳：预览卡由 ui2/view/map.js 的 mapPreview 视图渲染 */
+    if (LP.ui2 && LP.ui2.mount('mapPreview', { root: box }, {
+      state: LP.state.get(), data: LP.data, ui: { loc }
+    })) return;
     const s = LP.state.get();
     const unlocked = LP.archive.locationUnlocked(loc);
     const visited = LP.state.has('discoveredLocations', loc.id);
@@ -141,7 +145,51 @@ LP.map = (function () {
     box.appendChild(info);
   }
 
+  /* 选中地点并进入（旧壳/新壳共用的动作） */
+  function chooseNode(id, g) {
+    const loc = LP.data.locations[id];
+    if (!loc) return;
+    LP.audio.click();
+    mapSel = id;
+    const svg = (g && g.ownerSVGElement) || LP.$('.map-svg');
+    if (svg) LP.$$('.map-node', svg).forEach(n => n.classList.toggle('sel', n === g));
+    showPreview(loc);
+    if (!LP.archive.locationUnlocked(loc)) {
+      LP.ui.toast('这处地点还没有在档案中开放。');
+      return;
+    }
+    if (loc.scene) {
+      if (!canEnterScene()) return tellNoScene(loc.name);
+      LP.state.addTo('discoveredLocations', loc.id);
+      openScene(loc.id);          // 先建好目标内容
+      sceneTransition(loc);       // 再用纸张过场揭示（不阻塞）
+    } else {
+      LP.ui.toast(loc.desc);
+    }
+  }
+
+  function mapCtx() {
+    return {
+      state: LP.state.get(),
+      data: LP.data,
+      ui: { sel: mapSel, introPlayed: mapIntroPlayed },
+      onPreview: id => showPreview(LP.data.locations[id]),
+      onChoose: (id, g) => chooseNode(id, g),
+      onDuo: () => { if (LP.duo) LP.duo.openPanel(); },
+      /* 渲染完成后填充预览卡（默认选中或档案馆） */
+      afterRender: () => {
+        const defLoc = LP.data.locations[mapSel] || LP.data.locations.location_archive;
+        showPreview(defLoc);
+      }
+    };
+  }
+
   function renderMap(container) {
+    /* 新壳：整幅地图由 ui2/view/map.js 的 map 视图渲染 */
+    if (LP.ui2 && LP.ui2.mount('map', { root: container }, mapCtx())) {
+      mapIntroPlayed = true;       // 完整入场只播一次（与旧壳一致）
+      return;
+    }
     container.innerHTML = '';
     const s = LP.state.get();
     const wrap = LP.el('div', { class: 'map-wrap' });
@@ -355,21 +403,7 @@ LP.map = (function () {
       /* 预览（悬停/聚焦） + 选中 + 进入（保持原有单击进入习惯与测试兼容） */
       g.addEventListener('mouseenter', () => showPreview(loc));
       g.addEventListener('focus', () => showPreview(loc));
-      g.addEventListener('click', () => {
-        LP.audio.click();
-        mapSel = loc.id;
-        LP.$$('.map-node', svg).forEach(n => n.classList.toggle('sel', n === g));
-        showPreview(loc);
-        if (!unlocked) { LP.ui.toast('这处地点还没有在档案中开放。'); return; }
-        if (loc.scene) {
-          if (!canEnterScene()) return tellNoScene(loc.name);
-          LP.state.addTo('discoveredLocations', loc.id);
-          openScene(loc.id);          // 先建好目标内容
-          sceneTransition(loc);       // 再用纸张过场揭示（不阻塞）
-        } else {
-          LP.ui.toast(loc.desc);
-        }
-      });
+      g.addEventListener('click', () => chooseNode(loc.id, g));
       g.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); g.dispatchEvent(new Event('click')); }
       });
@@ -381,8 +415,6 @@ LP.map = (function () {
     /* 地点预览卡（默认显示当前选中或档案馆） */
     const preview = LP.el('div', { class: 'map-preview hidden', id: 'map-preview', 'aria-live': 'polite' });
     wrap.appendChild(preview);
-    const defLoc = LP.data.locations[mapSel] || LP.data.locations.location_archive;
-    showPreview(defLoc);
     if (mapSel) {
       const g = svg.querySelector('.map-node.sel');
       if (g) g.classList.add('sel');
@@ -409,6 +441,12 @@ LP.map = (function () {
       LP.el('figcaption', { class: 'mono', text: '数字档案馆 · 旧阅览室' })
     ]));
     container.appendChild(wrap);
+
+    /* 默认预览卡（当前选中地点，否则档案馆）
+       —— 必须在 wrap 挂到文档之后再填：showPreview 通过 #map-preview 查找，
+          挂载前调用会静默失败，预览卡会一直停在 hidden（历史缺陷，已修）。 */
+    const defLoc = LP.data.locations[mapSel] || LP.data.locations.location_archive;
+    showPreview(defLoc);
   }
 
   function focusMap() { LP.archive.setTab('map'); }
@@ -445,6 +483,32 @@ LP.map = (function () {
     obj_bench: 'bench_paper'
   };
 
+  /* 场景视图层所需的回调（热点判定与状态变更留在本模块） */
+  function sceneCtx(body, locId) {
+    return {
+      state: LP.state.get(),
+      data: LP.data,
+      ui: { locId },
+      onObject: (objId, el, e, stage, msgBox) => {
+        if (objId === 'obj_river') spawnRipples(stage, e);
+        if (objId === 'obj_sign') {
+          el.classList.remove('swing'); void el.offsetWidth; el.classList.add('swing');
+        }
+        const loc = LP.data.locations[locId];
+        const donePuzzle = OBJ_DONE_PUZZLE[objId];
+        const beforeDone = donePuzzle ? LP.state.has('completedPuzzles', donePuzzle) : false;
+        handleObject(loc.scene, objId, el, msgBox, stage);
+        /* 首次发现：仅当真实状态由未完成 → 完成时播放一次聚焦入档反馈 */
+        const afterDone = donePuzzle ? LP.state.has('completedPuzzles', donePuzzle) : false;
+        if (!beforeDone && afterDone) {
+          if (LP.ui2.scene) LP.ui2.scene.found(el);
+          else { el.classList.add('done', 'found'); setTimeout(() => el.classList.remove('found'), 700); }
+        }
+      },
+      afterRender: stage => bindSceneLifecycle(body, stage)
+    };
+  }
+
   function openScene(locId) {
     const loc = LP.data.locations[locId];
     if (!loc || !loc.scene) return;
@@ -455,6 +519,9 @@ LP.map = (function () {
     const body = LP.$('#scene-body');
     if (body.__cleanup) body.__cleanup();      // 释放上一场景遗留的定时器/动画
     body.innerHTML = '';
+
+    /* 新壳：舞台结构由 ui2/view/scene.js 渲染，交互仍走本模块 */
+    if (LP.ui2 && LP.ui2.mount('scene', { body }, sceneCtx(body, locId))) return;
 
     const stage = LP.el('div', { class: 'scene-stage' });
     const msgBox = LP.el('div', { class: 'scene-msg', text: loc.desc });

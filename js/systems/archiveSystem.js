@@ -99,9 +99,25 @@ LP.archive = (function () {
   let searchKw = '';
   let lastPercent = 12;
 
-  /* 解锁判定：依据 unlock 字段与当前幕 */
-  function isUnlocked(item) {
-    const s = LP.state.get();
+  /* ---------------- 新壳桥接（ui2） ----------------
+     ctx 把「状态 / 数据 / 视图本地 UI 状态 / 事件回调」一并交给视图层，
+     视图层只读不写；写操作经由回调回到这里执行。 */
+  function wbCtx(extra) {
+    return Object.assign({
+      state: LP.state.get(),
+      data: LP.data,
+      ui: {}
+    }, extra);
+  }
+  /* 按 id 找回列表项（视图层只回传 id，不持有数据对象） */
+  function findListItem(id) {
+    return listItems().find(x => x.id === id) || null;
+  }
+
+  /* 解锁判定：依据 unlock 字段与当前幕
+     （可选传入 state，供视图层以纯函数方式复用；不传则读当前状态） */
+  function isUnlocked(item, _s) {
+    const s = _s || LP.state.get();
     if (!item.unlock || item.unlock === 'start') return s.act >= 1;
     if (LP.state.has('unlockedDocs', item.id)) return true;
     switch (item.unlock) {
@@ -114,8 +130,8 @@ LP.archive = (function () {
       default:          return false;
     }
   }
-  function locationUnlocked(loc) {
-    const s = LP.state.get();
+  function locationUnlocked(loc, _s) {
+    const s = _s || LP.state.get();
     if (loc.unlock === 'start') return s.act >= 1;
     if (loc.unlock === 'act1_done') return s.act >= 2;
     if (loc.unlock === 'act3') return s.act >= 3;
@@ -288,6 +304,14 @@ LP.archive = (function () {
 
   function renderList() {
     const box = LP.$('#wb-list');
+    if (LP.ui2 && LP.ui2.mount('wbList', { root: box }, wbCtx({
+      ui: { tab: curTab, kw: searchKw },
+      onOpenItem: id => {
+        LP.audio.click();
+        const it = findListItem(id);
+        if (it) openItem(it);
+      }
+    }))) return;
     box.innerHTML = '';
     const items = listItems().filter(it => {
       if (!searchKw) return true;
@@ -368,6 +392,11 @@ LP.archive = (function () {
   function renderPhotoSortBanner() {
     const main = LP.$('#wb-empty');
     const s = LP.state.get();
+    if (LP.ui2 && LP.ui2.mount('wbEmpty', { root: main }, wbCtx({
+      ui: { tab: curTab },
+      onSort: () => LP.photo.openSort(),
+      onDuo: () => LP.duo.openPanel()
+    }))) return;
     // 恢复默认空态
     main.innerHTML = '';
     const mode = s.mode;
@@ -415,10 +444,26 @@ LP.archive = (function () {
     return LP.inv.sub(d.title);
   }
 
+  /* 预览卡底部按钮的动作（旧壳与新壳共用） */
+  function openPreviewDoc(doc) {
+    LP.audio.open();
+    if (doc.type === 'photo') { LP.photo.open(doc.id); markDocRead(doc); }
+    else if (doc.type === 'map') { curTab = 'map'; syncTabs(); }
+    else LP.doc.open(doc.id);
+  }
+
   function renderPreviewCard(doc) {
     const main = LP.$('#wb-empty');
     const prev = LP.$('#wb-preview');
     main.hidden = true; prev.hidden = false;
+    if (LP.ui2 && LP.ui2.mount('wbPreview', { root: prev }, wbCtx({
+      ui: { doc },
+      onRel: (rid, openable) => {
+        if (openable) openItem(LP.data.documents[rid]);
+        else LP.ui.toast('相关资料尚未解锁');
+      },
+      onOpenDoc: () => openPreviewDoc(doc)
+    }))) return;
     prev.innerHTML = '';
 
     const card = LP.el('div', { class: 'doc-card' });
@@ -471,12 +516,7 @@ LP.archive = (function () {
         : doc.damaged ? '尝试修复'
         : doc.type === 'map' ? '展开地图'
         : LP.inv.isGist(doc) ? '阅读梗概' : '阅读全文',
-      onclick: () => {
-        LP.audio.open();
-        if (doc.type === 'photo') { LP.photo.open(doc.id); markDocRead(doc); }
-        else if (doc.type === 'map') { curTab = 'map'; syncTabs(); }
-        else LP.doc.open(doc.id);
-      }
+      onclick: () => openPreviewDoc(doc)
     });
     actions.appendChild(openBtn);
     foot.appendChild(actions);
@@ -507,6 +547,9 @@ LP.archive = (function () {
     const main = LP.$('#wb-empty');
     const prev = LP.$('#wb-preview');
     main.hidden = true; prev.hidden = false;
+    if (LP.ui2 && LP.ui2.mount('wbPeople', { root: prev }, wbCtx({
+      onTrace: pid => tracePerson(LP.data.people[pid])
+    }))) return;
     prev.innerHTML = '';
     const grid = LP.el('div', { class: 'person-grid' });
     Object.values(LP.data.people).forEach(p => {
