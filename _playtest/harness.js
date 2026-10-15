@@ -2,7 +2,7 @@
    统一测试入口 —— npm test
    ------------------------------------------------------------
    按成本从低到高依次跑：
-     1. 语法自检       —— 遍历 js 目录下全部 .js，node --check
+     1. 语法自检       —— 遍历 js/ 与 ui2/ 下全部 .js，node --check
      2. 数据一致性自检 —— 线索/关系/时间线引用的 id 是否都存在
      3. 听写校验测试   —— _playtest/dictation.test.js（离线，必跑）
      4. 风格 lint      —— _playtest/style-lint.js（离线，STYLE_CONTRACT.md）
@@ -36,7 +36,8 @@ function walkJs(dir, acc) {
 }
 section('语法自检');
 const vm = require('vm');
-const jsFiles = walkJs(path.join(ROOT, 'js'), []);
+const jsFiles = walkJs(path.join(ROOT, 'js'), [])
+  .concat(fs.existsSync(path.join(ROOT, 'ui2')) ? walkJs(path.join(ROOT, 'ui2'), []) : []);
 let synFail = 0;
 for (const f of jsFiles) {
   try {

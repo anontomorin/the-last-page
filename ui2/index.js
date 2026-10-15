@@ -3,10 +3,12 @@
    ------------------------------------------------------------
    绞杀者模式（Strangler）：
      · 业务逻辑（LP.*）一行不动；
-     · ui2/ 只放「视图层」：viewModel(state, data, ui) 与 render(vm, ctx)
+     · ui2/ 只放「视图层」：viewModel(state, data, ui) 与 render(vm, hosts, ctx)
        两个纯函数，经 LP.ui2 注册；
-     · 默认走旧实现；?ui=next 或 localStorage.lp_ui=next 走新壳；
-     · 全部验收通过后再翻转默认值、删除旧实现（P6）。
+     · **P6 起默认走新壳**；?ui=legacy 或 localStorage.lp_ui=legacy
+       可一键回退到旧实现（旧目录按方案 §4「下一版本删除」保留一个版本）；
+     · 视觉一致性由 _playtest/ui-compare.js 逐张像素对比守住
+       （新旧壳同状态渲染，差异应在阈值内）。
 
    硬约束（见 FRONTEND_REBUILD_PLAN §5.3）：
      viewModel 与 render 都不得直接读写 LP.state，也不产生副作用。
@@ -19,15 +21,18 @@ LP.ui2 = (function () {
   const renders = {};    // name -> render(vm, ctx) -> DOMNode
 
   /* ---------- 开关 ----------
-     默认关闭（走旧壳）；显式指定才启用，保证任何情况下都可回退。 */
+     P6：默认启用新壳。显式传 ?ui=legacy（或设 localStorage.lp_ui=legacy）
+     可回退旧实现，保证线上任何时候都能一键还原。 */
   let flag = (function () {
     try {
       const q = new URLSearchParams(location.search);
-      if (q.get('ui') === 'next') return true;
       if (q.get('ui') === 'legacy') return false;
-      if (localStorage.getItem('lp_ui') === 'next') return true;
-    } catch (e) { /* 隐私模式 / 无 location：保持默认 */ }
-    return false;
+      if (q.get('ui') === 'next') return true;
+      const ls = localStorage.getItem('lp_ui');
+      if (ls === 'legacy') return false;
+      if (ls === 'next') return true;
+    } catch (e) { /* 隐私模式 / 无 location：走默认 */ }
+    return true;
   })();
 
   function register(name, view, render) {

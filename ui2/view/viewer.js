@@ -34,7 +34,9 @@
       kind: 'doc',
       docId: doc.id,
       letterBg: doc.type === 'letter',
+      /* 顶栏标题带「· 梗概」后缀；纸张内 h3 与旧壳一致，用纯标题 */
       title: LP.inv.sub(doc.title, s) + (gist ? ' · 梗概' : ''),
+      paperTitle: LP.inv.sub(doc.title, s),
       meta: gist
         ? `NO.${doc.no} · 编目摘要 · 正文在执笔者卷`
         : `NO.${doc.no} · ${doc.date} · ${doc.cred.level}可信度 · ${doc.cred.kind}`,
@@ -102,7 +104,7 @@
   function renderDoc(vm, hosts, ctx) {
     const el = LP.el;
     const paper = el('div', { class: 'paper-doc' + (vm.letterBg ? ' letter-bg' : '') });
-    paper.appendChild(el('h3', { text: vm.title }));
+    paper.appendChild(el('h3', { text: vm.paperTitle || vm.title }));
     paper.appendChild(el('div', { class: 'pdate', text: vm.gist ? '编目摘要' : (vm.date || '') }));
     if (vm.gist) {
       paper.appendChild(el('div', { class: 'gist-note mono', text: 'RECORD GIST · 正文不在此卷' }));
